@@ -78,7 +78,6 @@ augroup my_quickfix
     au QuickFixCmdPost [^l]* let g:my_stl_list_position = 1
 
     "  ┌─ after a quickfix command is run
-    "  │
     "  │                                                      ┌─ expanded into the name of the command
     "  │                                                      │  which was run
     "  │                                                      │

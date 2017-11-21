@@ -27,17 +27,17 @@
 com! -bang -buffer -nargs=? Cfilter exe qf#cfilter('qf' , <bang>0, <q-args>, <q-mods>)
 com! -bang -buffer -nargs=? Lfilter exe qf#cfilter('loc', <bang>0, <q-args>, <q-mods>)
 
-    " Cupdate {{{2
+" Cupdate {{{2
 
-    " `:Cupdate` updates the text of each entry in the current qfl.
-    " Useful after a refactoring, to have a visual feedback.
-    " Example:
-    "         PQ grep -IRn pat /tmp/some_dir/
-    "         cfdo %s/pat/rep/g
-    "         Cupdate
+" `:Cupdate` updates the text of each entry in the current qfl.
+" Useful after a refactoring, to have a visual feedback.
+" Example:
+"         PQ grep -IRn pat /tmp/some_dir/
+"         cfdo %s/pat/rep/g
+"         Cupdate
 
-    com! -bar -buffer Cupdate exe qf#cupdate('qf', <q-mods>)
-    com! -bar -buffer Lupdate exe qf#cupdate('loc', <q-mods>)
+com! -bar -buffer Cupdate exe qf#cupdate('qf', <q-mods>)
+com! -bar -buffer Lupdate exe qf#cupdate('loc', <q-mods>)
 
 " Mappings {{{1
 
@@ -183,7 +183,7 @@ endif
 let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
-                    \   setl wrap<
+                    \   setl bl< cul< efm< wrap<
                     \ | exe 'nunmap <buffer> <cr>'
                     \ | exe 'nunmap <buffer> <c-w><cr>'
                     \ | exe 'nunmap <buffer> <c-w>t'
@@ -193,4 +193,8 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ | exe 'nunmap <buffer> cob'
                     \ | exe 'au! my_qf * <buffer>'
                     \ | exe 'aug! my_qf'
+                    \ | delcommand Cfilter
+                    \ | delcommand Lfilter
+                    \ | delcommand Cupdate
+                    \ | delcommand Lupdate
                     \  "
