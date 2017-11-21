@@ -1,9 +1,3 @@
-" NO GUARD
-" otherwise our ftplugin would never be sourced, because a previous
-" ftplugin already set the variable `b:did_ftplugin` (hit `gF`):
-"
-"         $VIMRUNTIME/ftplugin/qf.vim:11
-
 " Commands {{{1
 " Cfilter {{{2
 " Documentation:{{{
