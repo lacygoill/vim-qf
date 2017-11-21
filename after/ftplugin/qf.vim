@@ -192,7 +192,6 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ | exe 'nunmap <buffer> ]ob'
                     \ | exe 'nunmap <buffer> cob'
                     \ | exe 'au! my_qf * <buffer>'
-                    \ | exe 'aug! my_qf'
                     \ | delcommand Cfilter
                     \ | delcommand Lfilter
                     \ | delcommand Cupdate
