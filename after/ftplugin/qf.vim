@@ -21,8 +21,13 @@
 com! -bang -buffer -nargs=? Cfilter exe qf#cfilter('qf' , <bang>0, <q-args>, <q-mods>)
 com! -bang -buffer -nargs=? Lfilter exe qf#cfilter('loc', <bang>0, <q-args>, <q-mods>)
 
-cnorea <expr> <buffer> cfilter getcmdtype() ==# ':' && getcmdline() ==# 'cfilter' ? 'Cfilter' : 'cfilter'
-cnorea <expr> <buffer> lfilter getcmdtype() ==# ':' && getcmdline() ==# 'lfilter' ? 'Lfilter' : 'lfilter'
+cnorea <expr> <buffer> cfilter getcmdtype() ==# ':' && getcmdline() ==# 'cfilter'
+\                              ?    'Cfilter'
+\                              :    'cfilter'
+
+cnorea <expr> <buffer> lfilter getcmdtype() ==# ':' && getcmdline() ==# 'lfilter'
+\                              ?    'Lfilter'
+\                              :    'lfilter'
 
 " Cupdate {{{2
 
@@ -35,6 +40,14 @@ cnorea <expr> <buffer> lfilter getcmdtype() ==# ':' && getcmdline() ==# 'lfilter
 
 com! -bar -buffer Cupdate exe qf#cupdate('qf', <q-mods>)
 com! -bar -buffer Lupdate exe qf#cupdate('loc', <q-mods>)
+
+cnorea <expr> <buffer> cupdate getcmdtype() ==# ':' && getcmdline() ==# 'cupdate'
+\                              ?    'Cupdate'
+\                              :    'cupdate'
+
+cnorea <expr> <buffer> lupdate getcmdtype() ==# ':' && getcmdline() ==# 'lupdate'
+\                              ?    'Lupdate'
+\                              :    'lupdate'
 
 " Mappings {{{1
 
@@ -181,6 +194,7 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
                     \   setl bl< cul< efm< wrap<
+                    \ | exe 'au! my_qf * <buffer>'
                     \ | exe 'nunmap <buffer> <cr>'
                     \ | exe 'nunmap <buffer> <c-w><cr>'
                     \ | exe 'nunmap <buffer> <c-w>t'
@@ -190,7 +204,8 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ | exe 'nunmap <buffer> cob'
                     \ | exe 'cuna   <buffer> cfilter'
                     \ | exe 'cuna   <buffer> lfilter'
-                    \ | exe 'au! my_qf * <buffer>'
+                    \ | exe 'cuna   <buffer> cupdate'
+                    \ | exe 'cuna   <buffer> lupdate'
                     \ | delcommand Cfilter
                     \ | delcommand Lfilter
                     \ | delcommand Cupdate
