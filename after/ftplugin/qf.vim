@@ -59,7 +59,13 @@ unlet! s:char
 
 nno <buffer> <nowait> <silent>  <cr>       <cr>:norm! zv<cr>
 nno <buffer> <nowait> <silent>  <c-w><cr>  :<c-u>exe qf#c_w(0)<cr>
-nno <buffer> <nowait> <silent>  <c-w>t     :<c-u>exe qf#c_w(1)<cr>
+" Warning:
+" By default, <c-w>T moves the current window to a new tab page.
+" Here, we use it slightly differently: it opens the entry under the cursor in a
+" new tag page.
+" Also, we don't use `<c-w>t` because, by default, the latter moves the focus to
+" the top window in the current tab page.
+nno <buffer> <nowait> <silent>  <c-w>T     :<c-u>exe qf#c_w(1)<cr>
 
 nno <buffer> <nowait> <silent>  q          :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
 
