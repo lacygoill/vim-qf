@@ -203,7 +203,7 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ | exe 'au! my_qf * <buffer>'
                     \ | exe 'nunmap <buffer> <cr>'
                     \ | exe 'nunmap <buffer> <c-w><cr>'
-                    \ | exe 'nunmap <buffer> <c-w>t'
+                    \ | exe 'nunmap <buffer> <c-w>T'
                     \ | exe 'nunmap <buffer> q'
                     \ | exe 'nunmap <buffer> [ob'
                     \ | exe 'nunmap <buffer> ]ob'
