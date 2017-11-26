@@ -164,7 +164,7 @@ fu! qf#open(cmd) abort "{{{1
     \?                         [ 'l', len(getloclist(0)) ]
     \:                         [ 'c', len(getqflist())   ]
 
-    let mod = Get_modifier_to_open_window()
+    let mod = window#get_modifier_to_open_window()
 
     let how_to_open = mod =~# '^vert'
     \?                    mod.' '.prefix.'window '.40
