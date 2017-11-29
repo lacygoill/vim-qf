@@ -158,17 +158,17 @@ fu! s:get_pat(pat) abort "{{{1
     \                      'plugged/vim-tmuxify',
     \                    ]
 
-    " if no pattern was provided, use the search register as a fallback
-    " remove possible slash before/after the pattern
-    " if `:Cfilter` was passed `-not_my_plugins`, build the right pattern
-    " otherwise, just add word boundaries
+    " If no pattern was provided, use the search register as a fallback.
+    " Remove a possible couple of slashes before and after the pattern.
+    " If `:Cfilter` was passed `-not_my_plugins`, build the right pattern.
+    " Otherwise, do nothing.
     return a:pat == ''
     \?         @/
     \:     a:pat =~ '^/.*/$'
     \?        a:pat[1:-2]
     \:     a:pat ==# '-not_my_plugins'
     \?        '^\%('.join(not_my_plugins, '\|').'\)'
-    \:        '\<'.a:pat.'\m\>'
+    \:        a:pat
 endfu
 
 fu! qf#hide_noise(action) abort "{{{1
