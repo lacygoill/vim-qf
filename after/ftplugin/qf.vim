@@ -214,8 +214,8 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ | exe 'cuna   <buffer> lfilter'
                     \ | exe 'cuna   <buffer> cupdate'
                     \ | exe 'cuna   <buffer> lupdate'
-                    \ | delcommand Cfilter
-                    \ | delcommand Lfilter
-                    \ | delcommand Cupdate
-                    \ | delcommand Lupdate
+                    \ | delc Cfilter
+                    \ | delc Lfilter
+                    \ | delc Cupdate
+                    \ | delc Lupdate
                     \  "
