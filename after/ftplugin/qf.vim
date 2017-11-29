@@ -18,8 +18,10 @@
 " Do not give the `-bar` attribute to the commands.
 " It would break a pattern containing a bar (for example, for an alternation).
 
-com! -bang -buffer -nargs=? Cfilter exe qf#cfilter('qf' , <bang>0, <q-args>, <q-mods>)
-com! -bang -buffer -nargs=? Lfilter exe qf#cfilter('loc', <bang>0, <q-args>, <q-mods>)
+com! -bang -buffer -nargs=? -complete=customlist,qf#cfilter_complete Cfilter
+\                                   exe qf#cfilter('qf' , <bang>0, <q-args>, <q-mods>)
+com! -bang -buffer -nargs=? -complete=customlist,qf#cfilter_complete Lfilter
+\                                   exe qf#cfilter('loc', <bang>0, <q-args>, <q-mods>)
 
 cnorea <expr> <buffer> cfilter getcmdtype() ==# ':' && getcmdline() ==# 'cfilter'
 \                              ?    'Cfilter'

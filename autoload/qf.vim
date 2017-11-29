@@ -54,14 +54,7 @@ fu! qf#cfilter(list, bang, pat, mod) abort "{{{1
         "                           │     └─ AND the text must not match the pattern
         "                           └─ the pattern must NOT MATCH the path of the buffer
 
-        " if no pattern was provided, use the search register as a fallback
-        " remove possible slash before/after the pattern
-        " add word boundaries if no slash was used
-        let pat = a:pat == ''
-        \?            @/
-        \:        a:pat =~ '^/.*/$'
-        \?           a:pat[1:-2]
-        \:           '\<'.a:pat.'\m\>'
+        let pat = s:get_pat(a:pat)
 
         let list = a:list ==# 'qf' ? getqflist() : getloclist(0)
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
@@ -83,6 +76,10 @@ fu! qf#cfilter(list, bang, pat, mod) abort "{{{1
         return 'echoerr '.string(v:exception)
     endtry
     return ''
+endfu
+
+fu! qf#cfilter_complete(arglead, _cmdline, _pos) abort "{{{1
+    return [ '-not_my_plugins' ]
 endfu
 
 fu! qf#conceal(this) abort "{{{1
@@ -133,6 +130,45 @@ fu! qf#cupdate(list, mod) abort "{{{1
     catch
         return 'echoerr '.string(v:exception)
     endtry
+endfu
+
+fu! s:get_pat(pat) abort "{{{1
+    let not_my_plugins = [
+    \                      'plugged/emmet-vim',
+    \                      'plugged/fzf.vim',
+    \                      'plugged/goyo.vim',
+    \                      'plugged/limelight.vim',
+    \                      'plugged/potion',
+    \                      'plugged/seoul256.vim',
+    \                      'plugged/tmux.vim',
+    \                      'plugged/ultisnips',
+    \                      'plugged/undotree',
+    \                      'plugged/unicode.vim',
+    \                      'plugged/vim-abolish',
+    \                      'plugged/vim-cheat40',
+    \                      'plugged/vim-dirvish',
+    \                      'plugged/vim-easy-align',
+    \                      'plugged/vim-exchange',
+    \                      'plugged/vim-fugitive',
+    \                      'plugged/vim-gutentags',
+    \                      'plugged/vim-rhubarb',
+    \                      'plugged/vim-sandwich',
+    \                      'plugged/vim-sneak',
+    \                      'plugged/vim-snippets',
+    \                      'plugged/vim-tmuxify',
+    \                    ]
+
+    " if no pattern was provided, use the search register as a fallback
+    " remove possible slash before/after the pattern
+    " if `:Cfilter` was passed `-not_my_plugins`, build the right pattern
+    " otherwise, just add word boundaries
+    return a:pat == ''
+    \?         @/
+    \:     a:pat =~ '^/.*/$'
+    \?        a:pat[1:-2]
+    \:     a:pat ==# '-not_my_plugins'
+    \?        '^\%('.join(not_my_plugins, '\|').'\)'
+    \:        '\<'.a:pat.'\m\>'
 endfu
 
 fu! qf#hide_noise(action) abort "{{{1
