@@ -23,13 +23,13 @@ com! -bang -buffer -nargs=? -complete=customlist,qf#cfilter_complete Cfilter
 com! -bang -buffer -nargs=? -complete=customlist,qf#cfilter_complete Lfilter
 \                                   exe qf#cfilter('loc', <bang>0, <q-args>, <q-mods>)
 
-cnorea <expr> <buffer> cfilter getcmdtype() ==# ':' && getcmdline() ==# 'cfilter'
-\                              ?    'Cfilter'
-\                              :    'cfilter'
+cnorea <expr> <buffer> cfilter  getcmdtype() ==# ':' && getcmdline() ==# 'cfilter'
+\                               ?    'Cfilter'
+\                               :    'cfilter'
 
-cnorea <expr> <buffer> lfilter getcmdtype() ==# ':' && getcmdline() ==# 'lfilter'
-\                              ?    'Lfilter'
-\                              :    'lfilter'
+cnorea <expr> <buffer> lfilter  getcmdtype() ==# ':' && getcmdline() ==# 'lfilter'
+\                               ?    'Lfilter'
+\                               :    'lfilter'
 
 " Cupdate {{{2
 
@@ -43,13 +43,13 @@ cnorea <expr> <buffer> lfilter getcmdtype() ==# ':' && getcmdline() ==# 'lfilter
 com! -bar -buffer Cupdate exe qf#cupdate('qf', <q-mods>)
 com! -bar -buffer Lupdate exe qf#cupdate('loc', <q-mods>)
 
-cnorea <expr> <buffer> cupdate getcmdtype() ==# ':' && getcmdline() ==# 'cupdate'
-\                              ?    'Cupdate'
-\                              :    'cupdate'
+cnorea <expr> <buffer> cupdate  getcmdtype() ==# ':' && getcmdline() ==# 'cupdate'
+\                               ?    'Cupdate'
+\                               :    'cupdate'
 
-cnorea <expr> <buffer> lupdate getcmdtype() ==# ':' && getcmdline() ==# 'lupdate'
-\                              ?    'Lupdate'
-\                              :    'lupdate'
+cnorea <expr> <buffer> lupdate  getcmdtype() ==# ':' && getcmdline() ==# 'lupdate'
+\                               ?    'Lupdate'
+\                               :    'lupdate'
 
 " Mappings {{{1
 
