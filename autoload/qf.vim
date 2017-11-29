@@ -134,6 +134,7 @@ endfu
 
 fu! s:get_pat(pat) abort "{{{1
     let not_my_plugins = [
+    \                      'autoload/plug.vim',
     \                      'plugged/emmet-vim',
     \                      'plugged/fzf.vim',
     \                      'plugged/goyo.vim',
