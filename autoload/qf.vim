@@ -78,7 +78,7 @@ fu! qf#cfilter(list, bang, pat, mod) abort "{{{1
     return ''
 endfu
 
-fu! qf#cfilter_complete(arglead, _cmdline, _pos) abort "{{{1
+fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{1
     return [ '-not_my_plugins' ]
 endfu
 
