@@ -241,6 +241,7 @@ fu! qf#open(cmd) abort "{{{1
        " Probably because the help window hasn't been opened yet.}}}
     endif
 endfu
+
 fu! qf#open_maybe(cmd) abort "{{{1
     "             ┌─ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
     "             │  But, contrary to `:helpg`, the location list is local to a window.
