@@ -101,18 +101,18 @@ fu! qf#cupdate(list, mod) abort "{{{1
 
         " update the text of the qfl entries
         let list = a:list ==# 'qf' ? getqflist() : getloclist(0)
-        call map(list, 'extend(v:val, { "text": get(getbufline(v:val.bufnr, v:val.lnum), 0, "") })')
-        "               │                       │
-        "               │                       └─ `getbufline()` should return a list with a single item.
-        "               │                          But we use `get()` to give the item a default value,
-        "               │                          in case it doesn't exist.
-        "               │
-        "               └─ There will be a conflict between the old value
-        "                  associated to the key `text`, and the new one.
+        call map(list, { k,v -> extend(v, { 'text': get(getbufline(v.bufnr, v.lnum), 0, '') }) })
+        "                       │                   │
+        "                       │                   └─ `getbufline()` should return a list with a single item.
+        "                       │                      But we use `get()` to give the item a default value,
+        "                       │                      in case it doesn't exist.
+        "                       │
+        "                       └─ There will be a conflict between the old value
+        "                          associated to the key `text`, and the new one.
         "
-        "                  And in case of conflict, by default `extend()` overwrites
-        "                  the old value with the new one.
-        "                  So, in effect, `extend()` will replace the old text with the new one.
+        "                          And in case of conflict, by default `extend()` overwrites
+        "                          the old value with the new one.
+        "                          So, in effect, `extend()` will replace the old text with the new one.
 
         let action = a:mod =~# '^keep' ? ' ' : 'r'
         "                                 │     │
@@ -180,9 +180,9 @@ fu! qf#hide_noise(action) abort "{{{1
         call matchdelete(w:my_conceal_match)
         unlet! w:my_conceal_match
     elseif a:action ==# 'enable' && !exists('w:my_conceal_match')
-        if index(map(getmatches(), 'v:val.group'), 'Conceal') >= 0
+        if index(map(getmatches(), { k,v -> v.group }), 'Conceal') >= 0
             setl cocu&vim cole&vim
-            let id = getmatches()[index(map(getmatches(), 'v:val.group'), 'Conceal')].id
+            let id = getmatches()[index(map(getmatches(), { k,v -> v.group }), 'Conceal')].id
             call matchdelete(id)
         else
             call qf#conceal('location')
