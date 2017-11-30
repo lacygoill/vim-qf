@@ -79,7 +79,7 @@ fu! qf#cfilter(list, bang, pat, mod) abort "{{{1
 endfu
 
 fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{1
-    return [ '-not_my_plugins' ]
+    return [ '-not_my_plugins', '-not_relevant' ]
 endfu
 
 fu! qf#conceal(this) abort "{{{1
@@ -162,23 +162,28 @@ fu! s:get_pat(pat) abort "{{{1
     " If no pattern was provided, use the search register as a fallback.
     " Remove a possible couple of slashes before and after the pattern.
     " If `:Cfilter` was passed `-not_my_plugins`, build the right pattern.
-    " Otherwise, do nothing.
+    " If `:Cfilter` was  passed `-not_relevant`, use a  pattern matching session
+    " and temporary files. Otherwise, do nothing.
     return a:pat == ''
     \?         @/
     \:     a:pat =~ '^/.*/$'
     \?        a:pat[1:-2]
     \:     a:pat ==# '-not_my_plugins'
     \?        '^\%('.join(not_my_plugins, '\|').'\)'
+    \:     a:pat ==# '-not_relevant'
+    \?        '^\%(session\|tmp\)'
     \:        a:pat
 endfu
 
 fu! qf#hide_noise(action) abort "{{{1
     if a:action ==# 'is_active'
         return exists('w:my_conceal_match')
+
     elseif a:action ==# 'disable' && exists('w:my_conceal_match')
         setl cocu&vim cole&vim
         call matchdelete(w:my_conceal_match)
         unlet! w:my_conceal_match
+
     elseif a:action ==# 'enable' && !exists('w:my_conceal_match')
         if index(map(getmatches(), { k,v -> v.group }), 'Conceal') >= 0
             setl cocu&vim cole&vim
