@@ -295,4 +295,3 @@ fu! qf#open_maybe(cmd) abort "{{{1
         call qf#open(a:cmd)
     endif
 endfu
-
