@@ -89,7 +89,10 @@ fu! qf#conceal(this) abort "{{{1
     endif
     let pat = patterns[a:this]
     setl cocu=nc cole=3
-    let w:my_conceal_match = matchadd('Conceal', pat, 0, -1, {'conceal': 'x'})
+    if exists('w:my_qf_conceal')
+        call matchdelete(w:my_qf_conceal)
+    endif
+    let w:my_qf_conceal = matchadd('Conceal', pat, 0, -1, {'conceal': 'x'})
 endfu
 
 fu! qf#cupdate(list, mod) abort "{{{1
@@ -177,14 +180,14 @@ endfu
 
 fu! qf#hide_noise(action) abort "{{{1
     if a:action ==# 'is_active'
-        return exists('w:my_conceal_match')
+        return exists('w:my_qf_conceal')
 
-    elseif a:action ==# 'disable' && exists('w:my_conceal_match')
+    elseif a:action ==# 'disable' && exists('w:my_qf_conceal')
         setl cocu&vim cole&vim
-        call matchdelete(w:my_conceal_match)
-        unlet! w:my_conceal_match
+        call matchdelete(w:my_qf_conceal)
+        unlet! w:my_qf_conceal
 
-    elseif a:action ==# 'enable' && !exists('w:my_conceal_match')
+    elseif a:action ==# 'enable' && !exists('w:my_qf_conceal')
         if index(map(getmatches(), { k,v -> v.group }), 'Conceal') >= 0
             setl cocu&vim cole&vim
             let id = getmatches()[index(map(getmatches(), { k,v -> v.group }), 'Conceal')].id
