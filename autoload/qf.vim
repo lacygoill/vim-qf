@@ -159,6 +159,7 @@ fu! s:get_pat(pat) abort "{{{1
     \                      'plugged/vim-sandwich',
     \                      'plugged/vim-sneak',
     \                      'plugged/vim-snippets',
+    \                      'plugged/vim-submode',
     \                      'plugged/vim-tmuxify',
     \                    ]
 
