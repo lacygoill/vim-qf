@@ -84,6 +84,12 @@ augroup my_qf
     au! * <buffer>
     au BufWinEnter <buffer> setl cursorline nowrap
 augroup END
+" When  `:lh` populates  a  loclist  and opens  a  location  window, there's  no
+" `BufWinEnter` right after `FileType qf`.
+" I don't know why. Imo, there should be. There is one for `:helpg`.
+" Anyway, because of this, our window-local settings won't be applied in a window
+" opened by `:lh`. We want them, so fire `BufWinEnter`.
+doautocmd <nomodeline> my_qf BufWinEnter
 
 " efm {{{2
 " Why do we set 'efm'?{{{
