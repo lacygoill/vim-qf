@@ -104,7 +104,7 @@ fu! qf#cupdate(list, mod) abort "{{{1
 
         " update the text of the qfl entries
         let list = a:list ==# 'qf' ? getqflist() : getloclist(0)
-        call map(list, { k,v -> extend(v, { 'text': get(getbufline(v.bufnr, v.lnum), 0, '') }) })
+        call map(list, { i,v -> extend(v, { 'text': get(getbufline(v.bufnr, v.lnum), 0, '') }) })
         "                       │                   │
         "                       │                   └─ `getbufline()` should return a list with a single item.
         "                       │                      But we use `get()` to give the item a default value,
@@ -189,9 +189,9 @@ fu! qf#hide_noise(action) abort "{{{1
         unlet! w:my_qf_conceal
 
     elseif a:action ==# 'enable' && !exists('w:my_qf_conceal')
-        if index(map(getmatches(), { k,v -> v.group }), 'Conceal') >= 0
+        if index(map(getmatches(), { i,v -> v.group }), 'Conceal') >= 0
             setl cocu&vim cole&vim
-            let id = getmatches()[index(map(getmatches(), { k,v -> v.group }), 'Conceal')].id
+            let id = getmatches()[index(map(getmatches(), { i,v -> v.group }), 'Conceal')].id
             call matchdelete(id)
         else
             call qf#conceal('location')
