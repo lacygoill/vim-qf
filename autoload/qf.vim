@@ -36,7 +36,7 @@
 " in this file.  It must be done from vim-qf/after/ftplugin/qf.vim
 " Why? Watch:
 "
-"         g/t
+"         g\t
 "             in a file where the keyword `fixme` is present
 "             → `fixme` is highlighted ✔
 "
@@ -45,10 +45,8 @@
 "             → `fixme` is still highlighted ✘
 
 
-" let s:matches_ids     = {}
 let s:matches_any_qfl = {}
 let s:known_patterns  = { 'location': '\v^\s*\|\s*\|\s\zs\S+' }
-
 
 fu! qf#c_w(tabpage) abort "{{{1
     try
@@ -165,10 +163,6 @@ fu! qf#create_matches() abort "{{{1
                     \                                  :    []
                     \                                 ))
                     let this_window = win_getid()
-                    " if !has_key(s:matches_ids, qf_id)
-                    "     let s:matches_ids[this_window] = []
-                    " endif
-                    " let s:matches_ids[this_window] += [match_id]
                 endfor
             endfor
         endif
@@ -224,11 +218,6 @@ fu! qf#delete_previous_matches() abort "{{{1
         for match_id in map(getmatches(), {i,v -> v.id})
             call matchdelete(match_id)
         endfor
-
-        " for match_id in get(s:matches_ids, win_getid(), [])
-        "     call matchdelete(match_id)
-        " endfor
-
     catch
         echom v:exception.' | '.v:throwpoint
     endtry

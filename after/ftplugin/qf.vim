@@ -71,7 +71,7 @@ nno  <buffer><nowait><silent>  q       :<c-u>let g:my_stl_list_position = 0 <bar
 nno  <buffer><nowait><silent>  [ob     :<c-u>call qf#hide_noise('enable')<cr>
 nno  <buffer><nowait><silent>  ]ob     :<c-u>call qf#hide_noise('disable')<cr>
 nno  <buffer><nowait><silent>  cob     :<c-u>call qf#hide_noise(qf#hide_noise('is_active')
-                                           \                        ? 'disable' : 'enable')<cr>
+                                       \                            ? 'disable' : 'enable')<cr>
 
 " Options {{{1
 

@@ -104,3 +104,11 @@ augroup my_quickfix
     "                             :echo g:myvar  →  E121: Undefined variable: g:myvar
     "}}}
 augroup END
+
+" Mappings {{{1
+
+nno  <silent><unique>  z(  :copen<cr>
+nno  <silent><unique>  z)  :cclose<cr>
+
+nno  <silent><unique>  z[  :lopen<cr>
+nno  <silent><unique>  z]  :lclose<cr>
