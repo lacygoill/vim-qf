@@ -1,3 +1,55 @@
+" TODO:
+" Restore window position after we close  qf window, and manually reopen it with
+" `:[cl]open`.
+" The easiest way to restore the window  position is to create a mapping opening
+" which would call qf#open('[l]vim').
+
+" TODO:
+" Before resetting 'cole' and 'cocu', check  whether they were altered by one of
+" our autoload functions. When you set a match, set also a flag:
+"
+"         let s:did_install_a_match
+"
+" Create a function to get the value of this flag from the filetype plugin.
+" If it's set, reset the options and reset the flag. Otherwise, don't do anything.
+
+" FIXME:
+" In `vim-interactive-lists`, we wrote this:
+"
+"         if &buftype ==# 'quickfix' | let is_quickfix = 1 | noautocmd wincmd p | endif
+"
+" `wincmd p` is not reliable. The previous  window could have nothing to do with
+" the ll window.
+" Search for `wincmd p` everywhere. I think we made similar mistakes elsewhere.
+
+" TODO:
+" Remove qf#conceal() from this file, and everywhere we called it, replace
+" it with a call to `qf#set_matches()`.
+
+
+" TODO:
+" Also, maybe we need to undo the settings 'cole', 'cocu'.
+" Indeed, the  2nd time we display  a qf buffer  in the same window,  there's no
+" guarantee that we're going to conceal anything.
+"
+" But, if we decide to reset these options, it shouldn't be done from a function
+" in this file.  It must be done from vim-qf/after/ftplugin/qf.vim
+" Why? Watch:
+"
+"         g/t
+"             in a file where the keyword `fixme` is present
+"             → `fixme` is highlighted ✔
+"
+"         lvim /fixme/ %
+"             in the same file, without having closed the location window
+"             → `fixme` is still highlighted ✘
+
+
+" let s:matches_ids     = {}
+let s:matches_any_qfl = {}
+let s:known_patterns  = { 'location': '\v^\s*\|\s*\|\s\zs\S+' }
+
+
 fu! qf#c_w(tabpage) abort "{{{1
     try
         " In a qf window populated by `:helpg` or `:lh`, `C-w CR` opens a window
@@ -95,6 +147,37 @@ fu! qf#conceal(this) abort "{{{1
     let w:my_qf_conceal = matchadd('Conceal', pat, 0, -1, {'conceal': 'x'})
 endfu
 
+fu! qf#create_matches() abort "{{{1
+    try
+        let qf_id = s:get_qf_id()
+
+        let matches_this_qfl = get(s:matches_any_qfl, qf_id, {})
+        if !empty(matches_this_qfl)
+            for matches_from_all_origins in values(matches_this_qfl)
+                for a_match in matches_from_all_origins
+                    let [ group, pat ] = [ a_match.group, a_match.pat ]
+                    if group ==? 'Conceal'
+                        setl cocu=nc cole=3
+                    endif
+                    let match_id = call('matchadd',   [ group, pat, 0, -1]
+                    \                               + (group ==? 'conceal'
+                    \                                  ?    [{ 'conceal': 'x' }]
+                    \                                  :    []
+                    \                                 ))
+                    let this_window = win_getid()
+                    " if !has_key(s:matches_ids, qf_id)
+                    "     let s:matches_ids[this_window] = []
+                    " endif
+                    " let s:matches_ids[this_window] += [match_id]
+                endfor
+            endfor
+        endif
+
+    catch
+        echom v:exception.' | '.v:throwpoint
+    endtry
+endfu
+
 fu! qf#cupdate(list, mod) abort "{{{1
     try
         " save title of the qf window
@@ -133,6 +216,75 @@ fu! qf#cupdate(list, mod) abort "{{{1
     catch
         return 'echoerr '.string(v:exception)
     endtry
+endfu
+
+fu! qf#delete_previous_matches() abort "{{{1
+    setl cocu< cole<
+    try
+        for match_id in map(getmatches(), {i,v -> v.id})
+            call matchdelete(match_id)
+        endfor
+
+        " for match_id in get(s:matches_ids, win_getid(), [])
+        "     call matchdelete(match_id)
+        " endfor
+
+    catch
+        echom v:exception.' | '.v:throwpoint
+    endtry
+endfu
+
+fu! qf#disable_some_keys(keys) abort "{{{1
+    for a_key in a:keys
+        sil! exe 'nno  <buffer><nowait><silent>  '.a:key.'  <nop>'
+    endfor
+endfu
+
+fu! qf#focus_window(type, toward_qf) abort "{{{1
+
+    " Can we use `wincmd p` to focus the qf window, after populating a qfl?{{{
+    "
+    " No. It's not reliable.
+    "
+    " For example, suppose we've executed a command which has populated the qfl,
+    " and opened  the qf  window. The previous  window will,  indeed, be  the qf
+    " window. Because it  seems that after  Vim has opened  it, it gets  back to
+    " whatever window we were originally in.
+    "
+    " But  then,  from  the  qf  window,  suppose  we  execute  another  command
+    " populating the  qfl.  This time,  the previous window  will NOT be  the qf
+    " window. It will be whatever window had  the focus before we entered the qf
+    " window.
+    "
+    "}}}
+    if a:toward_qf
+        "
+        "   ┌ dictionary: {'winid': 42}
+        "   │
+        let id = call(a:type ==# 'loc'
+        \                ?    'getloclist'
+        \                :    'getqflist',
+        \                a:type ==# 'loc'
+        \                ?    [0, {'winid':0}]
+        \                :    [   {'winid':0}])
+        let id = id.winid
+
+    elseif a:type ==# 'qf'
+        noautocmd wincmd p
+        return
+
+    else
+        let win_ids = gettabinfo(tabpagenr())[0].windows
+        let loc_id  = win_getid()
+        let id      = get(filter(copy(win_ids), {i,v ->    get(getloclist(v, {'winid': 0}), 'winid', 0)
+        \                                               == loc_id
+        \                                               && v != loc_id })
+        \                 ,0,0)
+    endif
+
+    if id != 0
+        call win_gotoid(id)
+    endif
 endfu
 
 fu! s:get_pat(pat) abort "{{{1
@@ -177,6 +329,22 @@ fu! s:get_pat(pat) abort "{{{1
     \:     a:pat ==# '-not_relevant'
     \?        '^\%(session\|tmp\)'
     \:        a:pat
+endfu
+
+fu! s:get_qf_id() abort "{{{1
+    try
+        return get(call(b:qf_is_loclist
+        \               ?    'getloclist'
+        \               :    'getqflist',
+        \
+        \               b:qf_is_loclist
+        \               ?    [0, {'id': 0}]
+        \               :    [   {'id': 0}]
+        \         ), 'id', 0)
+
+    catch
+        echom v:exception.' | '.v:throwpoint
+    endtry
 endfu
 
 fu! qf#hide_noise(action) abort "{{{1
@@ -304,4 +472,21 @@ fu! qf#open_maybe(cmd) abort "{{{1
     else
         call qf#open(a:cmd)
     endif
+endfu
+
+fu! qf#set_matches(origin, group, pat) abort "{{{1
+    try
+        let id = s:get_qf_id()
+        if !has_key(s:matches_any_qfl, id)
+            let s:matches_any_qfl[id] = {}
+        endif
+        let matches_this_qfl_this_origin = get(s:matches_any_qfl[id], a:origin, [])
+        let pat = get(s:known_patterns, a:pat, a:pat)
+        call extend(s:matches_any_qfl[id], { a:origin : extend( matches_this_qfl_this_origin,
+        \                                                       [{ 'group': a:group, 'pat': pat }]
+        \                                                     )})
+
+    catch
+        echom v:exception.' | '.v:throwpoint
+    endtry
 endfu

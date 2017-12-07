@@ -54,27 +54,24 @@ cnorea <expr> <buffer> lupdate  getcmdtype() ==# ':' && getcmdline() ==# 'lupdat
 " Mappings {{{1
 
 " disable some keys, to avoid annoying error messages
-for s:char in [ 'a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x']
-    sil! exe 'nno <buffer> <nowait> <silent> '.s:char.' <nop>'
-endfor
-unlet! s:char
+call qf#disable_some_keys([ 'a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
 
-nno <buffer> <nowait> <silent>  <cr>       <cr>:norm! zv<cr>
-nno <buffer> <nowait> <silent>  <c-w><cr>  :<c-u>exe qf#c_w(0)<cr>
+nno  <buffer><nowait><silent>  <cr>       <cr>:norm! zv<cr>
+nno  <buffer><nowait><silent>  <c-w><cr>  :<c-u>exe qf#c_w(0)<cr>
 " Warning:
 " By default, <c-w>T moves the current window to a new tab page.
 " Here, we use it slightly differently: it opens the entry under the cursor in a
 " new tag page.
 " Also, we don't use `<c-w>t` because, by default, the latter moves the focus to
 " the top window in the current tab page.
-nno <buffer> <nowait> <silent>  <c-w>T     :<c-u>exe qf#c_w(1)<cr>
+nno  <buffer><nowait><silent>  <c-w>T  :<c-u>exe qf#c_w(1)<cr>
 
-nno <buffer> <nowait> <silent>  q          :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
+nno  <buffer><nowait><silent>  q       :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
 
-nno <buffer> <nowait> <silent>  [ob        :<c-u>call qf#hide_noise('enable')<cr>
-nno <buffer> <nowait> <silent>  ]ob        :<c-u>call qf#hide_noise('disable')<cr>
-nno <buffer> <nowait> <silent>  cob        :<c-u>call qf#hide_noise(qf#hide_noise('is_active')
-                                        \ ? 'disable' : 'enable')<cr>
+nno  <buffer><nowait><silent>  [ob     :<c-u>call qf#hide_noise('enable')<cr>
+nno  <buffer><nowait><silent>  ]ob     :<c-u>call qf#hide_noise('disable')<cr>
+nno  <buffer><nowait><silent>  cob     :<c-u>call qf#hide_noise(qf#hide_noise('is_active')
+                                           \                        ? 'disable' : 'enable')<cr>
 
 " Options {{{1
 
@@ -201,6 +198,9 @@ endif
 if get(b:, 'my_conceal_what', '') != ''
     call qf#conceal(get(b:, 'my_conceal_what', ''))
 endif
+
+call qf#delete_previous_matches()
+call qf#create_matches()
 
 " Teardown {{{1
 
