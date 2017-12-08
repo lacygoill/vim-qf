@@ -80,7 +80,7 @@ fu! qf#c_w(tabpage) abort "{{{1
             call win_gotoid(new)
         endif
     catch
-        call my_lib#catch_error()
+        return my_lib#catch_error()
     endtry
 endfu
 
@@ -122,7 +122,7 @@ fu! qf#cfilter(list, bang, pat, mod) abort "{{{1
         echo printf('Filtered list:%s matching %s (%d items)',
         \           a:bang ? ' not' : '', a:pat, len(list))
     catch
-        call my_lib#catch_error()
+        return my_lib#catch_error()
     endtry
 endfu
 
@@ -166,7 +166,7 @@ fu! qf#create_matches() abort "{{{1
         endif
 
     catch
-        call my_lib#catch_error()
+        return my_lib#catch_error()
     endtry
 endfu
 
@@ -206,7 +206,7 @@ fu! qf#cupdate(list, mod) abort "{{{1
         \                              :    [ 0, [], 'a', old_title ])
 
     catch
-        call my_lib#catch_error()
+        return my_lib#catch_error()
     endtry
 endfu
 
@@ -217,7 +217,7 @@ fu! qf#delete_previous_matches() abort "{{{1
             call matchdelete(match_id)
         endfor
     catch
-        call my_lib#catch_error()
+        return my_lib#catch_error()
     endtry
 endfu
 
@@ -331,7 +331,7 @@ fu! s:get_qf_id() abort "{{{1
         \         ), 'id', 0)
 
     catch
-        call my_lib#catch_error()
+        return my_lib#catch_error()
     endtry
 endfu
 
@@ -475,6 +475,6 @@ fu! qf#set_matches(origin, group, pat) abort "{{{1
         \                                                     )})
 
     catch
-        call my_lib#catch_error()
+        return my_lib#catch_error()
     endtry
 endfu
