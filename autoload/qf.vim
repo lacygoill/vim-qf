@@ -80,9 +80,8 @@ fu! qf#c_w(tabpage) abort "{{{1
             call win_gotoid(new)
         endif
     catch
-        return 'echoerr '.string(v:exception)
+        call my_lib#catch_error()
     endtry
-    return ''
 endfu
 
 fu! qf#cfilter(list, bang, pat, mod) abort "{{{1
@@ -123,9 +122,8 @@ fu! qf#cfilter(list, bang, pat, mod) abort "{{{1
         echo printf('Filtered list:%s matching %s (%d items)',
         \           a:bang ? ' not' : '', a:pat, len(list))
     catch
-        return 'echoerr '.string(v:exception)
+        call my_lib#catch_error()
     endtry
-    return ''
 endfu
 
 fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{1
@@ -168,7 +166,7 @@ fu! qf#create_matches() abort "{{{1
         endif
 
     catch
-        echom v:exception.' | '.v:throwpoint
+        call my_lib#catch_error()
     endtry
 endfu
 
@@ -208,7 +206,7 @@ fu! qf#cupdate(list, mod) abort "{{{1
         \                              :    [ 0, [], 'a', old_title ])
 
     catch
-        return 'echoerr '.string(v:exception)
+        call my_lib#catch_error()
     endtry
 endfu
 
@@ -219,7 +217,7 @@ fu! qf#delete_previous_matches() abort "{{{1
             call matchdelete(match_id)
         endfor
     catch
-        echom v:exception.' | '.v:throwpoint
+        call my_lib#catch_error()
     endtry
 endfu
 
@@ -230,7 +228,6 @@ fu! qf#disable_some_keys(keys) abort "{{{1
 endfu
 
 fu! qf#focus_window(type, toward_qf) abort "{{{1
-
     " Can we use `wincmd p` to focus the qf window, after populating a qfl?{{{
     "
     " No. It's not reliable.
@@ -241,11 +238,10 @@ fu! qf#focus_window(type, toward_qf) abort "{{{1
     " whatever window we were originally in.
     "
     " But  then,  from  the  qf  window,  suppose  we  execute  another  command
-    " populating the  qfl.  This time,  the previous window  will NOT be  the qf
-    " window. It will be whatever window had  the focus before we entered the qf
-    " window.
-    "
+    " populating the  qfl.  This time,  the qf window  will NOT be  the previous
+    " window but the current one.
     "}}}
+
     if a:toward_qf
         "
         "   ┌ dictionary: {'winid': 42}
@@ -256,11 +252,13 @@ fu! qf#focus_window(type, toward_qf) abort "{{{1
         \                a:type ==# 'loc'
         \                ?    [0, {'winid':0}]
         \                :    [   {'winid':0}])
+        if empty(id)
+            return (a:type ==# 'loc' ? 'l' : 'c').'window'
+        endif
         let id = id.winid
 
     elseif a:type ==# 'qf'
-        noautocmd wincmd p
-        return
+        return 'wincmd p'
 
     else
         let win_ids = gettabinfo(tabpagenr())[0].windows
@@ -274,6 +272,7 @@ fu! qf#focus_window(type, toward_qf) abort "{{{1
     if id != 0
         call win_gotoid(id)
     endif
+    return ''
 endfu
 
 fu! s:get_pat(pat) abort "{{{1
@@ -332,7 +331,7 @@ fu! s:get_qf_id() abort "{{{1
         \         ), 'id', 0)
 
     catch
-        echom v:exception.' | '.v:throwpoint
+        call my_lib#catch_error()
     endtry
 endfu
 
@@ -476,6 +475,6 @@ fu! qf#set_matches(origin, group, pat) abort "{{{1
         \                                                     )})
 
     catch
-        echom v:exception.' | '.v:throwpoint
+        call my_lib#catch_error()
     endtry
 endfu

@@ -19,9 +19,9 @@
 " It would break a pattern containing a bar (for example, for an alternation).
 
 com! -bang -buffer -nargs=? -complete=customlist,qf#cfilter_complete Cfilter
-\                                   exe qf#cfilter('qf' , <bang>0, <q-args>, <q-mods>)
+\                                   call qf#cfilter('qf' , <bang>0, <q-args>, <q-mods>)
 com! -bang -buffer -nargs=? -complete=customlist,qf#cfilter_complete Lfilter
-\                                   exe qf#cfilter('loc', <bang>0, <q-args>, <q-mods>)
+\                                   call qf#cfilter('loc', <bang>0, <q-args>, <q-mods>)
 
 cnorea <expr> <buffer> cfilter  getcmdtype() ==# ':' && getcmdline() ==# 'cfilter'
 \                               ?    'Cfilter'
@@ -40,8 +40,8 @@ cnorea <expr> <buffer> lfilter  getcmdtype() ==# ':' && getcmdline() ==# 'lfilte
 "         cfdo %s/pat/rep/g
 "         Cupdate
 
-com! -bar -buffer Cupdate exe qf#cupdate('qf', <q-mods>)
-com! -bar -buffer Lupdate exe qf#cupdate('loc', <q-mods>)
+com! -bar -buffer Cupdate call qf#cupdate('qf', <q-mods>)
+com! -bar -buffer Lupdate call qf#cupdate('loc', <q-mods>)
 
 cnorea <expr> <buffer> cupdate  getcmdtype() ==# ':' && getcmdline() ==# 'cupdate'
 \                               ?    'Cupdate'
@@ -57,14 +57,14 @@ cnorea <expr> <buffer> lupdate  getcmdtype() ==# ':' && getcmdline() ==# 'lupdat
 call qf#disable_some_keys([ 'a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
 
 nno  <buffer><nowait><silent>  <cr>       <cr>:norm! zv<cr>
-nno  <buffer><nowait><silent>  <c-w><cr>  :<c-u>exe qf#c_w(0)<cr>
+nno  <buffer><nowait><silent>  <c-w><cr>  :<c-u>call qf#c_w(0)<cr>
 " Warning:
 " By default, <c-w>T moves the current window to a new tab page.
 " Here, we use it slightly differently: it opens the entry under the cursor in a
 " new tag page.
 " Also, we don't use `<c-w>t` because, by default, the latter moves the focus to
 " the top window in the current tab page.
-nno  <buffer><nowait><silent>  <c-w>T  :<c-u>exe qf#c_w(1)<cr>
+nno  <buffer><nowait><silent>  <c-w>T  :<c-u>call qf#c_w(1)<cr>
 
 nno  <buffer><nowait><silent>  q       :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
 
