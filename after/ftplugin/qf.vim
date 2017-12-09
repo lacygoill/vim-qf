@@ -68,11 +68,6 @@ nno  <buffer><nowait><silent>  <c-w>T  :<c-u>call qf#c_w(1)<cr>
 
 nno  <buffer><nowait><silent>  q       :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
 
-nno  <buffer><nowait><silent>  [ob     :<c-u>call qf#hide_noise('enable')<cr>
-nno  <buffer><nowait><silent>  ]ob     :<c-u>call qf#hide_noise('disable')<cr>
-nno  <buffer><nowait><silent>  cob     :<c-u>call qf#hide_noise(qf#hide_noise('is_active')
-                                       \                            ? 'disable' : 'enable')<cr>
-
 " Options {{{1
 
 setl nobuflisted
@@ -186,18 +181,6 @@ if  b:qf_is_loclist
 endif
 
 " Noise {{{1
-
-" We  check the  existence of  `b:my_conceal_what`, to  NOT call  `qf#conceal()`
-" unconditionally  and always  source the  autoload/ directory,  which would  go
-" against its purpose.
-"
-" TODO:
-" However, it still feels wrong to  call an autoload function from the interface
-" of a plugin. Maybe  we should move `qf#conceal()` inside  `my_lib`, and rename
-" it `my_lib#conceal()`.
-if get(b:, 'my_conceal_what', '') != ''
-    call qf#conceal(get(b:, 'my_conceal_what', ''))
-endif
 
 call qf#delete_previous_matches()
 call qf#create_matches()

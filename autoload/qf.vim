@@ -1,7 +1,4 @@
 " TODO:
-" finish reviewing `myfuncs#search_todo()`
-
-" TODO:
 " Restore window position after we close  qf window, and manually reopen it with
 " `:[cl]open`.
 " The easiest way to restore the window  position is to create a mapping opening
@@ -25,10 +22,6 @@
 " the ll window.
 " Search for `wincmd p` everywhere. I think we made similar mistakes elsewhere.
 
-" TODO:
-" Remove qf#conceal() from this file, and everywhere we called it, replace
-" it with a call to `qf#set_matches()`.
-
 
 " TODO:
 " Also, maybe we need to undo the settings 'cole', 'cocu'.
@@ -49,8 +42,7 @@
 
 
 let s:matches_any_qfl = {}
-let s:known_patterns  = { 'location': '\v^\s*\|\s*\|\s\zs\S+' }
-"                                     '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?'
+let s:known_patterns  = { 'location': '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?' }
 
 fu! qf#c_w(tabpage) abort "{{{1
     try
@@ -135,19 +127,6 @@ fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{1
     return empty(a:arglead)
     \?         candidates
     \:         filter(candidates, 'v:val[:strlen(a:arglead)-1] ==# a:arglead')
-endfu
-
-fu! qf#conceal(this) abort "{{{1
-    let patterns = { 'location': '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?' }
-    if !has_key(patterns, a:this)
-        return
-    endif
-    let pat = patterns[a:this]
-    setl cocu=nc cole=3
-    if exists('w:my_qf_conceal')
-        call matchdelete(w:my_qf_conceal)
-    endif
-    let w:my_qf_conceal = matchadd('Conceal', pat, 0, -1, {'conceal': 'x'})
 endfu
 
 fu! qf#create_matches() abort "{{{1
@@ -292,26 +271,6 @@ fu! s:get_qf_id() abort "{{{1
     catch
         return my_lib#catch_error()
     endtry
-endfu
-
-fu! qf#hide_noise(action) abort "{{{1
-    if a:action ==# 'is_active'
-        return exists('w:my_qf_conceal')
-
-    elseif a:action ==# 'disable' && exists('w:my_qf_conceal')
-        setl cocu&vim cole&vim
-        call matchdelete(w:my_qf_conceal)
-        unlet! w:my_qf_conceal
-
-    elseif a:action ==# 'enable' && !exists('w:my_qf_conceal')
-        if index(map(getmatches(), { i,v -> v.group }), 'Conceal') >= 0
-            setl cocu&vim cole&vim
-            let id = getmatches()[index(map(getmatches(), { i,v -> v.group }), 'Conceal')].id
-            call matchdelete(id)
-        else
-            call qf#conceal('location')
-        endif
-    endif
 endfu
 
 fu! qf#open(cmd) abort "{{{1
