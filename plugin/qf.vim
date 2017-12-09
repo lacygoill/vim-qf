@@ -110,10 +110,3 @@ augroup my_quickfix
     "}}}
 augroup END
 
-" Mappings {{{1
-
-nno  <silent><unique>  z(  :exe qf#focus_window('qf', 1)<cr>
-nno  <silent><unique>  z)  :cclose<cr>
-
-nno  <silent><unique>  z[  :exe qf#focus_window('loc', 1)<cr>
-nno  <silent><unique>  z]  :lclose<cr>

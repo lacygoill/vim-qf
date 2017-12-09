@@ -1,4 +1,7 @@
 " TODO:
+" finish reviewing `myfuncs#search_todo()`
+
+" TODO:
 " Restore window position after we close  qf window, and manually reopen it with
 " `:[cl]open`.
 " The easiest way to restore the window  position is to create a mapping opening
@@ -47,6 +50,7 @@
 
 let s:matches_any_qfl = {}
 let s:known_patterns  = { 'location': '\v^\s*\|\s*\|\s\zs\S+' }
+"                                     '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?'
 
 fu! qf#c_w(tabpage) abort "{{{1
     try
@@ -225,54 +229,6 @@ fu! qf#disable_some_keys(keys) abort "{{{1
     for a_key in a:keys
         sil! exe 'nno  <buffer><nowait><silent>  '.a:key.'  <nop>'
     endfor
-endfu
-
-fu! qf#focus_window(type, toward_qf) abort "{{{1
-    " Can we use `wincmd p` to focus the qf window, after populating a qfl?{{{
-    "
-    " No. It's not reliable.
-    "
-    " For example, suppose we've executed a command which has populated the qfl,
-    " and opened  the qf  window. The previous  window will,  indeed, be  the qf
-    " window. Because it  seems that after  Vim has opened  it, it gets  back to
-    " whatever window we were originally in.
-    "
-    " But  then,  from  the  qf  window,  suppose  we  execute  another  command
-    " populating the  qfl.  This time,  the qf window  will NOT be  the previous
-    " window but the current one.
-    "}}}
-
-    if a:toward_qf
-        "
-        "   ┌ dictionary: {'winid': 42}
-        "   │
-        let id = call(a:type ==# 'loc'
-        \                ?    'getloclist'
-        \                :    'getqflist',
-        \                a:type ==# 'loc'
-        \                ?    [0, {'winid':0}]
-        \                :    [   {'winid':0}])
-        if empty(id)
-            return (a:type ==# 'loc' ? 'l' : 'c').'window'
-        endif
-        let id = id.winid
-
-    elseif a:type ==# 'qf'
-        return 'wincmd p'
-
-    else
-        let win_ids = gettabinfo(tabpagenr())[0].windows
-        let loc_id  = win_getid()
-        let id      = get(filter(copy(win_ids), {i,v ->    get(getloclist(v, {'winid': 0}), 'winid', 0)
-        \                                               == loc_id
-        \                                               && v != loc_id })
-        \                 ,0,0)
-    endif
-
-    if id != 0
-        call win_gotoid(id)
-    endif
-    return ''
 endfu
 
 fu! s:get_pat(pat) abort "{{{1
