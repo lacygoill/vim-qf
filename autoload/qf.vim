@@ -1,5 +1,72 @@
 " Variables {{{1
+" What's the purpose of `s:matches_any_qfl`?{{{
+"
+" Suppose we  have a  plugin which  populates a  qfl, opens  the qf  window, and
+" applies a  match. The latter  is local  to the window. And  if we  close, then
+" re-open the qf window, its id changes. So, we lose the match.
+"
+" To fix this, we need to achieve 2 things:
+"
+"         • don't apply a match directly from a third-party plugin,
+"           it must be done from `after/ftplugin/qf.vim`, because the latter
+"           is always sourced whenever we open a qf window
+"
+"           We can't  rely on the buffer  number, nor on the  window id, because
+"           they both change.
+"
+"         • save the information of a match, so that `after/ftplugin/qf.vim`
+"           can reapply it
+"
+" We need to bind the information of a  match (HG name, regex) to a qfl (through
+" its 'context' key) or to its id.
+" Atm, I don't want to use the 'context' key because:
+"
+"         • it's not supported in Neovim
+"         • it could be used by another third-party plugin with a data type
+"           different than a dictionary (risk of incompatibility/interference)
+"
+" So, instead, we bind the info to the qfl id in the variable `s:matches_any_qfl`.
+"}}}
+" How is it structured?{{{
+"
+" It stores a dictionary whose keys are qfl ids. The value of a key is a sub-dictionary
+" describing matches.
+"
+" Each key in this sub-dictionary describes an “origin”. By convention, we build the
+" text of an origin like this:
+"         {plugin_name}:{function_name}
+"
+" This kind of info could be useful when debugging. It tells us from which function
+" in which plugin does the match come from.
+"
+" Finally, the value associated to an “origin” key is a list of sub-sub-dictionaries.
+" Why a list? Because a SINGLE function from a plugin could need to install SEVERAL
+" matches. These final sub-sub-dictionaries contain 2 keys/values:
+"
+"         • 'group' → HG name
+"         • 'pat'   → regex
+"}}}
+" Example of simple value for `s:matches_any_qfl`:{{{
+"
+" { '1': {'myfuncs:search_todo':
+" \                             [{'group': 'Conceal', 'pat': '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?'},
+" \                              {'group': 'Todo',    'pat': '\cfixme\|todo'}]
+" \      }}
+"}}}
+" How is it used?{{{
+"
+" In a plugin, when we populate a qfl and want to apply a match to its window,
+" we invoke:
+"
+"         call qf#set_matches({origin}, {HG}, {pat})
+"
+" It will register a match in `s:matches_any_qfl`.
+" Then, in `after/ftplugin/qf.vim`, we invoke `qf#create_matches()`.
+" The latter checks whether the id of the current qfl is in `s:matches_any_qfl`.
+" If it is, it installs all the matches which are bound to it.
+"}}}
 let s:matches_any_qfl = {}
+
 " What's the use of `known_patterns`?{{{
 "
 " If you  often use the same  regex to describe some  text on which you  want to
