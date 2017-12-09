@@ -17,6 +17,7 @@
 " Search for `wincmd p` everywhere. I think we made similar mistakes elsewhere.
 
 
+
 let s:matches_any_qfl = {}
 " What's the use of `known_patterns`?{{{
 "
@@ -30,7 +31,10 @@ let s:matches_any_qfl = {}
 "
 "         call qf#set_matches({origin}, {HG}, {telling_name})
 "}}}
-let s:known_patterns  = { 'location': '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?' }
+let s:known_patterns  = {
+\                         'location'  : '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?',
+\                         'double_bar': '^||\|\s*|\s*|\s*$',
+\                       }
 
 fu! qf#c_w(tabpage) abort "{{{1
     try
