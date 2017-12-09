@@ -1,10 +1,4 @@
 " TODO:
-" Restore window position after we close  qf window, and manually reopen it with
-" `:[cl]open`.
-" The easiest way to restore the window  position is to create a mapping opening
-" which would call qf#open('[l]vim').
-
-" TODO:
 " Before resetting 'cole' and 'cocu', check  whether they were altered by one of
 " our autoload functions. When you set a match, set also a flag:
 "
