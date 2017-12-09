@@ -23,24 +23,6 @@
 " Search for `wincmd p` everywhere. I think we made similar mistakes elsewhere.
 
 
-" TODO:
-" Also, maybe we need to undo the settings 'cole', 'cocu'.
-" Indeed, the  2nd time we display  a qf buffer  in the same window,  there's no
-" guarantee that we're going to conceal anything.
-"
-" But, if we decide to reset these options, it shouldn't be done from a function
-" in this file.  It must be done from vim-qf/after/ftplugin/qf.vim
-" Why? Watch:
-"
-"         g\t
-"             in a file where the keyword `fixme` is present
-"             → `fixme` is highlighted ✔
-"
-"         lvim /fixme/ %
-"             in the same file, without having closed the location window
-"             → `fixme` is still highlighted ✘
-
-
 let s:matches_any_qfl = {}
 let s:known_patterns  = { 'location': '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?' }
 
@@ -197,6 +179,11 @@ fu! qf#cupdate(list, mod) abort "{{{1
 endfu
 
 fu! qf#delete_previous_matches() abort "{{{1
+    " Why reset 'cole' and 'cocu'?{{{
+    "
+    " The  2nd time  we display  a  qf buffer  in  the same  window, there's  no
+    " guarantee that we're going to conceal anything.
+    "}}}
     setl cocu< cole<
     try
         for match_id in map(getmatches(), {i,v -> v.id})
