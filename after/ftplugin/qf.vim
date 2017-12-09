@@ -180,7 +180,7 @@ if  b:qf_is_loclist
     "}}}
 endif
 
-" Noise {{{1
+" Matches {{{1
 
 call qf#delete_previous_matches()
 call qf#create_matches()
@@ -196,9 +196,6 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ | exe 'nunmap <buffer> <c-w><cr>'
                     \ | exe 'nunmap <buffer> <c-w>T'
                     \ | exe 'nunmap <buffer> q'
-                    \ | exe 'nunmap <buffer> [ob'
-                    \ | exe 'nunmap <buffer> ]ob'
-                    \ | exe 'nunmap <buffer> cob'
                     \ | exe 'cuna   <buffer> cfilter'
                     \ | exe 'cuna   <buffer> lfilter'
                     \ | exe 'cuna   <buffer> cupdate'
