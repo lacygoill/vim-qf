@@ -131,7 +131,10 @@ fu! qf#cfilter(list, bang, pat, mod) abort "{{{1
 endfu
 
 fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{1
-    return [ '-not_my_plugins', '-not_relevant' ]
+    let candidates = [ '-not_my_plugins', '-not_relevant' ]
+    return empty(a:arglead)
+    \?         candidates
+    \:         filter(candidates, 'v:val[:strlen(a:arglead)-1] ==# a:arglead')
 endfu
 
 fu! qf#conceal(this) abort "{{{1

@@ -109,4 +109,3 @@ augroup my_quickfix
     "                             :echo g:myvar  →  E121: Undefined variable: g:myvar
     "}}}
 augroup END
-
