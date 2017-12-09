@@ -18,6 +18,18 @@
 
 
 let s:matches_any_qfl = {}
+" What's the use of `known_patterns`?{{{
+"
+" If you  often use the same  regex to describe some  text on which you  want to
+" apply a match, add it to this dictionary, with a telling name. Then, instead
+" of writing this:
+"
+"         call qf#set_matches({origin}, {HG}, {complex_regex})
+"
+" … you can write this:
+"
+"         call qf#set_matches({origin}, {HG}, {telling_name})
+"}}}
 let s:known_patterns  = { 'location': '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?' }
 
 fu! qf#c_w(tabpage) abort "{{{1
