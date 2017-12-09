@@ -33,7 +33,7 @@ let s:matches_any_qfl = {}
 "}}}
 let s:known_patterns  = {
 \                         'location'  : '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?',
-\                         'double_bar': '^||\|\s*|\s*|\s*$',
+\                         'double_bar': '^||\s*\|\s*|\s*|\s*$',
 \                       }
 
 fu! qf#c_w(tabpage) abort "{{{1
