@@ -1,23 +1,4 @@
-" TODO:
-" Before resetting 'cole' and 'cocu', check  whether they were altered by one of
-" our autoload functions. When you set a match, set also a flag:
-"
-"         let s:did_install_a_match
-"
-" Create a function to get the value of this flag from the filetype plugin.
-" If it's set, reset the options and reset the flag. Otherwise, don't do anything.
-
-" FIXME:
-" In `vim-interactive-lists`, we wrote this:
-"
-"         if &buftype ==# 'quickfix' | let is_quickfix = 1 | noautocmd wincmd p | endif
-"
-" `wincmd p` is not reliable. The previous  window could have nothing to do with
-" the ll window.
-" Search for `wincmd p` everywhere. I think we made similar mistakes elsewhere.
-
-
-
+" Variables {{{1
 let s:matches_any_qfl = {}
 " What's the use of `known_patterns`?{{{
 "
@@ -36,7 +17,8 @@ let s:known_patterns  = {
 \                         'double_bar': '^||\s*\|\s*|\s*|\s*$',
 \                       }
 
-fu! qf#c_w(tabpage) abort "{{{1
+" Functions {{{1
+fu! qf#c_w(tabpage) abort "{{{2
     try
         " In a qf window populated by `:helpg` or `:lh`, `C-w CR` opens a window
         " with an unnamed buffer. We don't want that.
@@ -72,7 +54,7 @@ fu! qf#c_w(tabpage) abort "{{{1
     endtry
 endfu
 
-fu! qf#cfilter(list, bang, pat, mod) abort "{{{1
+fu! qf#cfilter(list, bang, pat, mod) abort "{{{2
     try
         let old_title = get(a:list ==# 'qf'
         \                   ?     getqflist(   {'title': 1})
@@ -114,14 +96,14 @@ fu! qf#cfilter(list, bang, pat, mod) abort "{{{1
     endtry
 endfu
 
-fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{1
+fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{2
     let candidates = [ '-not_my_plugins', '-not_relevant' ]
     return empty(a:arglead)
     \?         candidates
     \:         filter(candidates, 'v:val[:strlen(a:arglead)-1] ==# a:arglead')
 endfu
 
-fu! qf#create_matches() abort "{{{1
+fu! qf#create_matches() abort "{{{2
     try
         let qf_id = s:get_qf_id()
 
@@ -148,7 +130,7 @@ fu! qf#create_matches() abort "{{{1
     endtry
 endfu
 
-fu! qf#cupdate(list, mod) abort "{{{1
+fu! qf#cupdate(list, mod) abort "{{{2
     try
         " save title of the qf window
         let old_title = a:list ==# 'qf'
@@ -188,7 +170,7 @@ fu! qf#cupdate(list, mod) abort "{{{1
     endtry
 endfu
 
-fu! qf#delete_previous_matches() abort "{{{1
+fu! qf#delete_previous_matches() abort "{{{2
     " Why reset 'cole' and 'cocu'?{{{
     "
     " The  2nd time  we display  a  qf buffer  in  the same  window, there's  no
@@ -204,13 +186,13 @@ fu! qf#delete_previous_matches() abort "{{{1
     endtry
 endfu
 
-fu! qf#disable_some_keys(keys) abort "{{{1
+fu! qf#disable_some_keys(keys) abort "{{{2
     for a_key in a:keys
         sil! exe 'nno  <buffer><nowait><silent>  '.a:key.'  <nop>'
     endfor
 endfu
 
-fu! s:get_pat(pat) abort "{{{1
+fu! s:get_pat(pat) abort "{{{2
     let not_my_plugins = [
     \                      'autoload/plug.vim',
     \                      'plugged/emmet-vim',
@@ -254,7 +236,7 @@ fu! s:get_pat(pat) abort "{{{1
     \:        a:pat
 endfu
 
-fu! s:get_qf_id() abort "{{{1
+fu! s:get_qf_id() abort "{{{2
     try
         return get(call(b:qf_is_loclist
         \               ?    'getloclist'
@@ -270,7 +252,7 @@ fu! s:get_qf_id() abort "{{{1
     endtry
 endfu
 
-fu! qf#open(cmd) abort "{{{1
+fu! qf#open(cmd) abort "{{{2
 "           │
 "           └─ we need to know which command was executed to decide whether
 "              we open the qf window or the ll window
@@ -322,7 +304,7 @@ fu! qf#open(cmd) abort "{{{1
     endif
 endfu
 
-fu! qf#open_maybe(cmd) abort "{{{1
+fu! qf#open_maybe(cmd) abort "{{{2
     "             ┌─ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
     "             │  But, contrary to `:helpg`, the location list is local to a window.
     "             │  Which one?
@@ -377,7 +359,7 @@ fu! qf#open_maybe(cmd) abort "{{{1
     endif
 endfu
 
-fu! qf#set_matches(origin, group, pat) abort "{{{1
+fu! qf#set_matches(origin, group, pat) abort "{{{2
     try
         let id = s:get_qf_id()
         if !has_key(s:matches_any_qfl, id)
