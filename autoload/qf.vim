@@ -163,7 +163,7 @@ let s:matches_any_qfl = {}
 "}}}
 let s:known_patterns  = {
 \                         'location'  : '^\v.{-}\|\s*%(\d+)?\s*%(col\s+\d+)?\s*\|\s?',
-\                         'double_bar': '^||\s*\|\s*|\s*|\s*$',
+\                         'double_bar': '^|\s*|\s*\|\s*|\s*|\s*$',
 \                       }
 
 let s:other_plugins = [
