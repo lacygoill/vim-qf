@@ -162,7 +162,7 @@ let s:matches_any_qfl = {}
 "         call qf#set_matches({origin}, {HG}, {telling_name})
 "}}}
 let s:known_patterns  = {
-\                         'location'  : '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?',
+\                         'location'  : '^\v.{-}\|\s*%(\d+)?\s*%(col\s+\d+)?\s*\|\s?',
 \                         'double_bar': '^||\s*\|\s*|\s*|\s*$',
 \                       }
 
