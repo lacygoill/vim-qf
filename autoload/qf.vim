@@ -76,13 +76,16 @@
 
 " Why not just relying on the autocmd opening the qf window?
 "
-"         autocmd QuickFixCmdPost cwindow
-"         doautocmd <nomodeline> QuickFixCmdPost grep
+"         vim-window:
+"             autocmd QuickFixCmdPost cwindow
 "
-"             → open qf window
-"             → FileType qf
-"             → source qf ftplugin
-"             → call qf#create_matches()
+"         a plugin:
+"             doautocmd <nomodeline> QuickFixCmdPost grep
+"
+"                 → open qf window
+"                 → FileType qf
+"                 → source qf ftplugin
+"                 → call qf#create_matches()
 "
 " So, in this scenario, we would need to set the matches BEFORE opening
 " the qf window (currently we do it AFTER).
@@ -135,10 +138,14 @@
 " Even with all  that, the qf filetype  plugin would be sourced twice  if the qf
 " window is not already opened. Indeed:
 "
-"         doautocmd <nomodeline> QuickFixCmdPost grep
+"         vim-window:
+"             autocmd QuickFixCmdPost cwindow
+"
+"         a plugin:
+"             doautocmd <nomodeline> QuickFixCmdPost grep
 "
 " … will fire `FileType qf` iff the window is not opened.
-" I don't like that.
+" I don't like a filetype plugin being sourced several times.
 "}}}
 let s:matches_any_qfl = {}
 
