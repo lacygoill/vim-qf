@@ -1,8 +1,3 @@
-if exists('g:autoloaded_qf')
-    finish
-endif
-let g:autoloaded_qf = 1
-
 " Variables {{{1
 " What's the purpose of `s:matches_any_qfl`?{{{
 "
