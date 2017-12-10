@@ -249,6 +249,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         let pat = s:get_pat(a:pat)
 
         let list = b:qf_is_loclist  ? getloclist(0) : getqflist()
+        let old_size = len(list)
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
         \                         op, bool, op))
 
@@ -263,8 +264,8 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         \?            [ 0, [], 'a', new_title ]
         \:            [    [], 'a', new_title ])
 
-        echo printf('Filtered list:%s matching %s (%d items)',
-        \           a:bang ? ' not' : '', a:pat, len(list))
+        echo printf('(%d) items were removed because they %s match  %s',
+        \           old_size - len(list), a:bang ? 'did NOT' : 'DID', a:pat)
     catch
         return my_lib#catch_error()
     endtry
