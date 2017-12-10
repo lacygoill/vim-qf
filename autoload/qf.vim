@@ -479,13 +479,27 @@ fu! qf#open(cmd) abort "{{{2
 
     let mod = window#get_modifier_to_open_window()
 
+    " In some of our  plugins, we may want to open the qf  window even though it
+    " doesn't contain any valid entry (ex: `:Scriptnames`).
+    " In that case, we execute sth like:
+    "
+    "         doautocmd <nomodeline> QuickFixCmdPost copen
+    "         doautocmd <nomodeline> QuickFixCmdPost lopen
+    "
+    " Here,  `:copen` and  `:lopen` are  not valid  commands because  they don't
+    " populate a qfl. We could probably  use any invented name. But `:copen` and
+    "  `:lopen`  make the  code more  readable. The command  name expresses  our
+    " intention:
+    "
+    "         we want to open the qf window unconditionally
+    let cmd = expand('<amatch>') =~# '^[cl]open$' ? 'open' : 'window'
     let how_to_open = mod =~# '^vert'
-    \?                    mod.' '.prefix.'window '.40
-    \:                    mod.' '.prefix.'window '.max([min([10, size]), 1])
-    "                                              │    │
-    "                                              │    └── at most 10 lines height
-    "                                              └── at least 1 line height (if the loclist is empty,
-    "                                                                          `lwindow 0` would raise an error)
+    \?                    mod.' '.prefix.cmd.40
+    \:                    mod.' '.prefix.cmd.max([min([10, size]), 1])
+    "                                        │    │
+    "                                        │    └── at most 10 lines height
+    "                                        └── at least 1 line height (if the loclist is empty,
+    "                                                                    `lwindow 0` would raise an error)
 
     exe how_to_open
 
