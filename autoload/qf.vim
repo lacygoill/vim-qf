@@ -333,13 +333,13 @@ fu! qf#cupdate(mod) abort "{{{2
         let function = s:get_function()
 
         call call(function, b:qf_is_loclist
-        \:            [ 0, list, action ]
-        \?            [    list, action ])
+        \?            [ 0, list, action ]
+        \:            [    list, action ])
 
         " restore title
         call call(function, b:qf_is_loclist
-        \:            [ 0, [], 'a', old_title ]
-        \?            [    [], 'a', old_title ])
+        \?            [ 0, [], 'a', old_title ]
+        \:            [    [], 'a', old_title ])
 
     catch
         return my_lib#catch_error()
