@@ -171,6 +171,33 @@ let s:known_patterns  = {
 \                         'double_bar': '^||\s*\|\s*|\s*|\s*$',
 \                       }
 
+let s:other_plugins = [
+\                       'autoload/plug.vim',
+\                       'plugged/emmet-vim',
+\                       'plugged/fzf.vim',
+\                       'plugged/goyo.vim',
+\                       'plugged/limelight.vim',
+\                       'plugged/potion',
+\                       'plugged/seoul256.vim',
+\                       'plugged/tmux.vim',
+\                       'plugged/ultisnips',
+\                       'plugged/undotree',
+\                       'plugged/unicode.vim',
+\                       'plugged/vim-abolish',
+\                       'plugged/vim-cheat40',
+\                       'plugged/vim-dirvish',
+\                       'plugged/vim-easy-align',
+\                       'plugged/vim-exchange',
+\                       'plugged/vim-fugitive',
+\                       'plugged/vim-gutentags',
+\                       'plugged/vim-rhubarb',
+\                       'plugged/vim-sandwich',
+\                       'plugged/vim-sneak',
+\                       'plugged/vim-snippets',
+\                       'plugged/vim-submode',
+\                       'plugged/vim-tmuxify',
+\                    ]
+
 " Functions {{{1
 fu! qf#c_w(tabpage) abort "{{{2
     try
@@ -251,7 +278,7 @@ fu! qf#cfilter(list, bang, pat, mod) abort "{{{2
 endfu
 
 fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{2
-    let candidates = [ '-not_my_plugins', '-not_relevant' ]
+    let candidates = [ '-commented', '-other_plugins', '-tmp' ]
     return empty(a:arglead)
     \?         candidates
     \:         filter(candidates, 'v:val[:strlen(a:arglead)-1] ==# a:arglead')
@@ -347,47 +374,30 @@ fu! qf#disable_some_keys(keys) abort "{{{2
 endfu
 
 fu! s:get_pat(pat) abort "{{{2
-    let not_my_plugins = [
-    \                      'autoload/plug.vim',
-    \                      'plugged/emmet-vim',
-    \                      'plugged/fzf.vim',
-    \                      'plugged/goyo.vim',
-    \                      'plugged/limelight.vim',
-    \                      'plugged/potion',
-    \                      'plugged/seoul256.vim',
-    \                      'plugged/tmux.vim',
-    \                      'plugged/ultisnips',
-    \                      'plugged/undotree',
-    \                      'plugged/unicode.vim',
-    \                      'plugged/vim-abolish',
-    \                      'plugged/vim-cheat40',
-    \                      'plugged/vim-dirvish',
-    \                      'plugged/vim-easy-align',
-    \                      'plugged/vim-exchange',
-    \                      'plugged/vim-fugitive',
-    \                      'plugged/vim-gutentags',
-    \                      'plugged/vim-rhubarb',
-    \                      'plugged/vim-sandwich',
-    \                      'plugged/vim-sneak',
-    \                      'plugged/vim-snippets',
-    \                      'plugged/vim-submode',
-    \                      'plugged/vim-tmuxify',
-    \                    ]
+    let pat = a:pat
 
-    " If no pattern was provided, use the search register as a fallback.
-    " Remove a possible couple of slashes before and after the pattern.
-    " If `:Cfilter` was passed `-not_my_plugins`, build the right pattern.
-    " If `:Cfilter` was  passed `-not_relevant`, use a  pattern matching session
-    " and temporary files. Otherwise, do nothing.
-    return a:pat == ''
-    \?         @/
-    \:     a:pat =~ '^/.*/$'
-    \?        a:pat[1:-2]
-    \:     a:pat ==# '-not_my_plugins'
-    \?        '^\%('.join(not_my_plugins, '\|').'\)'
-    \:     a:pat ==# '-not_relevant'
-    \?        '^\%(session\|tmp\)'
-    \:        a:pat
+    let arg2pat = {
+    \               '-commented':     '^\s*"',
+    \               '-other_plugins': '^\%('.join(s:other_plugins, '\|').'\)',
+    \               '-tmp':           '^\%(session\|tmp\)',
+    \             }
+
+    " If `:Cfilter` was passed a special argument, interpret it.
+    if pat =~# join(keys(arg2pat), '\|')
+        let pat = split(pat, '\s\+')
+        call map(pat, {i,v -> arg2pat[v]})
+        let pat = join(pat, '\|')
+        return pat
+    else
+        " If no pattern was provided, use the search register as a fallback.
+        " Remove a possible couple of slashes before and after the pattern.
+        " Otherwise, do nothing.
+        return pat == ''
+        \?         @/
+        \:     pat =~ '^/.*/$'
+        \?         pat[1:-2]
+        \:         pat
+    endif
 endfu
 
 fu! s:get_qf_id() abort "{{{2
