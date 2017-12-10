@@ -98,12 +98,12 @@ let g:autoloaded_qf = 1
 " First: we would need to refactor several functions.
 "
 "         • qf#set_matches()
-"           s:get_qf_id()
+"           s:get_id()
 "
 "           → they should be passed a numeric flag, to help them determine
 "             whether we operate on a loclist or a qfl
 "
-"         • `s:get_qf_id()` should stop relying on `b:qf_is_loclist`
+"         • `s:get_id()` should stop relying on `b:qf_is_loclist`
 "            and use the flag we pass instead
 "
 "            This is because when we would invoke `qf#set_matches()`,
@@ -235,12 +235,9 @@ fu! qf#c_w(tabpage) abort "{{{2
     endtry
 endfu
 
-fu! qf#cfilter(list, bang, pat, mod) abort "{{{2
+fu! qf#cfilter(bang, pat, mod) abort "{{{2
     try
-        let old_title = get(a:list ==# 'qf'
-        \                   ?     getqflist(   {'title': 1})
-        \                   :    getloclist(0, {'title': 1}),
-        \                   'title', '')
+        let old_title = s:get_title()
 
         "                                          ┌─ the pattern MUST match the path of the buffer
         "                                          │  do not make the comparison strict no matter what (`=~#`)
@@ -256,19 +253,20 @@ fu! qf#cfilter(list, bang, pat, mod) abort "{{{2
 
         let pat = s:get_pat(a:pat)
 
-        let list = a:list ==# 'qf' ? getqflist() : getloclist(0)
+        let list = b:qf_is_loclist  ? getloclist(0) : getqflist()
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
         \                         op, bool, op))
 
         let action = a:mod =~# '^keep' ? ' ' : 'r'
-        let new_title = {'title': ':filter '.pat.' '.old_title}
-        call call('set'.a:list.'list', a:list ==# 'qf'
-        \                              ?    [    list, action ]
-        \                              :    [ 0, list, action ])
+        let function = b:qf_is_loclist ? 'setloclist' : 'setqflist'
+        let new_title = {'title': ':filter '.pat.' '.get(old_title, 'title', '')}
+        call call(function, b:qf_is_loclist
+        \?            [ 0, list, action ]
+        \:            [    list, action ])
 
-        call call('set'.a:list.'list', a:list ==# 'qf'
-        \                              ?    [    [], 'a', new_title ]
-        \                              :    [ 0, [], 'a', new_title ])
+        call call(function, b:qf_is_loclist
+        \?            [ 0, [], 'a', new_title ]
+        \:            [    [], 'a', new_title ])
 
         echo printf('Filtered list:%s matching %s (%d items)',
         \           a:bang ? ' not' : '', a:pat, len(list))
@@ -286,9 +284,9 @@ endfu
 
 fu! qf#create_matches() abort "{{{2
     try
-        let qf_id = s:get_qf_id()
+        let id = s:get_id()
 
-        let matches_this_qfl = get(s:matches_any_qfl, qf_id, {})
+        let matches_this_qfl = get(s:matches_any_qfl, id, {})
         if !empty(matches_this_qfl)
             for matches_from_all_origins in values(matches_this_qfl)
                 for a_match in matches_from_all_origins
@@ -311,15 +309,13 @@ fu! qf#create_matches() abort "{{{2
     endtry
 endfu
 
-fu! qf#cupdate(list, mod) abort "{{{2
+fu! qf#cupdate(mod) abort "{{{2
     try
         " save title of the qf window
-        let old_title = a:list ==# 'qf'
-        \                   ?    getqflist({'title': 1})
-        \                   :    getloclist(0, {'title': 1})
+        let old_title = s:get_title()
 
         " update the text of the qfl entries
-        let list = a:list ==# 'qf' ? getqflist() : getloclist(0)
+        let list = b:qf_is_loclist ? getloclist(0) : getqflist()
         call map(list, { i,v -> extend(v, { 'text': get(getbufline(v.bufnr, v.lnum), 0, '') }) })
         "                       │                   │
         "                       │                   └─ `getbufline()` should return a list with a single item.
@@ -333,23 +329,57 @@ fu! qf#cupdate(list, mod) abort "{{{2
         "                          the old value with the new one.
         "                          So, in effect, `extend()` will replace the old text with the new one.
 
+        let function = b:qf_is_loclist ? 'setloclist' : 'setqflist'
+
         let action = a:mod =~# '^keep' ? ' ' : 'r'
         "                                 │     │
         "                                 │     └─ don't create a new list, just replace the current one
         "                                 └─ create a new list
-        call call('set'.a:list.'list', a:list ==# 'qf'
-        \                              ?    [    list, action ]
-        \                              :    [ 0, list, action ])
+        call call(function, b:qf_is_loclist
+        \:            [ 0, list, action ]
+        \?            [    list, action ])
 
         " restore title
-        call call('set'.a:list.'list', a:list ==# 'qf'
-        \                              ?    [    [], 'a', old_title ]
-        \                              :    [ 0, [], 'a', old_title ])
+        call call(function, b:qf_is_loclist
+        \:            [ 0, [], 'a', old_title ]
+        \?            [    [], 'a', old_title ])
 
     catch
         return my_lib#catch_error()
     endtry
 endfu
+
+fu! qf#delete_entries(type, ...) abort "{{{2
+    try
+        if index(['char', 'line', 'block'], a:type) >= 0
+            let range = [line("'["), line("']")]
+        elseif a:type ==# 'vis'
+            let range = [line("'<"), line("'>")]
+        elseif a:type ==# 'Ex'
+            let range = [a:1, a:2]
+        else
+            return
+        endif
+
+        let pos = min(range)
+
+        let title = s:get_title()
+
+        let list = b:qf_is_loclist
+        \?             getloclist(0)
+        \:             getqflist()
+        call remove(list, range[0]-1, range[1]-1)
+        call call(b:qf_is_loclist ? 'setloclist' : 'setqflist',
+        \         b:qf_is_loclist ? [0, list, 'r'] : [list, 'r'])
+        call call(b:qf_is_loclist ? 'setloclist' : 'setqflist',
+        \         b:qf_is_loclist ? [0, [], 'a', title] : [[], 'a', title])
+
+        exe 'norm! '.pos.'G'
+    catch
+        return my_lib#catch_error()
+    endtry
+endfu
+
 
 fu! qf#delete_previous_matches() abort "{{{2
     " Why reset 'cole' and 'cocu'?{{{
@@ -400,7 +430,7 @@ fu! s:get_pat(pat) abort "{{{2
     endif
 endfu
 
-fu! s:get_qf_id() abort "{{{2
+fu! s:get_id() abort "{{{2
     try
         return get(call(b:qf_is_loclist
         \               ?    'getloclist'
@@ -414,6 +444,12 @@ fu! s:get_qf_id() abort "{{{2
     catch
         return my_lib#catch_error()
     endtry
+endfu
+
+fu! s:get_title() abort "{{{2
+    return b:qf_is_loclist
+    \?         getloclist(0, {'title': 1})
+    \:         getqflist({'title': 1})
 endfu
 
 fu! qf#open(cmd) abort "{{{2
@@ -525,7 +561,7 @@ endfu
 
 fu! qf#set_matches(origin, group, pat) abort "{{{2
     try
-        let id = s:get_qf_id()
+        let id = s:get_id()
         if !has_key(s:matches_any_qfl, id)
             let s:matches_any_qfl[id] = {}
         endif

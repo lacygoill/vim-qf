@@ -8,28 +8,17 @@
 "             Filter the quickfix looking  for pattern, `{pat}`. The pattern can
 "             match the filename  or text.  Providing `!` will  invert the match
 "             (just like `grep -v`).
-"
-"     :Lfilter[!] /{pat}/
-"     :Lfilter[!]  {pat}
-"
-"             Same as :Cfilter but use the location list.
 "}}}
 
 " Do not give the `-bar` attribute to the commands.
 " It would break a pattern containing a bar (for example, for an alternation).
 
 com! -bang -buffer -nargs=? -complete=customlist,qf#cfilter_complete Cfilter
-\                                   call qf#cfilter('qf' , <bang>0, <q-args>, <q-mods>)
-com! -bang -buffer -nargs=? -complete=customlist,qf#cfilter_complete Lfilter
-\                                   call qf#cfilter('loc', <bang>0, <q-args>, <q-mods>)
+\                                   call qf#cfilter(<bang>0, <q-args>, <q-mods>)
 
 cnorea <expr> <buffer> cfilter  getcmdtype() ==# ':' && getcmdline() ==# 'cfilter'
 \                               ?    'Cfilter'
 \                               :    'cfilter'
-
-cnorea <expr> <buffer> lfilter  getcmdtype() ==# ':' && getcmdline() ==# 'lfilter'
-\                               ?    'Lfilter'
-\                               :    'lfilter'
 
 " Cupdate {{{2
 
@@ -40,16 +29,11 @@ cnorea <expr> <buffer> lfilter  getcmdtype() ==# ':' && getcmdline() ==# 'lfilte
 "         cfdo %s/pat/rep/g
 "         Cupdate
 
-com! -bar -buffer Cupdate call qf#cupdate('qf', <q-mods>)
-com! -bar -buffer Lupdate call qf#cupdate('loc', <q-mods>)
+com! -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 
 cnorea <expr> <buffer> cupdate  getcmdtype() ==# ':' && getcmdline() ==# 'cupdate'
 \                               ?    'Cupdate'
 \                               :    'cupdate'
-
-cnorea <expr> <buffer> lupdate  getcmdtype() ==# ':' && getcmdline() ==# 'lupdate'
-\                               ?    'Lupdate'
-\                               :    'lupdate'
 
 " Mappings {{{1
 
@@ -67,6 +51,16 @@ nno  <buffer><nowait><silent>  <c-w><cr>  :<c-u>call qf#c_w(0)<cr>
 nno  <buffer><nowait><silent>  <c-w>T  :<c-u>call qf#c_w(1)<cr>
 
 nno  <buffer><nowait><silent>  q       :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
+
+nno <buffer>        <silent>   D       :<c-u>set opfunc=qf#delete_entries<cr>g@
+nno <buffer><nowait><silent>   DD      :<c-u>set opfunc=qf#delete_entries<bar>exe 'norm! '.v:count1.'g@_'<cr>
+xno <buffer><nowait><silent>   D       :<c-u>call qf#delete_entries('vis')<cr>
+
+com! -bar -buffer -range Cdelete call qf#delete_entries('Ex', <line1>, <line2>)
+
+cnorea <expr> <buffer> cdelete  getcmdtype() ==# ':' && getcmdline() ==# 'cdelete'
+\                               ?    'Cdelete'
+\                               :    'cdelete'
 
 " Options {{{1
 
@@ -192,16 +186,17 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ ."
                     \   setl bl< cul< efm< wrap<
                     \ | exe 'au! my_qf * <buffer>'
-                    \ | exe 'nunmap <buffer> <cr>'
                     \ | exe 'nunmap <buffer> <c-w><cr>'
                     \ | exe 'nunmap <buffer> <c-w>T'
+                    \ | exe 'nunmap <buffer> <cr>'
+                    \ | exe 'nunmap <buffer> D'
+                    \ | exe 'nunmap <buffer> DD'
+                    \ | exe 'xunmap <buffer> D'
                     \ | exe 'nunmap <buffer> q'
+                    \ | exe 'cuna   <buffer> cdelete'
                     \ | exe 'cuna   <buffer> cfilter'
-                    \ | exe 'cuna   <buffer> lfilter'
                     \ | exe 'cuna   <buffer> cupdate'
-                    \ | exe 'cuna   <buffer> lupdate'
+                    \ | delc Cdelete
                     \ | delc Cfilter
-                    \ | delc Lfilter
                     \ | delc Cupdate
-                    \ | delc Lupdate
                     \  "
