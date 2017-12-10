@@ -316,11 +316,17 @@ fu! qf#cupdate(mod) abort "{{{2
 
         " update the text of the qfl entries
         let list = b:qf_is_loclist ? getloclist(0) : getqflist()
+        " Why using `get()`?{{{
+        "
+        " `getbufline()`  should return  a list  with  a single  item, the  line
+        " `lnum` in the buffer `bufnr`.
+        " But it will fail if the buffer is unloaded. In this case, it will just
+        " return an empty list.
+        " It seems that Vim unloads a buffer which was loaded just to look for a pattern,
+        " but that the user never actively visited.
+        "}}}
+        "                                           │
         call map(list, { i,v -> extend(v, { 'text': get(getbufline(v.bufnr, v.lnum), 0, '') }) })
-        "                       │                   │
-        "                       │                   └─ `getbufline()` should return a list with a single item.
-        "                       │                      But we use `get()` to give the item a default value,
-        "                       │                      in case it doesn't exist.
         "                       │
         "                       └─ There will be a conflict between the old value
         "                          associated to the key `text`, and the new one.
@@ -328,7 +334,6 @@ fu! qf#cupdate(mod) abort "{{{2
         "                          And in case of conflict, by default `extend()` overwrites
         "                          the old value with the new one.
         "                          So, in effect, `extend()` will replace the old text with the new one.
-
         let action   = s:get_action(a:mod)
         let function = s:get_function()
 
