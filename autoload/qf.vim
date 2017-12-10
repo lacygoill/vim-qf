@@ -311,6 +311,9 @@ endfu
 
 fu! qf#cupdate(mod) abort "{{{2
     try
+        " save position
+        let pos = line('.')
+
         " save title of the qf window
         let old_title = s:get_title()
 
@@ -346,6 +349,8 @@ fu! qf#cupdate(mod) abort "{{{2
         \?            [ 0, [], 'a', old_title ]
         \:            [    [], 'a', old_title ])
 
+        " restore position
+        exe 'norm! '.pos.'G'
     catch
         return my_lib#catch_error()
     endtry
