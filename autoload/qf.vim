@@ -257,8 +257,8 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
         \                         op, bool, op))
 
-        let action = a:mod =~# '^keep' ? ' ' : 'r'
-        let function = b:qf_is_loclist ? 'setloclist' : 'setqflist'
+        let action = s:get_action(a:mod)
+        let function = s:get_function()
         let new_title = {'title': ':filter '.pat.' '.get(old_title, 'title', '')}
         call call(function, b:qf_is_loclist
         \?            [ 0, list, action ]
@@ -329,12 +329,9 @@ fu! qf#cupdate(mod) abort "{{{2
         "                          the old value with the new one.
         "                          So, in effect, `extend()` will replace the old text with the new one.
 
-        let function = b:qf_is_loclist ? 'setloclist' : 'setqflist'
+        let action   = s:get_action(a:mod)
+        let function = s:get_function()
 
-        let action = a:mod =~# '^keep' ? ' ' : 'r'
-        "                                 │     │
-        "                                 │     └─ don't create a new list, just replace the current one
-        "                                 └─ create a new list
         call call(function, b:qf_is_loclist
         \:            [ 0, list, action ]
         \?            [    list, action ])
@@ -403,6 +400,33 @@ fu! qf#disable_some_keys(keys) abort "{{{2
     endfor
 endfu
 
+fu! s:get_action(mod) abort "{{{2
+    return a:mod =~# '^keep' ? ' ' : 'r'
+    "                           │     │
+    "                           │     └─ don't create a new list, just replace the current one
+    "                           └─ create a new list
+endfu
+
+fu! s:get_function() abort "{{{2
+    return b:qf_is_loclist ? 'setloclist' : 'setqflist'
+endfu
+
+fu! s:get_id() abort "{{{2
+    try
+        return get(call(b:qf_is_loclist
+        \               ?    'getloclist'
+        \               :    'getqflist',
+        \
+        \               b:qf_is_loclist
+        \               ?    [0, {'id': 0}]
+        \               :    [   {'id': 0}]
+        \         ), 'id', 0)
+
+    catch
+        return my_lib#catch_error()
+    endtry
+endfu
+
 fu! s:get_pat(pat) abort "{{{2
     let pat = a:pat
 
@@ -428,22 +452,6 @@ fu! s:get_pat(pat) abort "{{{2
         \?         pat[1:-2]
         \:         pat
     endif
-endfu
-
-fu! s:get_id() abort "{{{2
-    try
-        return get(call(b:qf_is_loclist
-        \               ?    'getloclist'
-        \               :    'getqflist',
-        \
-        \               b:qf_is_loclist
-        \               ?    [0, {'id': 0}]
-        \               :    [   {'id': 0}]
-        \         ), 'id', 0)
-
-    catch
-        return my_lib#catch_error()
-    endtry
 endfu
 
 fu! s:get_title() abort "{{{2
