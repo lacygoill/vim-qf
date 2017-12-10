@@ -48,6 +48,9 @@
 "}}}
 " Example of simple value for `s:matches_any_qfl`:{{{
 "
+"    ┌ qf id
+"    │     ┌ origin
+"    │     │
 " { '1': {'myfuncs:search_todo':
 " \                             [{'group': 'Conceal', 'pat': '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?'},
 " \                              {'group': 'Todo',    'pat': '\cfixme\|todo'}]
@@ -61,9 +64,13 @@
 "         call qf#set_matches({origin}, {HG}, {pat})
 "
 " It will register a match in `s:matches_any_qfl`.
-" Then, in `after/ftplugin/qf.vim`, we invoke `qf#create_matches()`.
-" The latter checks whether the id of the current qfl is in `s:matches_any_qfl`.
-" If it is, it installs all the matches which are bound to it.
+" Then, we invoke `qf#create_matches()` to create the matches.
+" Finally, we  also invoke  `qf#create_matches()` in  `after/ftplugin/qf.vim` so
+" that the matches are re-applied whenever we close/re-open the qf window.
+"
+" `qf#create_matches()`  checks  whether  the  id  of  the  current  qfl  is  in
+" `s:matches_any_qfl`. If it is, it installs all  the matches which are bound to
+" `it.
 "}}}
 " Why call `qf#create_matches()` in every third-party plugin?{{{
 
