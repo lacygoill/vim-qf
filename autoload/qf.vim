@@ -65,6 +65,74 @@
 " The latter checks whether the id of the current qfl is in `s:matches_any_qfl`.
 " If it is, it installs all the matches which are bound to it.
 "}}}
+" Why call `qf#create_matches()` in every third-party plugin?{{{
+
+" Why not just relying on the autocmd opening the qf window?
+"
+"         autocmd QuickFixCmdPost cwindow
+"         doautocmd <nomodeline> QuickFixCmdPost grep
+"
+"             → open qf window
+"             → FileType qf
+"             → source qf ftplugin
+"             → call qf#create_matches()
+"
+" So, in this scenario, we would need to set the matches BEFORE opening
+" the qf window (currently we do it AFTER).
+"
+" First: we would need to refactor several functions.
+"
+"         • qf#set_matches()
+"           s:get_qf_id()
+"
+"           → they should be passed a numeric flag, to help them determine
+"             whether we operate on a loclist or a qfl
+"
+"         • `s:get_qf_id()` should stop relying on `b:qf_is_loclist`
+"            and use the flag we pass instead
+"
+"            This is because when we would invoke `qf#set_matches()`,
+"            the qf window would NOT have been opened, so there would
+"            be no `b:qf_is_loclist`.
+"
+"            It couldn't even rely on the expression populating `b:qf_is_loclist`:
+"
+"                    get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
+"
+"            … because, again, there would be no qf window yet.
+"
+" Second:
+" Suppose the qf window is already opened, and one of our plugin creates a new qfl,
+" with a new custom match. It won't be applied.
+"
+" Why?
+" Because, when `setloclist()` or `setqflist()` is invoked, if the qf window is already
+" opened, it triggers `BufReadPost` → `FileType` → `Syntax`.
+" So, our filetype plugin would be immediately sourced, and `qf#create_matches()` would
+" be executed too early (before `qf#set_matches()` has set the match).
+"
+" As a result, we would need to also trigger `FileType qf`:
+"
+"         doautocmd <nomodeline> QuickFixCmdPost grep
+"         if &l:buftype !=# 'quickfix'
+"             return
+"         endif
+"         doautocmd <nomodeline> FileType qf
+"
+" To avoid sourcing the qf filetype plugin when populating the qfl, we could use
+" `:noautocmd`:
+"
+"         noautocmd call setqflist(…)
+"
+" Conclusion:
+" Even with all  that, the qf filetype  plugin would be sourced twice  if the qf
+" window is not already opened. Indeed:
+"
+"         doautocmd <nomodeline> QuickFixCmdPost grep
+"
+" … will fire `FileType qf` iff the window is not opened.
+" I don't like that.
+"}}}
 let s:matches_any_qfl = {}
 
 " What's the use of `known_patterns`?{{{
