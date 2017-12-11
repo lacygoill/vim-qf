@@ -185,6 +185,7 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
                     \   setl bl< cul< efm< wrap<
+                    \ | unlet! b:qf_is_loclist
                     \ | exe 'au! my_qf * <buffer>'
                     \ | exe 'nunmap <buffer> <c-w><cr>'
                     \ | exe 'nunmap <buffer> <c-w>T'
