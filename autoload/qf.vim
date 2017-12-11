@@ -273,9 +273,7 @@ endfu
 
 fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{2
     let candidates = [ '-commented', '-other_plugins', '-tmp' ]
-    return empty(a:arglead)
-    \?         candidates
-    \:         filter(candidates, { i,v -> stridx(v, a:arglead) == 0 })
+    return filter(candidates, { i,v -> stridx(v, a:arglead) == 0 })
 endfu
 
 fu! qf#create_matches() abort "{{{2
