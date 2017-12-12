@@ -1,4 +1,12 @@
 " Commands {{{1
+" Cdelete {{{2
+
+com! -bar -buffer -range Cdelete call qf#delete_entries('Ex', <line1>, <line2>)
+
+cnorea <expr> <buffer> cdelete  getcmdtype() ==# ':' && getcmdline() ==# 'cdelete'
+\                               ?    'Cdelete'
+\                               :    'cdelete'
+
 " Cfilter {{{2
 " Documentation:{{{
 "
@@ -55,12 +63,6 @@ nno  <buffer><nowait><silent>  q       :<c-u>let g:my_stl_list_position = 0 <bar
 nno <buffer>        <silent>   D       :<c-u>set opfunc=qf#delete_entries<cr>g@
 nno <buffer><nowait><silent>   DD      :<c-u>set opfunc=qf#delete_entries<bar>exe 'norm! '.v:count1.'g@_'<cr>
 xno <buffer><nowait><silent>   D       :<c-u>call qf#delete_entries('vis')<cr>
-
-com! -bar -buffer -range Cdelete call qf#delete_entries('Ex', <line1>, <line2>)
-
-cnorea <expr> <buffer> cdelete  getcmdtype() ==# ':' && getcmdline() ==# 'cdelete'
-\                               ?    'Cdelete'
-\                               :    'cdelete'
 
 " Options {{{1
 
