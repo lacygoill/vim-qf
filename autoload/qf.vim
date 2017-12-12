@@ -265,7 +265,13 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         \:            [    [], 'a', new_title ])
 
         echo printf('(%d) items were removed because they %s match  %s',
-        \           old_size - len(list), a:bang ? 'did NOT' : 'DID', strchars(pat) <= 50 ? pat : 'the pattern')
+        \           old_size - len(list),
+        \           a:bang
+        \           ?    'did NOT'
+        \           :    'DID',
+        \           strchars(pat) <= 50
+        \           ?    pat
+        \           :    'the pattern')
     catch
         return my_lib#catch_error()
     endtry
