@@ -263,6 +263,8 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         \?            [ 0, [], 'a', new_title ]
         \:            [    [], 'a', new_title ])
 
+        call s:maybe_resize_height()
+
         echo printf('(%d) items were removed because they %s match  %s',
         \           old_size - len(list),
         \           a:bang
@@ -333,6 +335,8 @@ fu! qf#cupdate(mod) abort "{{{2
         "                          And in case of conflict, by default `extend()` overwrites
         "                          the old value with the new one.
         "                          So, in effect, `extend()` will replace the old text with the new one.
+
+        " update the qfl
         let action    = s:get_action(a:mod)
         let function  = s:get_function()
         let old_title = s:get_title()
@@ -345,6 +349,8 @@ fu! qf#cupdate(mod) abort "{{{2
         call call(function, b:qf_is_loclist
         \?            [ 0, [], 'a', old_title ]
         \:            [    [], 'a', old_title ])
+
+        call s:maybe_resize_height()
 
         " restore position
         exe 'norm! '.pos.'G'
@@ -375,6 +381,8 @@ fu! qf#delete_entries(type, ...) abort "{{{2
         \         b:qf_is_loclist ? [0, list, 'r'] : [list, 'r'])
         call call(function,
         \         b:qf_is_loclist ? [0, [], 'a', title] : [[], 'a', title])
+
+        call s:maybe_resize_height()
 
         exe 'norm! '.pos.'G'
     catch
@@ -466,6 +474,12 @@ fu! s:get_title() abort "{{{2
     return b:qf_is_loclist
     \?         getloclist(0, {'title': 1})
     \:         getqflist({'title': 1})
+endfu
+
+fu! s:maybe_resize_height() abort "{{{2
+    if winwidth(0) == &columns
+        exe min([ 10, len(s:get_list()) ]).'wincmd _'
+    endif
 endfu
 
 fu! qf#open(cmd) abort "{{{2
