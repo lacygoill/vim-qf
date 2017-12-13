@@ -244,9 +244,8 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         "                           │     └─ AND the text must not match the pattern
         "                           └─ the pattern must NOT MATCH the path of the buffer
 
-        let pat = s:get_pat(a:pat)
-
-        let list = s:get_list()
+        let pat      = s:get_pat(a:pat)
+        let list     = s:get_list()
         let old_size = len(list)
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
         \                         op, bool, op))
@@ -367,9 +366,9 @@ fu! qf#delete_entries(type, ...) abort "{{{2
         endif
 
         let pos      = min(range)
-        let title    = s:get_title()
-        let list     = s:get_list()
         let function = s:get_function()
+        let list     = s:get_list()
+        let title    = s:get_title()
 
         call remove(list, range[0]-1, range[1]-1)
         call call(function,
