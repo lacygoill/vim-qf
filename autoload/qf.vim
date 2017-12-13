@@ -250,18 +250,16 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
         \                         op, bool, op))
 
+        " update qfl
         let action    = s:get_action(a:mod)
         let function  = s:get_function()
+        let args      = s:get_all_args([list, action])
         let old_title = s:get_title()
         let new_title = {'title': ':filter '.pat.' '.get(old_title, 'title', '')}
+        call call(function, args)
 
-        call call(function, b:qf_is_loclist
-        \?            [ 0, list, action ]
-        \:            [    list, action ])
-
-        call call(function, b:qf_is_loclist
-        \?            [ 0, [], 'a', new_title ]
-        \:            [    [], 'a', new_title ])
+        " update title
+        call call(function, args + [new_title])
 
         call s:maybe_resize_height()
 
@@ -336,19 +334,15 @@ fu! qf#cupdate(mod) abort "{{{2
         "                          the old value with the new one.
         "                          So, in effect, `extend()` will replace the old text with the new one.
 
-        " update the qfl
-        let action    = s:get_action(a:mod)
-        let function  = s:get_function()
-        let old_title = s:get_title()
-
-        call call(function, b:qf_is_loclist
-        \?            [ 0, list, action ]
-        \:            [    list, action ])
+        " update qfl
+        let function = s:get_function()
+        let action   = s:get_action(a:mod)
+        let args     = s:get_all_args([list, action])
+        let title    = s:get_title()
+        call call(function, args)
 
         " restore title
-        call call(function, b:qf_is_loclist
-        \?            [ 0, [], 'a', old_title ]
-        \:            [    [], 'a', old_title ])
+        call call(function, args + [ title ])
 
         call s:maybe_resize_height()
 
@@ -371,16 +365,16 @@ fu! qf#delete_entries(type, ...) abort "{{{2
             return
         endif
 
+        let list     = s:get_list()
+        call remove(list, range[0]-1, range[1]-1)
+
         let pos      = min(range)
         let function = s:get_function()
-        let list     = s:get_list()
+        let args     = s:get_all_args([list, 'r'])
         let title    = s:get_title()
 
-        call remove(list, range[0]-1, range[1]-1)
-        call call(function,
-        \         b:qf_is_loclist ? [0, list, 'r'] : [list, 'r'])
-        call call(function,
-        \         b:qf_is_loclist ? [0, [], 'a', title] : [[], 'a', title])
+        call call(function, args)
+        call call(function, args + [ title ])
 
         call s:maybe_resize_height()
 
@@ -417,6 +411,12 @@ fu! s:get_action(mod) abort "{{{2
     "                           │     │
     "                           │     └─ don't create a new list, just replace the current one
     "                           └─ create a new list
+endfu
+
+fu! s:get_all_args(args) abort "{{{2
+    return b:qf_is_loclist
+    \?         [0] + a:args
+    \:               a:args
 endfu
 
 fu! s:get_function() abort "{{{2
