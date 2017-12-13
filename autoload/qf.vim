@@ -250,7 +250,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
 
         " get a qfl with(out) the entries we want to filter
         let pat      = s:get_pat(a:pat)
-        let list     = s:get_list()
+        let list     = s:getqflist()
         let old_size = len(list)
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
         \                         op, bool, op))
@@ -318,7 +318,7 @@ fu! qf#cupdate(mod) abort "{{{2
         let title = s:get_title()
 
         " get a qfl where the text is updated
-        let list = s:get_list()
+        let list = s:getqflist()
         " Why using `get()`?{{{
         "
         " `getbufline()`  should return  a list  with  a single  item, the  line
@@ -372,7 +372,7 @@ fu! qf#delete_entries(type, ...) abort "{{{2
         let title = s:get_title()
 
         " get a qfl without the entries we want to delete
-        let list = s:get_list()
+        let list = s:getqflist()
         call remove(list, range[0]-1, range[1]-1)
 
         " set this new qfl
@@ -421,12 +421,6 @@ fu! s:get_action(mod) abort "{{{2
     "                           └─ create a new list
 endfu
 
-fu! s:getqflist(args) abort "{{{2
-    return b:qf_is_loclist
-    \?         function('getloclist', [0] + a:args)
-    \:         function('getqflist',        a:args)
-endfu
-
 fu! s:setqflist(args) abort "{{{2
     return b:qf_is_loclist
     \?         function('setloclist', [0] + a:args)
@@ -435,15 +429,17 @@ endfu
 
 fu! s:get_id() abort "{{{2
     try
-        let l:Getqflist = s:getqflist([{'id': 0}])
-        return get(l:Getqflist(), 'id', 0)
+        let l:Getqflist_id = b:qf_is_loclist
+        \?                      function('getloclist', [0] + [{'id': 0}])
+        \:                      function('getqflist',        [{'id': 0}])
+        return get(l:Getqflist_id(), 'id', 0)
 
     catch
         return my_lib#catch_error()
     endtry
 endfu
 
-fu! s:get_list() abort "{{{2
+fu! s:getqflist() abort "{{{2
     return b:qf_is_loclist  ? getloclist(0) : getqflist()
 endfu
 
@@ -482,7 +478,7 @@ endfu
 
 fu! s:maybe_resize_height() abort "{{{2
     if winwidth(0) == &columns
-        exe min([ 10, len(s:get_list()) ]).'wincmd _'
+        exe min([ 10, len(s:getqflist()) ]).'wincmd _'
     endif
 endfu
 
