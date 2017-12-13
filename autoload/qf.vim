@@ -232,8 +232,6 @@ endfu
 
 fu! qf#cfilter(bang, pat, mod) abort "{{{2
     try
-        let old_title = s:get_title()
-
         "                                          ┌─ the pattern MUST match the path of the buffer
         "                                          │  do not make the comparison strict no matter what (`=~#`)
         "                                          │  `:ilist` respects 'ignorecase'
@@ -248,14 +246,16 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
 
         let pat = s:get_pat(a:pat)
 
-        let list = b:qf_is_loclist  ? getloclist(0) : getqflist()
+        let list = s:get_list()
         let old_size = len(list)
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
         \                         op, bool, op))
 
-        let action = s:get_action(a:mod)
-        let function = s:get_function()
+        let action    = s:get_action(a:mod)
+        let function  = s:get_function()
+        let old_title = s:get_title()
         let new_title = {'title': ':filter '.pat.' '.get(old_title, 'title', '')}
+
         call call(function, b:qf_is_loclist
         \?            [ 0, list, action ]
         \:            [    list, action ])
@@ -314,11 +314,8 @@ fu! qf#cupdate(mod) abort "{{{2
         " save position
         let pos = line('.')
 
-        " save title of the qf window
-        let old_title = s:get_title()
-
         " update the text of the qfl entries
-        let list = b:qf_is_loclist ? getloclist(0) : getqflist()
+        let list = s:get_list()
         " Why using `get()`?{{{
         "
         " `getbufline()`  should return  a list  with  a single  item, the  line
@@ -337,8 +334,9 @@ fu! qf#cupdate(mod) abort "{{{2
         "                          And in case of conflict, by default `extend()` overwrites
         "                          the old value with the new one.
         "                          So, in effect, `extend()` will replace the old text with the new one.
-        let action   = s:get_action(a:mod)
-        let function = s:get_function()
+        let action    = s:get_action(a:mod)
+        let function  = s:get_function()
+        let old_title = s:get_title()
 
         call call(function, b:qf_is_loclist
         \?            [ 0, list, action ]
@@ -368,17 +366,15 @@ fu! qf#delete_entries(type, ...) abort "{{{2
             return
         endif
 
-        let pos = min(range)
+        let pos      = min(range)
+        let title    = s:get_title()
+        let list     = s:get_list()
+        let function = s:get_function()
 
-        let title = s:get_title()
-
-        let list = b:qf_is_loclist
-        \?             getloclist(0)
-        \:             getqflist()
         call remove(list, range[0]-1, range[1]-1)
-        call call(b:qf_is_loclist ? 'setloclist' : 'setqflist',
+        call call(function,
         \         b:qf_is_loclist ? [0, list, 'r'] : [list, 'r'])
-        call call(b:qf_is_loclist ? 'setloclist' : 'setqflist',
+        call call(function,
         \         b:qf_is_loclist ? [0, [], 'a', title] : [[], 'a', title])
 
         exe 'norm! '.pos.'G'
@@ -386,7 +382,6 @@ fu! qf#delete_entries(type, ...) abort "{{{2
         return my_lib#catch_error()
     endtry
 endfu
-
 
 fu! qf#delete_previous_matches() abort "{{{2
     " Why reset 'cole' and 'cocu'?{{{
@@ -435,6 +430,10 @@ fu! s:get_id() abort "{{{2
     catch
         return my_lib#catch_error()
     endtry
+endfu
+
+fu! s:get_list() abort "{{{2
+    return b:qf_is_loclist  ? getloclist(0) : getqflist()
 endfu
 
 fu! s:get_pat(pat) abort "{{{2
@@ -505,7 +504,12 @@ fu! qf#open(cmd) abort "{{{2
     "                                        └── at least 1 line height (if the loclist is empty,
     "                                                                    `lwindow 0` would raise an error)
 
-    exe how_to_open
+    " it will fail if there's no loclist
+    try
+        exe how_to_open
+    catch
+        return my_lib#catch_error()
+    endtry
 
     if a:cmd ==# 'helpgrep'
         call timer_start(0, { -> execute('helpc')})
