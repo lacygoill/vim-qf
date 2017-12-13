@@ -246,7 +246,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
 
         " to update title later
         let old_title = s:get_title()
-        let new_title = {'title': get(old_title, 'title', '').'   [:filter '.pat.']'}
+        let new_title = {'title': get(old_title, 'title', '').'   [:filter'.(a:bang ? '!' : '').' '.pat.']'}
 
         " get a qfl with(out) the entries we want to filter
         let pat      = s:get_pat(a:pat)
@@ -302,7 +302,6 @@ fu! qf#create_matches() abort "{{{2
                     \                                  ?    [{ 'conceal': 'x' }]
                     \                                  :    []
                     \                                 ))
-                    let this_window = win_getid()
                 endfor
             endfor
         endif
@@ -314,11 +313,11 @@ endfu
 
 fu! qf#cupdate(mod) abort "{{{2
     try
-        " for future restoration
+        " to restore later
         let pos   = line('.')
         let title = s:get_title()
 
-        " get a qfl where the text has been updated
+        " get a qfl where the text is updated
         let list = s:get_list()
         " Why using `get()`?{{{
         "
