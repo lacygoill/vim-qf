@@ -244,6 +244,10 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         "                           │     └─ AND the text must not match the pattern
         "                           └─ the pattern must NOT MATCH the path of the buffer
 
+        " to update title later
+        let old_title = s:get_title()
+        let new_title = {'title': get(old_title, 'title', '').'   [:filter '.pat.']'}
+
         " get a qfl with(out) the entries we want to filter
         let pat      = s:get_pat(a:pat)
         let list     = s:get_list()
@@ -253,17 +257,16 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
 
         " set this new qfl
         let action    = s:get_action(a:mod)
-        let function  = s:get_function()
-        let args      = s:get_all_args([list, action])
-        let old_title = s:get_title()
-        let new_title = {'title': get(old_title, 'title', '').'   [:filter '.pat.']'}
-        call call(function, args)
+        let l:Set_qfl = s:get_function([list, action])
+        call l:Set_qfl()
 
         " update title
-        call call(function, args + [new_title])
+        let l:Set_title = function(l:Set_qfl, [new_title])
+        call l:Set_title()
 
         call s:maybe_resize_height()
 
+        " tell me what you did and why
         echo printf('(%d) items were removed because they %s match  %s',
         \           old_size - len(list),
         \           a:bang
@@ -312,7 +315,8 @@ endfu
 fu! qf#cupdate(mod) abort "{{{2
     try
         " for future restoration
-        let pos = line('.')
+        let pos   = line('.')
+        let title = s:get_title()
 
         " get a qfl where the text has been updated
         let list = s:get_list()
@@ -336,14 +340,13 @@ fu! qf#cupdate(mod) abort "{{{2
         "                          So, in effect, `extend()` will replace the old text with the new one.
 
         " set this new qfl
-        let function = s:get_function()
-        let action   = s:get_action(a:mod)
-        let args     = s:get_all_args([list, action])
-        let title    = s:get_title()
-        call call(function, args)
+        let action    = s:get_action(a:mod)
+        let l:Set_qfl = s:get_function([list, action])
+        call l:Set_qfl()
 
         " restore title
-        call call(function, args + [ title ])
+        let l:Set_title = function(l:Set_qfl, [title])
+        call l:Set_title()
 
         call s:maybe_resize_height()
 
@@ -366,21 +369,24 @@ fu! qf#delete_entries(type, ...) abort "{{{2
             return
         endif
         " for future restoration
-        let pos = min(range)
+        let pos   = min(range)
+        let title = s:get_title()
 
         " get a qfl without the entries we want to delete
         let list = s:get_list()
         call remove(list, range[0]-1, range[1]-1)
 
         " set this new qfl
-        let function = s:get_function()
-        let args     = s:get_all_args([list, 'r'])
-        let title    = s:get_title()
-        call call(function, args)
-        call call(function, args + [ title ])
+        let l:Set_qfl = s:get_function([list, 'r'])
+        call l:Set_qfl()
+
+        " restore title
+        let l:Set_title = function(l:Set_qfl, [title])
+        call l:Set_title()
 
         call s:maybe_resize_height()
 
+        " restore position
         exe 'norm! '.pos.'G'
     catch
         return my_lib#catch_error()
@@ -416,14 +422,10 @@ fu! s:get_action(mod) abort "{{{2
     "                           └─ create a new list
 endfu
 
-fu! s:get_all_args(args) abort "{{{2
+fu! s:get_function(args) abort "{{{2
     return b:qf_is_loclist
-    \?         [0] + a:args
-    \:               a:args
-endfu
-
-fu! s:get_function() abort "{{{2
-    return b:qf_is_loclist ? 'setloclist' : 'setqflist'
+    \?         function('setloclist', [0] + a:args)
+    \:         function('setqflist',        a:args)
 endfu
 
 fu! s:get_id() abort "{{{2
