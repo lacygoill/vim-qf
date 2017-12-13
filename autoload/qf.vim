@@ -244,16 +244,21 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         "                           │     └─ AND the text must not match the pattern
         "                           └─ the pattern must NOT MATCH the path of the buffer
 
-        " to update title later
-        let old_title = s:get_title()
-        let new_title = {'title': get(old_title, 'title', '').'   [:filter'.(a:bang ? '!' : '').' '.pat.']'}
-
         " get a qfl with(out) the entries we want to filter
-        let pat      = s:get_pat(a:pat)
         let list     = s:getqflist()
+        let pat      = s:get_pat(a:pat)
         let old_size = len(list)
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
         \                         op, bool, op))
+
+        if len(list) == old_size
+            echo 'nothing to remove'
+            return
+        endif
+
+        " to update title later
+        let old_title = s:get_title()
+        let new_title = {'title': old_title.title .'   [:filter'.(a:bang ? '!' : '').' '.pat.']'}
 
         " set this new qfl
         let action      = s:get_action(a:mod)
@@ -270,8 +275,8 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         echo printf('(%d) items were removed because they %s match  %s',
         \           old_size - len(list),
         \           a:bang
-        \           ?    'did NOT'
-        \           :    'DID',
+        \           ?    'DID'
+        \           :    'did NOT',
         \           strchars(pat) <= 50
         \           ?    pat
         \           :    'the pattern')
