@@ -256,12 +256,12 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         \                         op, bool, op))
 
         " set this new qfl
-        let action    = s:get_action(a:mod)
-        let l:Set_qfl = s:get_function([list, action])
-        call l:Set_qfl()
+        let action      = s:get_action(a:mod)
+        let l:Setqflist = s:setqflist([list, action])
+        call l:Setqflist()
 
         " update title
-        let l:Set_title = function(l:Set_qfl, [new_title])
+        let l:Set_title = function(l:Setqflist, [new_title])
         call l:Set_title()
 
         call s:maybe_resize_height()
@@ -339,12 +339,12 @@ fu! qf#cupdate(mod) abort "{{{2
         "                          So, in effect, `extend()` will replace the old text with the new one.
 
         " set this new qfl
-        let action    = s:get_action(a:mod)
-        let l:Set_qfl = s:get_function([list, action])
-        call l:Set_qfl()
+        let action      = s:get_action(a:mod)
+        let l:Setqflist = s:setqflist([list, action])
+        call l:Setqflist()
 
         " restore title
-        let l:Set_title = function(l:Set_qfl, [title])
+        let l:Set_title = function(l:Setqflist, [title])
         call l:Set_title()
 
         call s:maybe_resize_height()
@@ -376,11 +376,11 @@ fu! qf#delete_entries(type, ...) abort "{{{2
         call remove(list, range[0]-1, range[1]-1)
 
         " set this new qfl
-        let l:Set_qfl = s:get_function([list, 'r'])
-        call l:Set_qfl()
+        let l:Setqflist = s:setqflist([list, 'r'])
+        call l:Setqflist()
 
         " restore title
-        let l:Set_title = function(l:Set_qfl, [title])
+        let l:Set_title = function(l:Setqflist, [title])
         call l:Set_title()
 
         call s:maybe_resize_height()
@@ -421,7 +421,13 @@ fu! s:get_action(mod) abort "{{{2
     "                           └─ create a new list
 endfu
 
-fu! s:get_function(args) abort "{{{2
+fu! s:getqflist(args) abort "{{{2
+    return b:qf_is_loclist
+    \?         function('getloclist', [0] + a:args)
+    \:         function('getqflist',        a:args)
+endfu
+
+fu! s:setqflist(args) abort "{{{2
     return b:qf_is_loclist
     \?         function('setloclist', [0] + a:args)
     \:         function('setqflist',        a:args)
@@ -429,14 +435,8 @@ endfu
 
 fu! s:get_id() abort "{{{2
     try
-        return get(call(b:qf_is_loclist
-        \               ?    'getloclist'
-        \               :    'getqflist',
-        \
-        \               b:qf_is_loclist
-        \               ?    [0, {'id': 0}]
-        \               :    [   {'id': 0}]
-        \         ), 'id', 0)
+        let l:Getqflist = s:getqflist([{'id': 0}])
+        return get(l:Getqflist(), 'id', 0)
 
     catch
         return my_lib#catch_error()
