@@ -244,13 +244,14 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         "                           │     └─ AND the text must not match the pattern
         "                           └─ the pattern must NOT MATCH the path of the buffer
 
+        " get a qfl with(out) the entries we want to filter
         let pat      = s:get_pat(a:pat)
         let list     = s:get_list()
         let old_size = len(list)
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
         \                         op, bool, op))
 
-        " update qfl
+        " set this new qfl
         let action    = s:get_action(a:mod)
         let function  = s:get_function()
         let args      = s:get_all_args([list, action])
@@ -310,10 +311,10 @@ endfu
 
 fu! qf#cupdate(mod) abort "{{{2
     try
-        " save position
+        " for future restoration
         let pos = line('.')
 
-        " update the text of the qfl entries
+        " get a qfl where the text has been updated
         let list = s:get_list()
         " Why using `get()`?{{{
         "
@@ -334,7 +335,7 @@ fu! qf#cupdate(mod) abort "{{{2
         "                          the old value with the new one.
         "                          So, in effect, `extend()` will replace the old text with the new one.
 
-        " update qfl
+        " set this new qfl
         let function = s:get_function()
         let action   = s:get_action(a:mod)
         let args     = s:get_all_args([list, action])
@@ -364,15 +365,17 @@ fu! qf#delete_entries(type, ...) abort "{{{2
         else
             return
         endif
+        " for future restoration
+        let pos = min(range)
 
-        let list     = s:get_list()
+        " get a qfl without the entries we want to delete
+        let list = s:get_list()
         call remove(list, range[0]-1, range[1]-1)
 
-        let pos      = min(range)
+        " set this new qfl
         let function = s:get_function()
         let args     = s:get_all_args([list, 'r'])
         let title    = s:get_title()
-
         call call(function, args)
         call call(function, args + [ title ])
 
