@@ -421,26 +421,15 @@ fu! s:get_action(mod) abort "{{{2
     "                           └─ create a new list
 endfu
 
-fu! s:setqflist(args) abort "{{{2
-    return b:qf_is_loclist
-    \?         function('setloclist', [0] + a:args)
-    \:         function('setqflist',        a:args)
-endfu
-
 fu! s:get_id() abort "{{{2
     try
         let l:Getqflist_id = b:qf_is_loclist
         \?                      function('getloclist', [0] + [{'id': 0}])
         \:                      function('getqflist',        [{'id': 0}])
         return get(l:Getqflist_id(), 'id', 0)
-
     catch
         return my_lib#catch_error()
     endtry
-endfu
-
-fu! s:getqflist() abort "{{{2
-    return b:qf_is_loclist  ? getloclist(0) : getqflist()
 endfu
 
 fu! s:get_pat(pat) abort "{{{2
@@ -474,6 +463,16 @@ fu! s:get_title() abort "{{{2
     return b:qf_is_loclist
     \?         getloclist(0, {'title': 1})
     \:         getqflist({'title': 1})
+endfu
+
+fu! s:getqflist() abort "{{{2
+    return b:qf_is_loclist  ? getloclist(0) : getqflist()
+endfu
+
+fu! s:setqflist(args) abort "{{{2
+    return b:qf_is_loclist
+    \?         function('setloclist', [0] + a:args)
+    \:         function('setqflist',        a:args)
 endfu
 
 fu! s:maybe_resize_height() abort "{{{2
