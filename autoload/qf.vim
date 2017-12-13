@@ -255,7 +255,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         let function  = s:get_function()
         let args      = s:get_all_args([list, action])
         let old_title = s:get_title()
-        let new_title = {'title': ':filter '.pat.' '.get(old_title, 'title', '')}
+        let new_title = {'title': get(old_title, 'title', '').'   [:filter '.pat.']'}
         call call(function, args)
 
         " update title
