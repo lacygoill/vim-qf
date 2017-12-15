@@ -194,6 +194,25 @@ let s:other_plugins = [
 \                    ]
 
 " Functions {{{1
+fu! s:add_filter_to_title(title_dict, pat, bang) abort "{{{2
+    let pat = a:pat
+    let bang = a:bang ? '!' : ''
+    let title = a:title_dict.title
+
+    " If the  qfl has already  been filtered, we  don't want to  add another
+    " `[:filter pat]`  in the title. Too  verbose. Instead we want to  add a
+    " “branch”:
+    "         [:filter pat1] [:filter pat2]    ✘
+    "         [:filter pat1|pat2]              ✔
+    let filter_indicator = '\s*\[:filter'.(a:bang ? '!' : '!\@!')
+    let has_already_been_filtered = match(title, filter_indicator) >= 0
+    let title = has_already_been_filtered
+    \?              substitute(title, '\ze\]$', '|'.pat, '')
+    \:              title.'   [:filter'.bang.' '.pat.']'
+
+    return {'title': title}
+endfu
+
 fu! qf#c_w(tabpage) abort "{{{2
     try
         " In a qf window populated by `:helpg` or `:lh`, `C-w CR` opens a window
@@ -232,42 +251,29 @@ endfu
 
 fu! qf#cfilter(bang, pat, mod) abort "{{{2
     try
-        "                                          ┌─ the pattern MUST match the path of the buffer
-        "                                          │  do not make the comparison strict no matter what (`=~#`)
-        "                                          │  `:ilist` respects 'ignorecase'
-        "                                          │  `:Cfilter` should do the same
-        "                                          │
-        "                                          │     ┌─ OR the text must match
-        "                                          │     │
-        let [op, bool] = a:bang ? ['!~', '&&'] : ['=~', '||']
-        "                           │     │
-        "                           │     └─ AND the text must not match the pattern
-        "                           └─ the pattern must NOT MATCH the path of the buffer
-
         " get a qfl with(out) the entries we want to filter
-        let list     = s:getqflist()
-        let pat      = s:get_pat(a:pat)
-        let old_size = len(list)
+        let list          = s:getqflist()
+        let pat           = s:get_pat(a:pat)
+        let [comp, logic] = s:get_comp_and_logic(a:bang)
+        let old_size      = len(list)
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
-        \                         op, bool, op))
+        \                         comp, logic, comp))
 
         if len(list) == old_size
-            echo 'nothing to remove'
+            echo 'No entry was removed'
             return
         endif
 
         " to update title later
-        let old_title = s:get_title()
-        let new_title = {'title': old_title.title .'   [:filter'.(a:bang ? '!' : '').' '.pat.']'}
+        let title = s:add_filter_to_title(s:get_title(), a:pat, a:bang)
 
-        " set this new qfl
+        " set the new qfl
         let action      = s:get_action(a:mod)
         let l:Setqflist = s:setqflist([list, action])
         call l:Setqflist()
 
         " update title
-        let l:Set_title = function(l:Setqflist, [new_title])
-        call l:Set_title()
+        call l:Setqflist(title)
 
         call s:maybe_resize_height()
 
@@ -435,6 +441,20 @@ fu! s:get_id() abort "{{{2
     catch
         return my_lib#catch_error()
     endtry
+endfu
+
+fu! s:get_comp_and_logic(bang) abort "{{{2
+    "                                ┌─ the pattern MUST match the path of the buffer
+    "                                │  do not make the comparison strict no matter what (`=~#`)
+    "                                │  `:ilist` respects 'ignorecase'
+    "                                │  `:Cfilter` should do the same
+    "                                │
+    "                                │     ┌─ OR the text must match
+    "                                │     │
+    return a:bang ? ['!~', '&&'] : ['=~', '||']
+    "                 │     │
+    "                 │     └─ AND the text must not match the pattern
+    "                 └─ the pattern must NOT MATCH the path of the buffer
 endfu
 
 fu! s:get_pat(pat) abort "{{{2
