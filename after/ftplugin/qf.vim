@@ -149,7 +149,7 @@ let b:qf_is_loclist = get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
 " align the columns (more readable)
 " EXCEPT when the qfl is populated by `:WTF`
 if  b:qf_is_loclist
-\|| get(getqflist({'title':1}), 'title', '') !=# 'Stack trace(s)'
+\|| get(getqflist({'title':0}), 'title', '') !=# 'Stack trace(s)'
 
     if executable('column') && executable('sed')
         setl modifiable

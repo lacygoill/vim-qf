@@ -226,8 +226,8 @@ fu! qf#c_w(tabpage) abort "{{{2
         "
         " So, my  guess is  that `C-w CR`  opens a new  window, then  from there
         " `:helpg` opens another window to display the current entry.
-        if !get(b:, 'qf_is_loclist', 0) && get(    getqflist({'title':1}), 'title', '') =~# '^:helpg\%[rep]'
-        \|| get(b:, 'qf_is_loclist', 0) && get(getloclist(0, {'title':1}), 'title', '') =~# '^:lh\%[elpgrep]'
+        if !get(b:, 'qf_is_loclist', 0) && get(    getqflist({'title': 0}), 'title', '') =~# '^:helpg\%[rep]'
+        \|| get(b:, 'qf_is_loclist', 0) && get(getloclist(0, {'title': 0}), 'title', '') =~# '^:lh\%[elpgrep]'
             augroup close_noname_window
                 au!
                 au BufWinEnter * if empty(expand('<amatch>')) | close | endif
@@ -486,8 +486,8 @@ endfu
 
 fu! s:get_title() abort "{{{2
     return b:qf_is_loclist
-    \?         getloclist(0, {'title': 1})
-    \:         getqflist({'title': 1})
+    \?         getloclist(0, {'title': 0})
+    \:         getqflist({'title': 0})
 endfu
 
 fu! s:getqflist() abort "{{{2
