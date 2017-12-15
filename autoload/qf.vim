@@ -432,17 +432,6 @@ fu! s:get_action(mod) abort "{{{2
     "                           └─ create a new list
 endfu
 
-fu! s:get_id() abort "{{{2
-    try
-        let l:Getqflist_id = b:qf_is_loclist
-        \?                      function('getloclist', [0] + [{'id': 0}])
-        \:                      function('getqflist',        [{'id': 0}])
-        return get(l:Getqflist_id(), 'id', 0)
-    catch
-        return my_lib#catch_error()
-    endtry
-endfu
-
 fu! s:get_comp_and_logic(bang) abort "{{{2
     "                                ┌─ the pattern MUST match the path of the buffer
     "                                │  do not make the comparison strict no matter what (`=~#`)
@@ -455,6 +444,17 @@ fu! s:get_comp_and_logic(bang) abort "{{{2
     "                 │     │
     "                 │     └─ AND the text must not match the pattern
     "                 └─ the pattern must NOT MATCH the path of the buffer
+endfu
+
+fu! s:get_id() abort "{{{2
+    try
+        let l:Getqflist_id = b:qf_is_loclist
+        \?                      function('getloclist', [0] + [{'id': 0}])
+        \:                      function('getqflist',        [{'id': 0}])
+        return get(l:Getqflist_id(), 'id', 0)
+    catch
+        return my_lib#catch_error()
+    endtry
 endfu
 
 fu! s:get_pat(pat) abort "{{{2
