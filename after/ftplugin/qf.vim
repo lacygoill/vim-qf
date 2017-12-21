@@ -178,7 +178,13 @@ endif
 
 " Matches {{{1
 
-call qf#delete_previous_matches()
+" Why reset 'cole' and 'cocu'?{{{
+"
+" The  2nd time  we display  a  qf buffer  in  the same  window, there's  no
+" guarantee that we're going to conceal anything.
+"}}}
+setl cocu< cole<
+call clearmatches()
 call qf#create_matches()
 
 " Teardown {{{1

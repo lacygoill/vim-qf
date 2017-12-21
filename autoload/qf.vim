@@ -194,20 +194,27 @@ let s:other_plugins = [
 \                    ]
 
 " Functions {{{1
-fu! s:add_filter_to_title(title_dict, pat, bang) abort "{{{2
+fu! s:add_filter_indicator_to_title(title_dict, pat, bang) abort "{{{2
     let pat = a:pat
     let bang = a:bang ? '!' : ''
     let title = a:title_dict.title
 
+    " What is this “filter indicator”?{{{
+    "
     " If the  qfl has already  been filtered, we  don't want to  add another
     " `[:filter pat]`  in the title. Too  verbose. Instead we want to  add a
-    " “branch”:
-    "         [:filter pat1] [:filter pat2]    ✘
-    "         [:filter pat1|pat2]              ✔
+    " “branch” or a “concat”:
+    "
+    "         [:filter! pat1] [:filter! pat2]    ✘
+    "         [:filter! pat1 | pat2]             ✔
+    "
+    "         [:filter pat1] [:filter pat2]      ✘
+    "         [:filter pat1 & pat2]              ✔
+    "}}}
     let filter_indicator = '\s*\[:filter'.(a:bang ? '!' : '!\@!')
     let has_already_been_filtered = match(title, filter_indicator) >= 0
     let title = has_already_been_filtered
-    \?              substitute(title, '\ze\]$', '|'.pat, '')
+    \?              substitute(title, '\ze\]$', (a:bang ? ' | ' : ' \& ').pat, '')
     \:              title.'   [:filter'.bang.' '.pat.']'
 
     return {'title': title}
@@ -265,7 +272,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         endif
 
         " to update title later
-        let title = s:add_filter_to_title(s:get_title(), a:pat, a:bang)
+        let title = s:add_filter_indicator_to_title(s:get_title(), a:pat, a:bang)
 
         " set the new qfl
         let action      = s:get_action(a:mod)
@@ -398,22 +405,6 @@ fu! qf#delete_entries(type, ...) abort "{{{2
 
         " restore position
         exe 'norm! '.pos.'G'
-    catch
-        return my_lib#catch_error()
-    endtry
-endfu
-
-fu! qf#delete_previous_matches() abort "{{{2
-    " Why reset 'cole' and 'cocu'?{{{
-    "
-    " The  2nd time  we display  a  qf buffer  in  the same  window, there's  no
-    " guarantee that we're going to conceal anything.
-    "}}}
-    setl cocu< cole<
-    try
-        for match_id in map(getmatches(), {i,v -> v.id})
-            call matchdelete(match_id)
-        endfor
     catch
         return my_lib#catch_error()
     endtry
