@@ -412,7 +412,7 @@ endfu
 
 fu! qf#disable_some_keys(keys) abort "{{{2
     for a_key in a:keys
-        sil! exe 'nno  <buffer><nowait><silent>  '.a:key.'  <nop>'
+        sil! exe 'nno  <buffer><nowait><silent>  '.a_key.'  <nop>'
     endfor
 endfu
 
