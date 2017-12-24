@@ -60,9 +60,9 @@ nno  <buffer><nowait><silent>  <c-w>T  :<c-u>call qf#c_w(1)<cr>
 
 nno  <buffer><nowait><silent>  q       :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
 
-nno <buffer>        <silent>   D       :<c-u>set opfunc=qf#delete_entries<cr>g@
-nno <buffer><nowait><silent>   DD      :<c-u>set opfunc=qf#delete_entries<bar>exe 'norm! '.v:count1.'g@_'<cr>
-xno <buffer><nowait><silent>   D       :<c-u>call qf#delete_entries('vis')<cr>
+nno  <buffer><nowait><silent>  D       :<c-u>set opfunc=qf#delete_entries<cr>g@
+nno  <buffer><nowait><silent>  DD      :<c-u>set opfunc=qf#delete_entries<bar>exe 'norm! '.v:count1.'g@_'<cr>
+xno  <buffer><nowait><silent>  D       :<c-u>call qf#delete_entries('vis')<cr>
 
 " Options {{{1
 
@@ -71,6 +71,33 @@ setl nobuflisted
 augroup my_qf
     au! * <buffer>
     au BufWinEnter <buffer> setl cursorline nowrap
+    " FIXME:{{{
+    "
+    " If I press `SPC o` to open the TOC menu, and if I write in this file:
+    "
+    "         call qf#setup_toc()
+    "
+    " The function isn't called. No syntax highlighting. Why?
+    " If I install this autocmd:
+    "
+    "         au FileType qf call qf#setup_toc()
+    "
+    " Same result.
+    " If I install this autocmd
+    "
+    "         au Syntax qf call qf#setup_toc()
+    "
+    " It works. Why?
+    "
+    " If I install this autocmd
+    "
+    "         au Syntax <buffer> call qf#setup_toc()
+    "
+    " It works. What does <buffer> mean here? What's the difference with `qf`?
+    " I think it's expanded into a buffer number. So it limits the scope of
+    " the autocmd to the current buffer, when its syntax option is set.
+    "}}}
+    au Syntax <buffer> call qf#setup_toc()
 augroup END
 " When  `:lh` populates  a  loclist  and opens  a  location  window, there's  no
 " `BufWinEnter` right after `FileType qf`.
@@ -195,13 +222,13 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \   setl bl< cul< efm< wrap<
                     \ | unlet! b:qf_is_loclist
                     \ | exe 'au! my_qf * <buffer>'
-                    \ | exe 'nunmap <buffer> <c-w><cr>'
-                    \ | exe 'nunmap <buffer> <c-w>T'
-                    \ | exe 'nunmap <buffer> <cr>'
-                    \ | exe 'nunmap <buffer> D'
-                    \ | exe 'nunmap <buffer> DD'
-                    \ | exe 'xunmap <buffer> D'
-                    \ | exe 'nunmap <buffer> q'
+                    \ | exe 'nunmap  <buffer><nowait>  <c-w><cr>'
+                    \ | exe 'nunmap  <buffer><nowait>  <c-w>T'
+                    \ | exe 'nunmap  <buffer><nowait>  <cr>'
+                    \ | exe 'nunmap  <buffer><nowait>  D'
+                    \ | exe 'nunmap  <buffer><nowait>  DD'
+                    \ | exe 'xunmap  <buffer><nowait>  D'
+                    \ | exe 'nunmap  <buffer><nowait>  q'
                     \ | exe 'cuna   <buffer> cdelete'
                     \ | exe 'cuna   <buffer> cfilter'
                     \ | exe 'cuna   <buffer> cupdate'

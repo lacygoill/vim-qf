@@ -1,3 +1,8 @@
+" TODO:
+" We shouldn't  create matches. We  shouldn't use the  complex ad  hoc mechanism
+" around `s:matches_any_qfl`. Instead we should create ad hoc syntax file.
+" Look at how Neovim has solved the issue in `ftplugin/qf.vim` for TOC menus.
+
 " Variables {{{1
 " What's the purpose of `s:matches_any_qfl`?{{{
 "
@@ -638,4 +643,23 @@ fu! qf#set_matches(origin, group, pat) abort "{{{2
     catch
         return my_lib#catch_error()
     endtry
+endfu
+
+fu! qf#setup_toc() abort "{{{2
+    if get(w:, 'quickfix_title') !~# '\<TOC$' || &syntax != 'qf'
+        return
+    endif
+
+    let llist = getloclist(0)
+    if empty(llist)
+        return
+    endif
+
+    let bufnr = llist[0].bufnr
+    " we only want the texts, not their location
+    setl modifiable
+    sil %d_
+    call setline(1, map(llist, {i,v -> v.text}))
+    setl nomodifiable nomodified
+    let &syntax = getbufvar(bufnr, '&syntax')
 endfu
