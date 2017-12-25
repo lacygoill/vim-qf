@@ -129,7 +129,7 @@
 " As a result, we would need to also trigger `FileType qf`:
 "
 "         doautocmd <nomodeline> QuickFixCmdPost grep
-"         if &l:buftype !=# 'quickfix'
+"         if &bt !=# 'quickfix'
 "             return
 "         endif
 "         doautocmd <nomodeline> FileType qf

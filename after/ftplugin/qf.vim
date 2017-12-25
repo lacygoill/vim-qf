@@ -72,7 +72,6 @@ augroup my_qf
     au! * <buffer>
     au BufWinEnter <buffer> setl cursorline nowrap
     " FIXME:{{{
-    "
     " If I press `SPC o` to open the TOC menu, and if I write in this file:
     "
     "         call qf#setup_toc()
@@ -88,6 +87,26 @@ augroup my_qf
     "         au Syntax qf call qf#setup_toc()
     "
     " It works. Why?
+    "
+    " Update:
+    " It's because of the guard:
+    "
+    "         if … &syntax != 'qf'
+    "             return
+    "         endif
+    "
+    " We need it to prevent the autocmd to nest too deep:
+    "
+    "         Vim(let):E218: autocommand nesting too deep
+    "
+    " This error comes from the command (in `qf#setup_toc()`):
+    "
+    "         let &syntax = getbufvar(bufnr, '&syntax')
+    "
+    " We could prefix it with `:noa`, but then the new syntax file
+    " (help, markdown, man, …) would NOT be sourced.
+    "
+    "
     "
     " If I install this autocmd
     "
