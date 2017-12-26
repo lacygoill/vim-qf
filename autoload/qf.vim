@@ -538,10 +538,7 @@ fu! qf#open(cmd) abort "{{{2
     \?                         [ 'l', len(getloclist(0)) ]
     \:                         [ 'c', len(getqflist())   ]
 
-    let mod = window#get_modifier(1)
-    "                             │
-    "                             └ flag to tell the function we're going
-    "                               to open a qf window
+    let mod = window#get_modifier()
 
     " In some of our  plugins, we may want to open the qf  window even though it
     " doesn't contain any valid entry (ex: `:Scriptnames`).
