@@ -311,7 +311,7 @@ fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{2
     " which means Vim performs a basic filtering automatically:
     "
     "     • each candidate must begin with `a:arglead`
-    "     • the comparison is case-insensitive
+    "     • the comparison respects 'ic' and 'scs'
     " }}}
     return join(['-commented', '-other_plugins', '-tmp'], "\n")
 endfu
