@@ -21,8 +21,8 @@ cnorea <expr> <buffer> cdelete  getcmdtype() ==# ':' && getcmdline() ==# 'cdelet
 " Do not give the `-bar` attribute to the commands.
 " It would break a pattern containing a bar (for example, for an alternation).
 
-com! -bang -buffer -nargs=? -complete=customlist,qf#cfilter_complete Cfilter
-\                                   call qf#cfilter(<bang>0, <q-args>, <q-mods>)
+com! -bang -buffer -nargs=? -complete=custom,qf#cfilter_complete Cfilter
+\                           call qf#cfilter(<bang>0, <q-args>, <q-mods>)
 
 cnorea <expr> <buffer> cfilter  getcmdtype() ==# ':' && getcmdline() ==# 'cfilter'
 \                               ?    'Cfilter'

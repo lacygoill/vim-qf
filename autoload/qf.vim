@@ -304,8 +304,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
 endfu
 
 fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{2
-    let candidates = [ '-commented', '-other_plugins', '-tmp' ]
-    return filter(candidates, { i,v -> stridx(v, a:arglead) == 0 })
+    return join(['-commented', '-other_plugins', '-tmp'], "\n")
 endfu
 
 fu! qf#create_matches() abort "{{{2
