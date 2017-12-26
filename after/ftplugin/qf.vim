@@ -1,7 +1,7 @@
 " Commands {{{1
 " Cdelete {{{2
 
-com! -bar -buffer -range Cdelete call qf#delete_entries('Ex', <line1>, <line2>)
+com! -bar -buffer -range Cdelete call qf#delete_or_conceal('Ex', <line1>, <line2>)
 
 cnorea <expr> <buffer> cdelete  getcmdtype() ==# ':' && getcmdline() ==# 'cdelete'
 \                               ?    'Cdelete'
@@ -60,9 +60,9 @@ nno  <buffer><nowait><silent>  <c-w>T  :<c-u>call qf#c_w(1)<cr>
 
 nno  <buffer><nowait><silent>  q       :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
 
-nno  <buffer><nowait><silent>  D       :<c-u>set opfunc=qf#delete_entries<cr>g@
-nno  <buffer><nowait><silent>  DD      :<c-u>set opfunc=qf#delete_entries<bar>exe 'norm! '.v:count1.'g@_'<cr>
-xno  <buffer><nowait><silent>  D       :<c-u>call qf#delete_entries('vis')<cr>
+nno  <buffer><nowait><silent>  D       :<c-u>set opfunc=qf#delete_or_conceal<cr>g@
+nno  <buffer><nowait><silent>  DD      :<c-u>set opfunc=qf#delete_or_conceal<bar>exe 'norm! '.v:count1.'g@_'<cr>
+xno  <buffer><nowait><silent>  D       :<c-u>call qf#delete_or_conceal('vis')<cr>
 
 " Options {{{1
 

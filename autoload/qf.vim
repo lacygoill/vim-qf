@@ -379,7 +379,10 @@ fu! qf#cupdate(mod) abort "{{{2
     endtry
 endfu
 
-fu! qf#delete_entries(type, ...) abort "{{{2
+fu! qf#delete_or_conceal(type, ...) abort "{{{2
+    " Purpose:
+    "     • conceal visual block
+    "     • delete anything else (and update the qfl)
     try
         if index(['char', 'line', 'block'], a:type) >= 0
             let range = [line("'["), line("']")]
