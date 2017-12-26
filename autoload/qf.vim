@@ -384,7 +384,21 @@ fu! qf#delete_entries(type, ...) abort "{{{2
         if index(['char', 'line', 'block'], a:type) >= 0
             let range = [line("'["), line("']")]
         elseif a:type ==# 'vis'
-            let range = [line("'<"), line("'>")]
+            if visualmode() ==# "\<c-v>"
+                " We could also use:
+                "
+                "     let pat = '\%V.*\%V'
+                "
+                " … but the match would disappear when we change the focused window,
+                " probably because the visual marks would be set in another buffer.
+                let [vcol1, vcol2] = [virtcol("'<"), virtcol("'>")]
+                let pat = '\v%'.vcol1.'v.*%'.vcol2.'v'
+                call matchadd('Conceal', pat, 0, -1, {'Conceal' : 'x'})
+                setl cocu=nc cole=3
+                return
+            else
+                let range = [line("'<"), line("'>")]
+            endif
         elseif a:type ==# 'Ex'
             let range = [a:1, a:2]
         else
