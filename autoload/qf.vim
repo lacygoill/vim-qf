@@ -225,6 +225,46 @@ fu! s:add_filter_indicator_to_title(title_dict, pat, bang) abort "{{{2
     return {'title': title}
 endfu
 
+fu! qf#align() abort "{{{2
+    " align the columns (more readable)
+    " EXCEPT when the qfl is populated by `:WTF`
+    let is_wtf =   !b:qf_is_loclist
+    \            && get(getqflist({'title':0}), 'title', '') ==# 'Stack trace(s)'
+
+    if   is_wtf
+    \|| !executable('column')
+    \|| !executable('sed')
+        return
+    endif
+
+    let ul_save = &l:ul
+    setl modifiable ul=-1
+
+    " prepend the first occurrence of a bar with a literal C-a
+    sil! exe "%!sed 's/|/\<c-a>|/1'"
+    " do the same for the 2nd occurrence
+    sil! exe "%!sed 's/|/\<c-a>|/2'"
+    " sort the text using the C-a's as delimiters
+    sil! exe "%!column -s '\<c-a>' -t"
+
+    let &l:ul = ul_save
+    setl nomodifiable nomodified
+
+    " We could also install this autocmd in our vimrc:{{{
+    "
+    "         au BufReadPost quickfix call s:qf_align()
+    "
+    " … where `s:qf_align()` would contain commands to align the columns.
+    "
+    " It would work most of the time, including after `:helpg foo`.
+    " But it wouldn't work after `:lh foo`.
+    "
+    " Because `BufReadPost quickfix` wouldn't be fired, and the function wouldn't be
+    " called. However, `FileType  qf` is emitted, so  the `qf` filetype plugin  is a
+    " better place to format the contents of a quickfix buffer.
+        "}}}
+endfu
+
 fu! qf#c_w(tabpage) abort "{{{2
     try
         " In a qf window populated by `:helpg` or `:lh`, `C-w CR` opens a window

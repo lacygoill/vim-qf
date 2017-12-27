@@ -192,35 +192,7 @@ let b:qf_is_loclist = get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
 
 " Alignment {{{1
 
-" align the columns (more readable)
-" EXCEPT when the qfl is populated by `:WTF`
-if  b:qf_is_loclist
-\|| get(getqflist({'title':0}), 'title', '') !=# 'Stack trace(s)'
-
-    if executable('column') && executable('sed')
-        setl modifiable
-        " prepend the first occurrence of a bar with a literal C-a
-        sil! exe "%!sed 's/|/\<c-a>|/1'"
-        " do the same for the 2nd occurrence
-        sil! exe "%!sed 's/|/\<c-a>|/2'"
-        " sort the text using the C-a's as delimiters
-        sil! exe "%!column -s '\<c-a>' -t"
-        setl nomodifiable nomodified
-    endif
-    " We could also install this autocmd in our vimrc:{{{
-    "
-    "         au BufReadPost quickfix call s:qf_align()
-    "
-    " … where `s:qf_align()` would contain commands to align the columns.
-    "
-    " It would work most of the time, including after `:helpg foo`.
-    " But it wouldn't work after `:lh foo`.
-    "
-    " Because `BufReadPost quickfix` wouldn't be fired, and the function wouldn't be
-    " called. However, `FileType  qf` is emitted, so  the `qf` filetype plugin  is a
-    " better place to format the contents of a quickfix buffer.
-    "}}}
-endif
+call qf#align()
 
 " Matches {{{1
 
