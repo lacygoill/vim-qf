@@ -237,6 +237,9 @@ fu! qf#align() abort "{{{2
         return
     endif
 
+    " We won't try to undo the edition, so don't save anything in the undotree.
+    " Useful to lower memory consumption if qfl is big.
+    " For more info, see `:h clear-undo`.
     let ul_save = &l:ul
     setl modifiable ul=-1
 
