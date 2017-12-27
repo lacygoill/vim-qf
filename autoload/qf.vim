@@ -229,7 +229,7 @@ fu! qf#align() abort "{{{2
     " align the columns (more readable)
     " EXCEPT when the qfl is populated by `:WTF`
     let is_wtf =   !b:qf_is_loclist
-    \            && get(getqflist({'title':0}), 'title', '') ==# 'Stack trace(s)'
+    \            && get(getqflist({'title':0}), 'title', '') ==# 'WTF'
 
     if   is_wtf
     \|| !executable('column')
@@ -265,7 +265,7 @@ fu! qf#align() abort "{{{2
     " Because `BufReadPost quickfix` wouldn't be fired, and the function wouldn't be
     " called. However, `FileType  qf` is emitted, so  the `qf` filetype plugin  is a
     " better place to format the contents of a quickfix buffer.
-        "}}}
+    "}}}
 endfu
 
 fu! qf#c_w(tabpage) abort "{{{2
