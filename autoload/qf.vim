@@ -228,7 +228,7 @@ endfu
 fu! qf#align() abort "{{{2
     " align the columns (more readable)
     " EXCEPT when the qfl is populated by `:WTF`
-    let is_wtf =   !b:qf_is_loclist
+    let is_wtf =   !get(b:, 'qf_is_loclist', 0)
     \            && get(getqflist({'title':0}), 'title', '') ==# 'WTF'
 
     if   is_wtf
@@ -512,7 +512,7 @@ endfu
 
 fu! s:get_id() abort "{{{2
     try
-        let l:Getqflist_id = b:qf_is_loclist
+        let l:Getqflist_id = get(b:, 'qf_is_loclist', 0)
         \?                      function('getloclist', [0] + [{'id': 0}])
         \:                      function('getqflist',        [{'id': 0}])
         return get(l:Getqflist_id(), 'id', 0)
@@ -549,17 +549,17 @@ fu! s:get_pat(pat) abort "{{{2
 endfu
 
 fu! s:get_title() abort "{{{2
-    return b:qf_is_loclist
+    return get(b:, 'qf_is_loclist', 0)
     \?         getloclist(0, {'title': 0})
     \:         getqflist({'title': 0})
 endfu
 
 fu! s:getqflist() abort "{{{2
-    return b:qf_is_loclist  ? getloclist(0) : getqflist()
+    return get(b:, 'qf_is_loclist', 0)  ? getloclist(0) : getqflist()
 endfu
 
 fu! s:setqflist(args) abort "{{{2
-    return b:qf_is_loclist
+    return get(b:, 'qf_is_loclist', 0)
     \?         function('setloclist', [0] + a:args)
     \:         function('setqflist',        a:args)
 endfu
