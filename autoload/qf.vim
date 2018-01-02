@@ -581,9 +581,9 @@ fu! qf#open(cmd) abort "{{{2
     \?                         [ 'l', len(getloclist(0)) ]
     \:                         [ 'c', len(getqflist())   ]
 
-    let mod = call('window#get_modifier', a:cmd =~# '^l' ? [1] : [])
-    "                                                       │
-    "         flag meaning we're going to open a loc window ┘
+    let mod = call('lg#window_get_modifier', a:cmd =~# '^l' ? [1] : [])
+    "                                                          │
+    "            flag meaning we're going to open a loc window ┘
 
     " In some of our  plugins, we may want to open the qf  window even though it
     " doesn't contain any valid entry (ex: `:Scriptnames`).
