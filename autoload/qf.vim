@@ -300,7 +300,7 @@ fu! qf#c_w(tabpage) abort "{{{2
             call win_gotoid(new)
         endif
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -342,7 +342,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         \           ?    pat
         \           :    'the pattern')
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -381,7 +381,7 @@ fu! qf#create_matches() abort "{{{2
         endif
 
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -426,7 +426,7 @@ fu! qf#cupdate(mod) abort "{{{2
         " restore position
         exe 'norm! '.pos.'G'
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -479,7 +479,7 @@ fu! qf#delete_or_conceal(type, ...) abort "{{{2
         " restore position
         exe 'norm! '.pos.'G'
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -517,7 +517,7 @@ fu! s:get_id() abort "{{{2
         \:                      function('getqflist',        [{'id': 0}])
         return get(l:Getqflist_id(), 'id', 0)
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -611,7 +611,7 @@ fu! qf#open(cmd) abort "{{{2
     try
         exe how_to_open
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 
     if a:cmd ==# 'helpgrep'
@@ -711,7 +711,7 @@ fu! qf#set_matches(origin, group, pat) abort "{{{2
         \                                                     )})
 
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
