@@ -581,7 +581,7 @@ fu! qf#open(cmd) abort "{{{2
     \?                         [ 'l', len(getloclist(0)) ]
     \:                         [ 'c', len(getqflist())   ]
 
-    let mod = call('lg#window_get_modifier', a:cmd =~# '^l' ? [1] : [])
+    let mod = call('lg#window#get_modifier', a:cmd =~# '^l' ? [1] : [])
     "                                                          │
     "            flag meaning we're going to open a loc window ┘
 
