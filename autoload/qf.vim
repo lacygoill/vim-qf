@@ -633,13 +633,13 @@ fu! qf#open(cmd) abort "{{{2
         "           I prefer to open it later from the qf window
         "           this way, they will be positioned next to each other.
         "}}}
-       " Why don't we close it for `:lh`, only `:helpg`?{{{
-       " Because, the location list is attached to this help window.
-       " If we close it, the ll window will be closed too.
-       "}}}
-       " Why the delay?{{{
-       " If we don't delay, `:helpclose` fails.
-       " Probably because the help window hasn't been opened yet.}}}
+        " Why don't we close it for `:lh`, only `:helpg`?{{{
+        " Because, the location list is attached to this help window.
+        " If we close it, the ll window will be closed too.
+        "}}}
+        " Why the delay?{{{
+        " If we don't delay, `:helpclose` fails.
+        " Probably because the help window hasn't been opened yet.}}}
     endif
 endfu
 
