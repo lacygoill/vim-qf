@@ -1,3 +1,8 @@
+if exists('g:autoloaded_qf')
+    finish
+endif
+let g:autoloaded_qf = 1
+
 " TODO:
 " We shouldn't  create matches. We  shouldn't use the  complex ad  hoc mechanism
 " around `s:matches_any_qfl`. Instead we should create ad hoc syntax file.
