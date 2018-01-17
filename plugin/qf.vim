@@ -93,7 +93,7 @@ augroup my_quickfix
     "                       which could be watched by other autocmds
     "
     "                    Without the nested flag, these others autocmds wouldn't be executed.{{{
-    "                    Watch:
+    "                    MWE:
     "
     "                             augroup test_nested
     "                                 au!
