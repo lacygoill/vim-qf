@@ -48,21 +48,24 @@ cnorea <expr> <buffer> cupdate  getcmdtype() ==# ':' && getcmdline() ==# 'cupdat
 " disable some keys, to avoid annoying error messages
 call qf#disable_some_keys([ 'a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
 
-nno  <buffer><nowait><silent>  <cr>       <cr>:norm! zv<cr>
-nno  <buffer><nowait><silent>  <c-w><cr>  :<c-u>call qf#c_w(0)<cr>
-" Warning:
-" By default, <c-w>T moves the current window to a new tab page.
-" Here, we use it slightly differently: it opens the entry under the cursor in a
-" new tag page.
-" Also, we don't use `<c-w>t` because, by default, the latter moves the focus to
-" the top window in the current tab page.
-nno  <buffer><nowait><silent>  <c-w>T  :<c-u>call qf#c_w(1)<cr>
+nno  <buffer><nowait><silent>  <c-s>       :<c-u>call qf#open_elsewhere('split')<cr>
+nno  <buffer><nowait><silent>  <c-v><c-v>  :<c-u>call qf#open_elsewhere('vert split')<cr>
+nno  <buffer><nowait><silent>  <c-t>       :<c-u>call qf#open_elsewhere('tabpage')<cr>
+" FYI:{{{
+"
+" By default:
+"
+"     C-w T  moves the current window to a new tab page
+"     C-w t  moves the focus to the top window in the current tab page
+"}}}
 
-nno  <buffer><nowait><silent>  q       :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
+nno  <buffer><nowait><silent>  <cr>        <cr>:norm! zv<cr>
 
-nno  <buffer><nowait><silent>  D       :<c-u>set opfunc=qf#delete_or_conceal<cr>g@
-nno  <buffer><nowait><silent>  DD      :<c-u>set opfunc=qf#delete_or_conceal<bar>exe 'norm! '.v:count1.'g@_'<cr>
-xno  <buffer><nowait><silent>  D       :<c-u>call qf#delete_or_conceal('vis')<cr>
+nno  <buffer><nowait><silent>  q      :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
+
+nno  <buffer><nowait><silent>  D      :<c-u>set opfunc=qf#delete_or_conceal<cr>g@
+nno  <buffer><nowait><silent>  DD     :<c-u>set opfunc=qf#delete_or_conceal<bar>exe 'norm! '.v:count1.'g@_'<cr>
+xno  <buffer><nowait><silent>  D      :<c-u>call qf#delete_or_conceal('vis')<cr>
 
 " Options {{{1
 
@@ -213,8 +216,9 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \   setl bl< cul< efm< wrap<
                     \ | unlet! b:qf_is_loclist
                     \ | exe 'au! my_qf * <buffer>'
-                    \ | exe 'nunmap  <buffer><nowait>  <c-w><cr>'
-                    \ | exe 'nunmap  <buffer><nowait>  <c-w>T'
+                    \ | exe 'nunmap  <buffer><nowait>  <c-s>'
+                    \ | exe 'nunmap  <buffer><nowait>  <c-t>'
+                    \ | exe 'nunmap  <buffer><nowait>  <c-v><c-v>'
                     \ | exe 'nunmap  <buffer><nowait>  <cr>'
                     \ | exe 'nunmap  <buffer><nowait>  D'
                     \ | exe 'nunmap  <buffer><nowait>  DD'

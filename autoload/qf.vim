@@ -273,7 +273,7 @@ fu! qf#align() abort "{{{2
     "}}}
 endfu
 
-fu! qf#c_w(tabpage) abort "{{{2
+fu! qf#open_elsewhere(where) abort "{{{2
     try
         " In a qf window populated by `:helpg` or `:lh`, `C-w CR` opens a window
         " with an unnamed buffer. We don't want that.
@@ -296,7 +296,10 @@ fu! qf#c_w(tabpage) abort "{{{2
         endif
 
         exe "norm! \<c-w>\<cr>"
-        if a:tabpage
+        if a:where ==# 'vert split'
+            wincmd H
+
+        elseif a:where ==# 'tabpage'
             let orig = win_getid()
             tab sp
             let new = win_getid()
