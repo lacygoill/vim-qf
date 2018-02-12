@@ -94,7 +94,7 @@ augroup my_qf
     " Update:
     " It's because of the guard:
     "
-    "         if … &syntax != 'qf'
+    "         if … &syntax isnot# 'qf'
     "             return
     "         endif
     "

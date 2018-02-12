@@ -134,7 +134,7 @@ let g:autoloaded_qf = 1
 " As a result, we would need to also trigger `FileType qf`:
 "
 "         doautocmd <nomodeline> QuickFixCmdPost grep
-"         if &bt !=# 'quickfix'
+"         if &bt isnot# 'quickfix'
 "             return
 "         endif
 "         doautocmd <nomodeline> FileType qf
@@ -724,7 +724,7 @@ fu! qf#set_matches(origin, group, pat) abort "{{{2
 endfu
 
 fu! qf#setup_toc() abort "{{{2
-    if get(w:, 'quickfix_title') !~# '\<TOC$' || &syntax != 'qf'
+    if get(w:, 'quickfix_title') !~# '\<TOC$' || &syntax isnot# 'qf'
         return
     endif
 
