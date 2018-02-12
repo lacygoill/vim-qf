@@ -234,7 +234,7 @@ fu! qf#align() abort "{{{2
     " align the columns (more readable)
     " EXCEPT when the qfl is populated by `:WTF`
     let is_wtf =   !get(b:, 'qf_is_loclist', 0)
-    \            && get(getqflist({'title':0}), 'title', '') ==# 'WTF'
+    \            && get(getqflist({'title':0}), 'title', '') is# 'WTF'
 
     if   is_wtf
     \|| !executable('column')
@@ -296,10 +296,10 @@ fu! qf#open_elsewhere(where) abort "{{{2
         endif
 
         exe "norm! \<c-w>\<cr>"
-        if a:where ==# 'vert split'
+        if a:where is# 'vert split'
             wincmd H
 
-        elseif a:where ==# 'tabpage'
+        elseif a:where is# 'tabpage'
             let orig = win_getid()
             tab sp
             let new = win_getid()
@@ -376,11 +376,11 @@ fu! qf#create_matches() abort "{{{2
             for matches_from_all_origins in values(matches_this_qfl)
                 for a_match in matches_from_all_origins
                     let [ group, pat ] = [ a_match.group, a_match.pat ]
-                    if group ==? 'Conceal'
+                    if group is? 'conceal'
                         setl cocu=nc cole=3
                     endif
                     let match_id = call('matchadd',   [ group, pat, 0, -1]
-                    \                               + (group ==? 'conceal'
+                    \                               + (group is? 'conceal'
                     \                                  ?    [{ 'conceal': 'x' }]
                     \                                  :    []
                     \                                 ))
@@ -445,8 +445,8 @@ fu! qf#delete_or_conceal(type, ...) abort "{{{2
     try
         if index(['char', 'line', 'block'], a:type) >= 0
             let range = [line("'["), line("']")]
-        elseif a:type ==# 'vis'
-            if visualmode() ==# "\<c-v>"
+        elseif a:type is# 'vis'
+            if visualmode() is# "\<c-v>"
                 " We could also use:
                 "
                 "     let pat = '\%V.*\%V'
@@ -461,7 +461,7 @@ fu! qf#delete_or_conceal(type, ...) abort "{{{2
             else
                 let range = [line("'<"), line("'>")]
             endif
-        elseif a:type ==# 'Ex'
+        elseif a:type is# 'Ex'
             let range = [a:1, a:2]
         else
             return
@@ -548,7 +548,7 @@ fu! s:get_pat(pat) abort "{{{2
         " If no pattern was provided, use the search register as a fallback.
         " Remove a possible couple of slashes before and after the pattern.
         " Otherwise, do nothing.
-        return pat == ''
+        return pat is# ''
         \?         @/
         \:     pat =~ '^/.*/$'
         \?         pat[1:-2]
@@ -622,7 +622,7 @@ fu! qf#open(cmd) abort "{{{2
         return lg#catch_error()
     endtry
 
-    if a:cmd ==# 'helpgrep'
+    if a:cmd is# 'helpgrep'
         call timer_start(0, { -> execute('helpc')})
         "                                 │
         "                                 └─ close the help window in the current tabpage
@@ -667,7 +667,7 @@ fu! qf#open_maybe(cmd) abort "{{{2
     "             │
     "             │  We need to delay `:lwindow` with a fire-once autocmd listening to `BufWinEnter`.
     "             │}}}
-    if a:cmd ==# 'lhelpgrep'
+    if a:cmd is# 'lhelpgrep'
         augroup lhelpgrep_window
             au!
             "  ┌─ next time a buffer is displayed in a window

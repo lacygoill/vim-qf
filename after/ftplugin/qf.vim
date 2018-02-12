@@ -3,7 +3,7 @@
 
 com! -bar -buffer -range Cdelete call qf#delete_or_conceal('Ex', <line1>, <line2>)
 
-cnorea <expr> <buffer> cdelete  getcmdtype() ==# ':' && getcmdline() ==# 'cdelete'
+cnorea <expr> <buffer> cdelete  getcmdtype() is# ':' && getcmdline() is# 'cdelete'
 \                               ?    'Cdelete'
 \                               :    'cdelete'
 
@@ -24,7 +24,7 @@ cnorea <expr> <buffer> cdelete  getcmdtype() ==# ':' && getcmdline() ==# 'cdelet
 com! -bang -buffer -nargs=? -complete=custom,qf#cfilter_complete Cfilter
 \                           call qf#cfilter(<bang>0, <q-args>, <q-mods>)
 
-cnorea <expr> <buffer> cfilter  getcmdtype() ==# ':' && getcmdline() ==# 'cfilter'
+cnorea <expr> <buffer> cfilter  getcmdtype() is# ':' && getcmdline() is# 'cfilter'
 \                               ?    'Cfilter'
 \                               :    'cfilter'
 
@@ -39,7 +39,7 @@ cnorea <expr> <buffer> cfilter  getcmdtype() ==# ':' && getcmdline() ==# 'cfilte
 
 com! -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 
-cnorea <expr> <buffer> cupdate  getcmdtype() ==# ':' && getcmdline() ==# 'cupdate'
+cnorea <expr> <buffer> cupdate  getcmdtype() is# ':' && getcmdline() is# 'cupdate'
 \                               ?    'Cupdate'
 \                               :    'cupdate'
 
