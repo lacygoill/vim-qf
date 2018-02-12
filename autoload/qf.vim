@@ -322,7 +322,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
         \                         comp, logic, comp))
 
-        if len(list) == old_size
+        if len(list) ==# old_size
             echo 'No entry was removed'
             return
         endif
@@ -573,7 +573,7 @@ fu! s:setqflist(args) abort "{{{2
 endfu
 
 fu! s:maybe_resize_height() abort "{{{2
-    if winwidth(0) == &columns
+    if winwidth(0) ==# &columns
         exe min([ 10, len(s:getqflist()) ]).'wincmd _'
     endif
 endfu
