@@ -159,7 +159,7 @@ let g:autoloaded_qf = 1
 "}}}
 let s:matches_any_qfl = {}
 
-" What's the use of `known_patterns`?{{{
+" What's the use of `KNOWN_PATTERNS`?{{{
 "
 " If you  often use the same  regex to describe some  text on which you  want to
 " apply a match, add it to this dictionary, with a telling name. Then, instead
@@ -171,7 +171,7 @@ let s:matches_any_qfl = {}
 "
 "         call qf#set_matches({origin}, {HG}, {telling_name})
 "}}}
-let s:known_patterns  = {
+let s:KNOWN_PATTERNS  = {
 \                         'location'  : '^\v.{-}\|\s*%(\d+)?\s*%(col\s+\d+)?\s*\|\s?',
 \                         'double_bar': '^|\s*|\s*\|\s*|\s*|\s*$',
 \                       }
@@ -713,7 +713,7 @@ fu! qf#set_matches(origin, group, pat) abort "{{{2
             let s:matches_any_qfl[id] = {}
         endif
         let matches_this_qfl_this_origin = get(s:matches_any_qfl[id], a:origin, [])
-        let pat = get(s:known_patterns, a:pat, a:pat)
+        let pat = get(s:KNOWN_PATTERNS, a:pat, a:pat)
         call extend(s:matches_any_qfl[id], { a:origin : extend( matches_this_qfl_this_origin,
         \                                                       [{ 'group': a:group, 'pat': pat }]
         \                                                     )})
