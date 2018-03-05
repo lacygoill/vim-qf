@@ -133,8 +133,7 @@ doautocmd <nomodeline> my_qf BufWinEnter
 "
 " Type:
 "       :vim /fu/gj %
-"       5G
-"       setl ma | exe 'norm! d$' | setl noma
+"       :setl ma | $d_ | setl noma
 "       :cgetb
 "
 " The new qfl is not interactive.
@@ -157,13 +156,6 @@ doautocmd <nomodeline> my_qf BufWinEnter
 "
 " But the  alignment adds extra whitespace,  so our current value  needs to take
 " them into account.
-
-" Also, we could rewrite:
-"
-"         %\s\+   →   %*%\s
-"                     └───┤
-"                         └ scanf() notation (see :h efm-ignore, “pattern matching“)
-
 "}}}
 
 "                                ┌─ escape backslash to protect it from Vim's errorformat parser,
@@ -171,22 +163,31 @@ doautocmd <nomodeline> my_qf BufWinEnter
 "                                │
 "                                │  ┌─ same thing for the + quantifier
 "                                │  │
-let &l:efm = '%f%\s%\+\|%l col %c%\s%\+\|%m'
-"└┤             └────┤
-" │                  └ after Vim has parsed the format string, it becomes \s\+:
-" │                    a sequence of whitespace
+let &l:efm = '%f%*\s\|%l col %c%\s%\+\|%m'
+"└┤             └──┤
+" │                └ scanf() notation for `\s\+`(see :h efm-ignore, “pattern matching“)
 " │
 " └ using `:let` instead of `setl` makes the value more readable
 "   otherwise, we would need to escape any:
+"
+"           • backslash
 "
 "           • bar
 "
 "             here we still escape a bar, but it's only for the regex engine
 "             `:set` would need an additional backslash
 "
-"           • space
-"           • backslash
+"           • comma
+"
+"             We need to escape a comma even  with `:let`, because a comma has a
+"             special meaning for 'efm': separation between 2 formats.
+"
+"             But with `:set` we would need a double backslash, because a comma has
+"             also a special meaning for `:set`: separation between 2 option values.
+"
 "           • double quote
+"
+"           • space
 
 " Variables {{{1
 
