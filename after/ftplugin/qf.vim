@@ -158,11 +158,10 @@ doautocmd <nomodeline> my_qf BufWinEnter
 " them into account.
 "}}}
 
-"                                ┌─ escape backslash to protect it from Vim's errorformat parser,
-"                                │  so that the regex engine receives `\s`
+"                                ┌ all meta symbols (\ . # [), including the backslash,
+"                                │ have to be written with a leading '%'
+"                                │ (see :h `efm-ignore`)
 "                                │
-"                                │  ┌─ same thing for the + quantifier
-"                                │  │
 let &l:efm = '%f%*\s\|%l col %c%\s%\+\|%m'
 "└┤             └──┤
 " │                └ scanf() notation for `\s\+`(see :h efm-ignore, “pattern matching“)
