@@ -164,7 +164,7 @@ doautocmd <nomodeline> my_qf BufWinEnter
 "                              │
 let &l:efm = '%f%*\s\|%l col %c%\s%\+\|%m'
 "└┤             └──┤
-" │                └ scanf() notation for `\s\+`(see :h efm-ignore, “pattern matching“)
+" │                └ scanf() notation for `%\s%\+`(see :h efm-ignore, “pattern matching“)
 " │
 " └ using `:let` instead of `setl` makes the value more readable
 "   otherwise, we would need to escape any:
