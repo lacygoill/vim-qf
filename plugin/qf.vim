@@ -93,19 +93,25 @@ augroup my_quickfix
     "                       which could be watched by other autocmds
     "
     "                    Without the nested flag, these others autocmds wouldn't be executed.{{{
+    "
     "                    MWE:
     "
+    "                             $ cat /tmp/vimrc
     "                             augroup test_nested
     "                                 au!
+    "                                 au QuickFixCmdPost * nested call timer_start(0, {-> execute('copen')})
     "                                 au BufReadPost * let g:myvar = get(g:, 'myvar', 0) + 1
     "                             augroup END
     "
-    "                             :Grep foobar
-    "                             :echo g:myvar  →  1
+    "                             $ vim -Nu /tmp/vimrc
     "
-    "                             unlet g:myvar
-    "                             remove `nested` flag
-    "                             :Grep foobar
-    "                             :echo g:myvar  →  E121: Undefined variable: g:myvar
+    "                             :echo g:myvar
+    "                             →  E121: Undefined variable: g:myvar
+    "
+    "                             :vim /./ ~/.bashrc
+    "                             :echo g:myvar
+    "                                     ✔ →  2
+    "
+    "                             If you remove the nested `flag`, `g:myvar` will only output 1.
     "}}}
 augroup END
