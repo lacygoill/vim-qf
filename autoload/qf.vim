@@ -617,7 +617,16 @@ fu! qf#open(cmd) abort "{{{2
 
     " it will fail if there's no loclist
     try
-        exe how_to_open
+        " Why not `exe 'how_to_open'`?{{{
+        "
+        " Because of this bug:
+        "
+        "     https://github.com/lervag/vimtex/issues/963
+        "
+        " It has been fixed, but it  seems to persist when we automatically open
+        " the qf window. For some reason, delaying the opening fixes the issue.
+        "}}}
+        call timer_start(0, {-> execute(how_to_open)})
     catch
         return lg#catch_error()
     endtry
