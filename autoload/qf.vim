@@ -617,16 +617,7 @@ fu! qf#open(cmd) abort "{{{2
 
     " it will fail if there's no loclist
     try
-        " Why the delay? {{{
-        "
-        " Because of this bug:
-        "
-        "     https://github.com/lervag/vimtex/issues/963
-        "
-        " It has been fixed, but it  seems to persist when we automatically open
-        " the qf window. For some reason, delaying the opening fixes the issue.
-        "}}}
-        call timer_start(0, {-> execute(how_to_open)})
+        exe how_to_open
     catch
         return lg#catch_error()
     endtry
@@ -752,25 +743,8 @@ fu! qf#setup_toc() abort "{{{2
     let &syntax = getbufvar(bufnr, '&syntax')
 endfu
 
-fu! qf#stl_position(later) abort "{{{2
-    " Why the delay?{{{
-    "
-    " In `qf#open()`, we don't open the qf window immediately,
-    " because of an issue with vimtex.
-    " So, when we compile a tex file, and this function is called initially, the
-    " qf title won't have been set yet vimtex.
-    "}}}
-    if a:later
-        call timer_start(0, {-> execute(qf#stl_position(0))})
-        return
-    endif
-
-    " Why the condition?{{{
-    "
-    " I don't want to see the position  in the qf statusline EVERY time I update
-    " a tex file while the auto-compilation is on.
-    "}}}
-    if get(getqflist({'title':1}), 'title', '') isnot# 'Vimtex errors (LaTeX logfile)'
+fu! qf#stl_position() abort "{{{2
+    if getqflist() !=# []
         let g:my_stl_list_position = 1
     endif
 endfu
