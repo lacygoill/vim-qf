@@ -78,10 +78,6 @@ let g:loaded_qf = 1
 augroup my_quickfix
     au!
 
-    " show position in quickfix list (not in location list)
-    " location list is too easily populated by various commands (like `:Man`)
-    au QuickFixCmdPost [^l]* let g:my_stl_list_position = 1
-
     "  ┌─ after a quickfix command is run
     "  │                                                      ┌─ expanded into the name of the command
     "  │                                                      │  which was run
@@ -114,4 +110,9 @@ augroup my_quickfix
     "
     "                             If you remove the nested `flag`, `g:myvar` will only output 1.
     "}}}
+
+    " show position in quickfix list (not in location list)
+    " location list is too easily populated by various commands (like `:Man`)
+    au QuickFixCmdPost [^l]* call qf#stl_position(1)
 augroup END
+
