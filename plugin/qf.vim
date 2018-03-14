@@ -113,6 +113,6 @@ augroup my_quickfix
 
     " show position in quickfix list (not in location list)
     " location list is too easily populated by various commands (like `:Man`)
-    au QuickFixCmdPost [^l]* call qf#stl_position(1)
+    au QuickFixCmdPost [^l]* call qf#stl_position()
 augroup END
 
