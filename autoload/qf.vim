@@ -199,8 +199,10 @@ let s:other_plugins = [
 \                       'plugged/vim-sandwich',
 \                       'plugged/vim-sneak',
 \                       'plugged/vim-snippets',
+\                       'plugged/vim-speeddating',
 \                       'plugged/vim-submode',
 \                       'plugged/vim-tmuxify',
+\                       'plugged/vimtex',
 \                    ]
 
 " Functions {{{1
