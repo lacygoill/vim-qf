@@ -566,10 +566,15 @@ fu! s:getqflist() abort "{{{2
     return get(b:, 'qf_is_loclist', 0)  ? getloclist(0) : getqflist()
 endfu
 
-fu! s:setqflist(args) abort "{{{2
-    return get(b:, 'qf_is_loclist', 0)
-    \?         function('setloclist', [0] + a:args)
-    \:         function('setqflist',        a:args)
+fu! s:how_to_open(cmd, how_to_open) abort "{{{2
+    "                            ┌ I don't want the qf window to be opened
+    "                            │ every time I update a tex file.
+    if a:cmd =~# '^[cl]open$' || !s:qfl_is_populated_by_vimtex()
+    "  │
+    "  └ but I DO want the qf window to be opened when I press `z(` or `z[`,
+    "    even if the qfl has been populated by vimtex
+        exe a:how_to_open
+    endif
 endfu
 
 fu! s:maybe_resize_height() abort "{{{2
@@ -617,7 +622,19 @@ fu! qf#open(cmd) abort "{{{2
 
     " it will fail if there's no loclist
     try
-        exe how_to_open
+        " Why the delay? {{{
+        "
+        " Because of this bug:
+        "
+        "     https://github.com/lervag/vimtex/issues/963
+        "
+        " It has been fixed, but it  seems to persist when we automatically open
+        " the qf window. For some reason, delaying the opening fixes the issue.
+        "
+        " Also,  we need  to inspect  the title  of the  qf window  to determine
+        " whether the qfl was populated by vimtex. And the title is not set yet.
+        "}}}
+        call timer_start(0, {-> s:how_to_open(a:cmd, how_to_open)})
     catch
         return lg#catch_error()
     endtry
@@ -707,6 +724,11 @@ fu! qf#open_maybe(cmd) abort "{{{2
     endif
 endfu
 
+fu! s:qfl_is_populated_by_vimtex() abort "{{{2
+    let title = get(getqflist({'title':1}), 'title', '')
+    return title is# 'Vimtex errors (LaTeX logfile)'
+endfu
+
 fu! qf#set_matches(origin, group, pat) abort "{{{2
     try
         let id = s:get_id()
@@ -722,6 +744,12 @@ fu! qf#set_matches(origin, group, pat) abort "{{{2
     catch
         return lg#catch_error()
     endtry
+endfu
+
+fu! s:setqflist(args) abort "{{{2
+    return get(b:, 'qf_is_loclist', 0)
+    \?         function('setloclist', [0] + a:args)
+    \:         function('setqflist',        a:args)
 endfu
 
 fu! qf#setup_toc() abort "{{{2
@@ -743,9 +771,30 @@ fu! qf#setup_toc() abort "{{{2
     let &syntax = getbufvar(bufnr, '&syntax')
 endfu
 
-fu! qf#stl_position() abort "{{{2
+fu! qf#stl_position(later) abort "{{{2
+    " Why the delay?{{{
+    "
+    " In `qf#open()`, we don't open the qf window immediately,
+    " because of an issue with vimtex.
+    " So, when we compile a tex file, and this function is called initially, the
+    " qf title won't have been set yet vimtex.
+    "}}}
+    if a:later
+        call timer_start(0, {-> qf#stl_position(0)})
+        return
+    endif
+
     if getqflist() !=# []
         let g:my_stl_list_position = 1
+        " Why?{{{
+        "
+        " We need to  redraw the statusline to see the  indicator after a vimtex
+        " compilation. From `:h :redraws`:
+        "
+        "     Useful to update the status  line(s) when 'statusline' includes an
+        "     item that doesn't cause automatic updating.
+        "}}}
+        redraws
     endif
 endfu
 
