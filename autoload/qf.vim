@@ -757,6 +757,9 @@ fu! qf#stl_position() abort "{{{2
         "     item that doesn't cause automatic updating.
         "}}}
         redraws
+    else
+        " don't display '[]' in the statusline if the qfl is empty
+        let g:my_stl_list_position = 0
     endif
 endfu
 
