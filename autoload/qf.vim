@@ -369,6 +369,16 @@ fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{2
     return join(['-commented', '-other_plugins', '-tmp'], "\n")
 endfu
 
+fu! qf#cflush(loclist) abort "{{{2
+    if a:loclist
+        call setloclist(0, [], 'f')
+        lhi
+    else
+        call setqflist([], 'f')
+        chi
+    endif
+endfu
+
 fu! qf#create_matches() abort "{{{2
     try
         let id = s:get_id()

@@ -3,6 +3,11 @@ if exists('g:loaded_qf')
 endif
 let g:loaded_qf = 1
 
+" Commands {{{1
+
+com! -bar Cflush call qf#cflush(0)
+com! -bar Lflush call qf#cflush(1)
+
 " Autocmds {{{1
 
 " Does a new window have a location list?{{{
