@@ -6,7 +6,7 @@ let g:loaded_qf = 1
 " Commands {{{1
 
 com! -bar CfreeStack call qf#cfree_stack(0)
-com! -bar LfreeStack call qf#cfree(1)
+com! -bar LfreeStack call qf#cfree_stack(1)
 
 " Autocmds {{{1
 
