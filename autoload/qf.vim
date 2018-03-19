@@ -391,10 +391,11 @@ fu! qf#cgrep_buf(lnum1, lnum2, pat, loclist) abort "{{{2
     " ┌ we don't want the title of the qfl being separated `:` from `cexpr`
     " │
     exe pfx1.'expr []'
-    exe printf('%sbufdo sil! %svimgrepadd /%s/gj %%', range, pfx2, a:pat)
-    "                      │
-    "                      └ if the pattern is absent from a buffer,
-    "                        it will raise an error
+    let cmd = printf('%sbufdo sil! %svimgrepadd /%s/gj %%', range, pfx2, a:pat)
+    "                            │
+    "                            └ if the pattern is absent from a buffer,
+    "                              it will raise an error
+    exe cmd
 
     " get back to non-qf window
     wincmd p
@@ -402,6 +403,12 @@ fu! qf#cgrep_buf(lnum1, lnum2, pat, loclist) abort "{{{2
     only
     " open the qf window
     exe pfx1.'window'
+
+    if a:loclist
+        call setloclist(0, [], 'a', {'title': cmd})
+    else
+        call setqflist([], 'a', {'title': cmd})
+    endif
 endfu
 
 fu! qf#create_matches() abort "{{{2
