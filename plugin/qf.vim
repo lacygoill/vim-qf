@@ -49,8 +49,8 @@ com! -bar LfreeStack call qf#cfree(1)
 "         "                                  └ != regular window
 "         "
 "         " When WinNew is fired, there's probably NO displayed location list yet.
-"         " So, the autocmd fails to modify  the location list, which is good, because
-"         " that's what we want anyway.
+"         " So, the  autocmd fails to mutate  the location list, which  is good,
+"         " because that's what we want anyway.
 "         "
 "         " Confirmed by the  fact that if we slightly delay  the autocmd, it DOES
 "         " empty the loclist:
