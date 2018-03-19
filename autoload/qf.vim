@@ -401,8 +401,7 @@ fu! qf#cgrep_buf(lnum1, lnum2, pat, loclist) abort "{{{2
     let cmd = printf('%sbufdo sil! noa %svimgrepadd /%s/gj %%', range, pfx2, a:pat)
     exe cmd
 
-    " get back to non-qf window
-    wincmd p
+    exe pfx1.'window'
 
     if a:loclist
         call setloclist(0, [], 'a', {'title': cmd})
