@@ -369,7 +369,7 @@ fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{2
     return join(['-commented', '-other_plugins', '-tmp'], "\n")
 endfu
 
-fu! qf#cfree(loclist) abort "{{{2
+fu! qf#cfree_stack(loclist) abort "{{{2
     if a:loclist
         call setloclist(0, [], 'f')
         lhi
