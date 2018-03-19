@@ -404,9 +404,9 @@ fu! qf#cgrep_buf(lnum1, lnum2, pat, loclist) abort "{{{2
     exe pfx1.'window'
 
     if a:loclist
-        call setloclist(0, [], 'a', {'title': cmd})
+        call setloclist(0, [], 'a', {'title': ':'.cmd})
     else
-        call setqflist([], 'a', {'title': cmd})
+        call setqflist([], 'a', {'title': ':'.cmd})
     endif
 endfu
 
