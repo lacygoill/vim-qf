@@ -379,6 +379,31 @@ fu! qf#cfree_stack(loclist) abort "{{{2
     endif
 endfu
 
+fu! qf#cgrep_buf(lnum1, lnum2, pat, loclist) abort "{{{2
+    " open a  new tab page, because  Vim is going to  open each buffer in  a new
+    " split, which could make use lose the current layout
+    tabnew
+
+    let pfx1 = a:loclist ? 'l' : 'c'
+    let pfx2 = a:loclist ? 'l' : ''
+    let range = a:lnum1.','.a:lnum2
+
+    " ┌ we don't want the title of the qfl being separated `:` from `cexpr`
+    " │
+    exe pfx1.'expr []'
+    exe printf('%sbufdo sil! %svimgrepadd /%s/gj %%', range, pfx2, a:pat)
+    "                      │
+    "                      └ if the pattern is absent from a buffer,
+    "                        it will raise an error
+
+    " get back to non-qf window
+    wincmd p
+    " close every window to get a simpler layout
+    only
+    " open the qf window
+    exe pfx1.'window'
+endfu
+
 fu! qf#create_matches() abort "{{{2
     try
         let id = s:get_id()
