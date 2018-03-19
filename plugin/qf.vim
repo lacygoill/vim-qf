@@ -5,8 +5,8 @@ let g:loaded_qf = 1
 
 " Commands {{{1
 
-com! -bar Cflush call qf#cflush(0)
-com! -bar Lflush call qf#cflush(1)
+com! -bar Cfree call qf#cfree(0)
+com! -bar Lfree call qf#cfree(1)
 
 " Autocmds {{{1
 
@@ -75,7 +75,7 @@ com! -bar Lflush call qf#cflush(1)
 "                                                      │
 "                                                      └─ delete all loclists
 "
-" Besides,  at the  moment,  the  'f' (flush)  action  passed to  `setloclist()`
+" Besides,  at the  moment,  the  'f' (free)  action  passed to  `setloclist()`
 " doesn't exist in Neovim.
 "}}}
 
