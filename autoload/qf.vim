@@ -391,10 +391,14 @@ fu! qf#cgrep_buf(lnum1, lnum2, pat, loclist) abort "{{{2
     " ┌ we don't want the title of the qfl being separated `:` from `cexpr`
     " │
     exe pfx1.'expr []'
-    let cmd = printf('%sbufdo sil! noa %svimgrepadd /%s/gj %%', range, pfx2, a:pat)
+    "                            ┌ if the pattern is absent from a buffer,
+    "                            │ it will raise an error
     "                            │
-    "                            └ if the pattern is absent from a buffer,
-    "                              it will raise an error
+    "                            │   ┌ to prevent a possible autocmd from opening the qf window
+    "                            │   │  every time the qfl is expanded; it could make Vim open
+    "                            │   │  a new split for every buffer
+    "                            │   │
+    let cmd = printf('%sbufdo sil! noa %svimgrepadd /%s/gj %%', range, pfx2, a:pat)
     exe cmd
 
     " get back to non-qf window
