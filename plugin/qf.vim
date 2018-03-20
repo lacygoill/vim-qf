@@ -5,8 +5,8 @@ let g:loaded_qf = 1
 
 " Commands {{{1
 
-com! -bar CfreeStack call qf#cfree_stack(0)
-com! -bar LfreeStack call qf#cfree_stack(1)
+com! -bar CFreeStack call qf#cfree_stack(0)
+com! -bar LFreeStack call qf#cfree_stack(1)
 
 com! -bar -nargs=1 -range=% -addr=buffers  CGrepBuf  call qf#cgrep_buf(<line1>, <line2>, <q-args>, 0)
 com! -bar -nargs=1 -range=% -addr=buffers  LGrepBuf  call qf#cgrep_buf(<line1>, <line2>, <q-args>, 1)
