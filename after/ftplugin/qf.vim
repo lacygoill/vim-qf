@@ -162,7 +162,7 @@ doautocmd <nomodeline> my_qf BufWinEnter
 "                              │ have to be written with a leading '%'
 "                              │ (see :h `efm-ignore`)
 "                              │
-let &l:efm = '%f%*\s\|%l col %c%\s%\+\|%m'
+let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 "└┤             └──┤
 " │                └ scanf() notation for `%\s%\+`(see :h efm-ignore, “pattern matching“)
 " │
