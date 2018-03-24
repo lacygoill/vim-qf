@@ -34,7 +34,7 @@ cnorea <expr> <buffer> cfilter  getcmdtype() is# ':' && getcmdline() is# 'cfilte
 " Useful after a refactoring, to have a visual feedback.
 " Example:
 "         PQ grep -IRn pat /tmp/some_dir/
-"         cfdo %s/pat/rep/g
+"         noa cfdo %s/pat/rep/ge | update
 "         Cupdate
 
 com! -bar -buffer Cupdate call qf#cupdate(<q-mods>)
