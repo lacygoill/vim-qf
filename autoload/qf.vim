@@ -226,8 +226,8 @@ fu! s:add_filter_indicator_to_title(title_dict, pat, bang) abort "{{{2
     let filter_indicator = '\s*\[:filter'.(a:bang ? '!' : '!\@!')
     let has_already_been_filtered = match(title, filter_indicator) >= 0
     let title = has_already_been_filtered
-    \?              substitute(title, '\ze\]$', (a:bang ? ' | ' : ' \& ').pat, '')
-    \:              title.'   [:filter'.bang.' '.pat.']'
+            \ ?     substitute(title, '\ze\]$', (a:bang ? ' | ' : ' \& ').pat, '')
+            \ :     title.'   [:filter'.bang.' '.pat.']'
 
     return {'title': title}
 endfu
@@ -564,8 +564,8 @@ endfu
 fu! s:get_id() abort "{{{2
     try
         let l:Getqflist_id = get(b:, 'qf_is_loclist', 0)
-        \?                      function('getloclist', [0] + [{'id': 0}])
-        \:                      function('getqflist',        [{'id': 0}])
+                         \ ?    function('getloclist', [0] + [{'id': 0}])
+                         \ :    function('getqflist',        [{'id': 0}])
         return get(l:Getqflist_id(), 'id', 0)
     catch
         return lg#catch_error()
@@ -592,17 +592,17 @@ fu! s:get_pat(pat) abort "{{{2
         " Remove a possible couple of slashes before and after the pattern.
         " Otherwise, do nothing.
         return pat is# ''
-        \?         @/
-        \:     pat =~ '^/.*/$'
-        \?         pat[1:-2]
-        \:         pat
+           \ ?     @/
+           \ : pat =~ '^/.*/$'
+           \ ?     pat[1:-2]
+           \ :     pat
     endif
 endfu
 
 fu! s:get_title() abort "{{{2
     return get(b:, 'qf_is_loclist', 0)
-    \?         getloclist(0, {'title': 0})
-    \:         getqflist({'title': 0})
+       \ ?     getloclist(0, {'title': 0})
+       \ :     getqflist({'title': 0})
 endfu
 
 fu! s:getqflist() abort "{{{2
@@ -623,8 +623,8 @@ fu! qf#open(cmd) abort "{{{2
     "                                 ┌─ all the commands populating a ll seem to begin with the letter l
     "                                 │
     let [ prefix, size ] = a:cmd =~# '^l'
-    \?                         [ 'l', len(getloclist(0)) ]
-    \:                         [ 'c', len(getqflist())   ]
+                       \ ?     [ 'l', len(getloclist(0)) ]
+                       \ :     [ 'c', len(getqflist())   ]
 
     let mod = call('lg#window#get_modifier', a:cmd =~# '^l' ? [1] : [])
     "                                                          │
@@ -645,8 +645,8 @@ fu! qf#open(cmd) abort "{{{2
     "         we want to open the qf window unconditionally
     let cmd = expand('<amatch>') =~# '^[cl]open$' ? 'open' : 'window'
     let how_to_open = mod =~# '^vert'
-    \?                    mod.' '.prefix.cmd.40
-    \:                    mod.' '.prefix.cmd.max([min([10, size]), 1])
+                  \ ?     mod.' '.prefix.cmd.40
+                  \ :     mod.' '.prefix.cmd.max([min([10, size]), 1])
     "                                        │    │
     "                                        │    └── at most 10 lines height
     "                                        └── at least 1 line height (if the loclist is empty,
@@ -763,8 +763,8 @@ endfu
 
 fu! s:setqflist(args) abort "{{{2
     return get(b:, 'qf_is_loclist', 0)
-    \?         function('setloclist', [0] + a:args)
-    \:         function('setqflist',        a:args)
+       \ ?     function('setloclist', [0] + a:args)
+       \ :     function('setqflist',        a:args)
 endfu
 
 fu! qf#setup_toc() abort "{{{2
