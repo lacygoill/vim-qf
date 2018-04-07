@@ -577,8 +577,8 @@ fu! s:get_pat(pat) abort "{{{2
 
     let arg2pat = {
     \               '-commented':     '^\s*"',
-    \               '-other_plugins': '^\%('.join(s:other_plugins, '\|').'\)',
-    \               '-tmp':           '^\%(session\|tmp\)',
+    \               '-other_plugins': '\%(^\|/\)\%('.join(s:other_plugins, '\|').'\)',
+    \               '-tmp':           '\%(^\|/\)\%(session\|tmp\)/',
     \             }
 
     " If `:Cfilter` was passed a special argument, interpret it.
