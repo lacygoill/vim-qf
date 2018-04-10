@@ -381,10 +381,6 @@ fu! qf#cfree_stack(loclist) abort "{{{2
 endfu
 
 fu! qf#cgrep_buffer(lnum1, lnum2, pat, loclist) abort "{{{2
-    " open a  new tab page, because  Vim is going to  open each buffer in  a new
-    " split, which could make use lose the current layout
-    tabnew
-
     let pfx1 = a:loclist ? 'l' : 'c'
     let pfx2 = a:loclist ? 'l' : ''
     let range = a:lnum1.','.a:lnum2
