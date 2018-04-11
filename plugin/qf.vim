@@ -8,8 +8,8 @@ let g:loaded_qf = 1
 com! -bar CFreeStack call qf#cfree_stack(0)
 com! -bar LFreeStack call qf#cfree_stack(1)
 
-com! -bar -nargs=1 -range=% -addr=buffers  CGrepBuffer  call qf#cgrep_buffer(<line1>, <line2>, <q-args>, 0)
-com! -bar -nargs=1 -range=% -addr=buffers  LGrepBuffer  call qf#cgrep_buffer(<line1>, <line2>, <q-args>, 1)
+com! -nargs=1 -range=% -addr=buffers  CGrepBuffer  call qf#cgrep_buffer(<line1>, <line2>, <q-args>, 0)
+com! -nargs=1 -range=% -addr=buffers  LGrepBuffer  call qf#cgrep_buffer(<line1>, <line2>, <q-args>, 1)
 
 " Autocmds {{{1
 
