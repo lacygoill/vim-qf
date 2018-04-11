@@ -87,9 +87,9 @@ augroup my_quickfix
     au!
 
     "  ┌─ after a quickfix command is run
-    "  │                                                      ┌─ expanded into the name of the command
-    "  │                                                      │  which was run
-    "  │                                                      │
+    "  │                                             ┌─ expanded into the name of the command
+    "  │                                             │  which was run
+    "  │                                             │
     au QuickFixCmdPost * call qf#open_maybe(expand('<amatch>'))
 
     " show position in quickfix list (not in location list)
