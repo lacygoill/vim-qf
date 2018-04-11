@@ -90,34 +90,7 @@ augroup my_quickfix
     "  │                                                      ┌─ expanded into the name of the command
     "  │                                                      │  which was run
     "  │                                                      │
-    au QuickFixCmdPost * nested call qf#open_maybe(expand('<amatch>'))
-    "                    │
-    "                    └─ the commands `:cwindow` and `:lwindow` can trigger
-    "                       the `BufReadPost` event (happens when a quickfix buffer is loaded)
-    "                       which could be watched by other autocmds
-    "
-    "                    Without the nested flag, these others autocmds wouldn't be executed.{{{
-    "
-    "                    MWE:
-    "
-    "                             $ cat /tmp/vimrc
-    "                             augroup test_nested
-    "                                 au!
-    "                                 au QuickFixCmdPost * nested call timer_start(0, {-> execute('copen')})
-    "                                 au BufReadPost * let g:myvar = get(g:, 'myvar', 0) + 1
-    "                             augroup END
-    "
-    "                             $ vim -Nu /tmp/vimrc
-    "
-    "                             :echo g:myvar
-    "                             →  E121: Undefined variable: g:myvar
-    "
-    "                             :vim /./ ~/.bashrc
-    "                             :echo g:myvar
-    "                                     ✔ →  2
-    "
-    "                             If you remove the nested `flag`, `g:myvar` will only output 1.
-    "}}}
+    au QuickFixCmdPost * call qf#open_maybe(expand('<amatch>'))
 
     " show position in quickfix list (not in location list)
     " location list is too easily populated by various commands (like `:Man`)
