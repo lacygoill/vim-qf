@@ -140,9 +140,9 @@ let g:autoloaded_qf = 1
 "         doautocmd <nomodeline> FileType qf
 "
 " To avoid sourcing the qf filetype plugin when populating the qfl, we could use
-" `:noautocmd`:
+" `:noa`:
 "
-"         noautocmd call setqflist(…)
+"         noa call setqflist(…)
 "
 " Conclusion:
 " Even with all  that, the qf filetype  plugin would be sourced twice  if the qf
