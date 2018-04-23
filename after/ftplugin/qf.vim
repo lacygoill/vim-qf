@@ -128,6 +128,18 @@ augroup END
 " opened by `:lh`. We want them, so fire `BufWinEnter`.
 doautocmd <nomodeline> my_qf BufWinEnter
 
+" Update:
+" Atm, there's no `BufWinEnter` even after `:helpg`, but that's only because
+" we removed the `nested` flag to the autocmd opening the qf window inside:
+"
+"         ~/.vim/plugged/vim-qf/plugin/qf.vim
+"
+"         au QuickFixCmdPost * call qf#open_maybe(expand('<amatch>'))
+"                             ^
+"                             no nested flag
+"
+" If you add the nested flag back, `:helpg` will fire `BufWinEnter`, but NOT `:lh`.
+
 " efm {{{2
 " Why do we set 'efm'?{{{
 "
