@@ -86,6 +86,11 @@ com! -nargs=1 -range=% -addr=buffers  LGrepBuffer  call qf#cgrep_buffer(<line1>,
 augroup my_quickfix
     au!
 
+    " FIXME:
+    "     https://github.com/romainl/vim-qf/pull/70
+    "
+    " Should we re-add the nested flag in all autocmds in this plugin?
+
     "  ┌─ after a quickfix command is run
     "  │                                             ┌─ expanded into the name of the command
     "  │                                             │  which was run
