@@ -385,7 +385,7 @@ fu! qf#cgrep_buffer(lnum1, lnum2, pat, loclist) abort "{{{2
     let pfx2 = a:loclist ? 'l' : ''
     let range = a:lnum1.','.a:lnum2
 
-    " ┌ we don't want the title of the qfl being separated `:` from `cexpr`
+    " ┌ we don't want the title of the qfl separating `:` from `cexpr`
     " │
     exe pfx1.'expr []'
     "                    ┌ if the pattern is absent from a buffer,
