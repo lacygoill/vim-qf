@@ -48,6 +48,8 @@ cnorea <expr> <buffer> cupdate  getcmdtype() is# ':' && getcmdline() is# 'cupdat
 " disable some keys, to avoid annoying error messages
 call qf#disable_some_keys([ 'a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
 
+nno  <buffer><nowait><silent>  cof  :<c-u>call qf#toggle_full_filepath()<cr>
+
 nno  <buffer><nowait><silent>  <c-s>       :<c-u>call qf#open_elsewhere('split')<cr>
 nno  <buffer><nowait><silent>  <c-v><c-v>  :<c-u>call qf#open_elsewhere('vert split')<cr>
 nno  <buffer><nowait><silent>  <c-t>       :<c-u>call qf#open_elsewhere('tabpage')<cr>
@@ -202,7 +204,7 @@ let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 
 " Variables {{{1
 
-" are we in a location list or a quickfix list?
+" Are we viewing a location list or a quickfix list?
 let b:qf_is_loclist = get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
 
 " Alignment {{{1
@@ -232,6 +234,7 @@ let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
                     \ | exe 'nunmap  <buffer><nowait>  <c-t>'
                     \ | exe 'nunmap  <buffer><nowait>  <c-v><c-v>'
                     \ | exe 'nunmap  <buffer><nowait>  <cr>'
+                    \ | exe 'nunmap  <buffer><nowait>  cof'
                     \ | exe 'nunmap  <buffer><nowait>  D'
                     \ | exe 'nunmap  <buffer><nowait>  DD'
                     \ | exe 'xunmap  <buffer><nowait>  D'

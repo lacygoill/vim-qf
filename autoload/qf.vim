@@ -207,10 +207,9 @@ let s:other_plugins = [
 \                    ]
 
 " Functions {{{1
-fu! s:add_filter_indicator_to_title(title_dict, pat, bang) abort "{{{2
+fu! s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
     let pat = a:pat
     let bang = a:bang ? '!' : ''
-    let title = a:title_dict.title
 
     " What is this “filter indicator”?{{{
     "
@@ -225,12 +224,10 @@ fu! s:add_filter_indicator_to_title(title_dict, pat, bang) abort "{{{2
     "         [:filter pat1 & pat2]              ✔
     "}}}
     let filter_indicator = '\s*\[:filter'.(a:bang ? '!' : '!\@!')
-    let has_already_been_filtered = match(title, filter_indicator) >= 0
-    let title = has_already_been_filtered
-            \ ?     substitute(title, '\ze\]$', (a:bang ? ' | ' : ' \& ').pat, '')
-            \ :     title.'   [:filter'.bang.' '.pat.']'
-
-    return {'title': title}
+    let has_already_been_filtered = match(a:title, filter_indicator) >= 0
+    return has_already_been_filtered
+            \ ?     substitute(a:title, '\ze\]$', (a:bang ? ' | ' : ' \& ').pat, '')
+            \ :     a:title.'   [:filter'.bang.' '.pat.']'
 endfu
 
 fu! qf#align() abort "{{{2
@@ -239,9 +236,9 @@ fu! qf#align() abort "{{{2
     let is_wtf =   !get(b:, 'qf_is_loclist', 0)
     \            && get(getqflist({'title':0}), 'title', '') is# 'WTF'
 
-    if   is_wtf
-    \|| !executable('column')
-    \|| !executable('sed')
+    if    is_wtf
+    \ || !executable('column')
+    \ || !executable('sed')
         return
     endif
 
@@ -289,12 +286,12 @@ fu! qf#open_elsewhere(where) abort "{{{2
         "
         " So, my  guess is  that `C-w CR`  opens a new  window, then  from there
         " `:helpg` opens another window to display the current entry.
-        if !get(b:, 'qf_is_loclist', 0) && get(    getqflist({'title': 0}), 'title', '') =~# '^:helpg\%[rep]'
-        \|| get(b:, 'qf_is_loclist', 0) && get(getloclist(0, {'title': 0}), 'title', '') =~# '^:lh\%[elpgrep]'
+        if  !get(b:, 'qf_is_loclist', 0) && get(    getqflist({'title': 0}), 'title', '') =~# '^:helpg\%[rep]'
+        \ || get(b:, 'qf_is_loclist', 0) && get(getloclist(0, {'title': 0}), 'title', '') =~# '^:lh\%[elpgrep]'
             augroup close_noname_window
                 au!
                 au BufWinEnter * if empty(expand('<amatch>')) | close | endif
-                \|               exe 'au! close_noname_window' | aug! close_noname_window
+                \ |              exe 'au! close_noname_window' | aug! close_noname_window
             augroup END
         endif
 
@@ -316,6 +313,8 @@ fu! qf#open_elsewhere(where) abort "{{{2
 endfu
 
 fu! qf#cfilter(bang, pat, mod) abort "{{{2
+    if s:has_nvim('items') | return | endif
+
     try
         " get a qfl with(out) the entries we want to filter
         let list          = s:getqflist()
@@ -330,16 +329,19 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
             return
         endif
 
-        " to update title later
+        " " to update title later
+        " let title = s:add_filter_indicator_to_title(s:get_title(), a:pat, a:bang)
+
+        " " set the new qfl
+        " let action = s:get_action(a:mod)
+        " call s:setqflist(list, action)
+
+        " " update title
+        " call s:setqflist([], 'a', {'title': title})
+
         let title = s:add_filter_indicator_to_title(s:get_title(), a:pat, a:bang)
-
-        " set the new qfl
-        let action      = s:get_action(a:mod)
-        let l:Setqflist = s:setqflist([list, action])
-        call l:Setqflist()
-
-        " update title
-        call l:Setqflist(title)
+        let action = s:get_action(a:mod)
+        call s:setqflist([], action, {'items': list, 'title': title})
 
         call s:maybe_resize_height()
 
@@ -445,29 +447,36 @@ fu! qf#cupdate(mod) abort "{{{2
         "
         " `getbufline()`  should return  a list  with  a single  item, the  line
         " `lnum` in the buffer `bufnr`.
-        " But it will fail if the buffer is unloaded. In this case, it will just
+        " But, if the buffer is unloaded, it will just return an empty list.
+        " From `:h getbufline()`:
+        "
+        "     This function  works only  for loaded  buffers.  For  unloaded and
+        "     non-existing buffers, an empty |List| is returned.
+        "
+        " Therefore, if  an entry in  the qfl is present  in a buffer  which you
+        " didn't visit in the past, it  won't be loaded, and `getbufline()` will
         " return an empty list.
-        " It seems that Vim unloads a buffer which was loaded just to look for a pattern,
-        " but that the user never actively visited.
+        "
+        " In this case, we want the text field to stay the same (hence `v.text`).
         "}}}
         "                                           │
-        call map(list, { i,v -> extend(v, { 'text': get(getbufline(v.bufnr, v.lnum), 0, '') }) })
+        call map(list, { i,v -> extend(v, { 'text': get(getbufline(v.bufnr, v.lnum), 0, v.text) }) })
         "                       │
         "                       └─ There will be a conflict between the old value
         "                          associated to the key `text`, and the new one.
         "
-        "                          And in case of conflict, by default `extend()` overwrites
-        "                          the old value with the new one.
-        "                          So, in effect, `extend()` will replace the old text with the new one.
+        "                          And   in  case   of   conflict,  by   default
+        "                          `extend()` overwrites the  old value with the
+        "                          new  one.
+        "                          So,  in effect,  `extend()` will  replace the
+        "                          old text with the new one.
 
         " set this new qfl
-        let action      = s:get_action(a:mod)
-        let l:Setqflist = s:setqflist([list, action])
-        call l:Setqflist()
+        let action = s:get_action(a:mod)
+        call s:setqflist(list, action)
 
         " restore title
-        let l:Set_title = function(l:Setqflist, [title])
-        call l:Set_title()
+        call s:setqflist([], 'a', {'title': title})
 
         call s:maybe_resize_height()
 
@@ -515,12 +524,10 @@ fu! qf#delete_or_conceal(type, ...) abort "{{{2
         call remove(list, range[0]-1, range[1]-1)
 
         " set this new qfl
-        let l:Setqflist = s:setqflist([list, 'r'])
-        call l:Setqflist()
+        call s:setqflist(list, 'r')
 
         " restore title
-        let l:Set_title = function(l:Setqflist, [title])
-        call l:Set_title()
+        call s:setqflist(list, 'r', {'title': title})
 
         call s:maybe_resize_height()
 
@@ -598,12 +605,27 @@ endfu
 
 fu! s:get_title() abort "{{{2
     return get(b:, 'qf_is_loclist', 0)
-       \ ?     getloclist(0, {'title': 0})
-       \ :     getqflist({'title': 0})
+       \ ?     get(getloclist(0, {'title': 0}), 'title', '')
+       \ :     get(getqflist({'title': 0}), 'title', '')
 endfu
 
 fu! s:getqflist() abort "{{{2
     return get(b:, 'qf_is_loclist', 0)  ? getloclist(0) : getqflist()
+endfu
+
+fu! s:has_nvim(key) abort "{{{2
+    " TODO:
+    " Neovim doesn't implement some keys in the qfl yet:
+    "
+    "         id
+    "         module
+    "         size
+    "
+    " Remove the guard once it does.
+    if has('nvim')
+        echo 'A qfl in Neovim does not include the '.a:key.' key. But it''s needed.'
+        return 1
+    endif
 endfu
 
 fu! s:maybe_resize_height() abort "{{{2
@@ -758,10 +780,11 @@ fu! qf#set_matches(origin, group, pat) abort "{{{2
     endtry
 endfu
 
-fu! s:setqflist(args) abort "{{{2
-    return get(b:, 'qf_is_loclist', 0)
-       \ ?     function('setloclist', [0] + a:args)
-       \ :     function('setqflist',        a:args)
+fu! s:setqflist(...) abort "{{{2
+    call call(get(b:, 'qf_is_loclist', 0)
+       \         ?     'setloclist'
+       \         :     'setqflist',
+       \      a:000)
 endfu
 
 fu! qf#setup_toc() abort "{{{2
@@ -799,5 +822,19 @@ fu! qf#stl_position() abort "{{{2
         " don't display '[]' in the statusline if the qfl is empty
         let g:my_stl_list_position = 0
     endif
+endfu
+
+fu! qf#toggle_full_filepath() abort "{{{2
+    if s:has_nvim('module') | return | endif
+
+    let qfl = s:getqflist()
+
+    let l:Transformation = empty(get(get(qfl, 0, []), 'module', ''))
+    \                          ?    {i,v -> extend(v, {'module': fnamemodify(bufname(v.bufnr), ':t')})}
+    \                          :    {i,v -> extend(v, {'module': ''})}
+
+    let what =  {'items': map(s:getqflist(), l:Transformation)}
+
+    call s:setqflist(qfl, 'r', what)
 endfu
 
