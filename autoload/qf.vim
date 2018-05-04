@@ -313,8 +313,6 @@ fu! qf#open_elsewhere(where) abort "{{{2
 endfu
 
 fu! qf#cfilter(bang, pat, mod) abort "{{{2
-    if s:has_nvim('items') | return | endif
-
     try
         " get a qfl with(out) the entries we want to filter
         let list          = s:getqflist()
@@ -566,6 +564,22 @@ fu! s:get_comp_and_logic(bang) abort "{{{2
 endfu
 
 fu! s:get_id() abort "{{{2
+    " TODO: 'id' is missing in Neovim.{{{
+    "
+    " Therefore, `s:get_id()` always returns `0` in Neovim.
+    " Atm, it doesn't seem to cause any issue:
+    " qf#create_matches()  and qf#set_matches()  (the  only  functions to  call
+    " `s:get_id()`) work as expected.
+    "
+    " However, make sure there's no issue.
+    " If there's none, maybe it means `s:get_id()` is useless...
+    " Anyway, in  the future,  we should not  rely on  `qf#create_matches()` and
+    " `qf#set_matches()`. We should remove all these 3 functions:
+    "
+    "     qf#create_matches()
+    "     qf#set_matches()
+    "     s:get_id()
+    "}}}
     try
         let l:Getqflist_id = get(b:, 'qf_is_loclist', 0)
                          \ ?    function('getloclist', [0] + [{'id': 0}])
@@ -613,17 +627,20 @@ fu! s:getqflist() abort "{{{2
     return get(b:, 'qf_is_loclist', 0)  ? getloclist(0) : getqflist()
 endfu
 
-fu! s:has_nvim(key) abort "{{{2
+fu! s:has_nvim(property) abort "{{{2
     " TODO:
-    " Neovim doesn't implement some keys in the qfl yet:
+    " Neovim doesn't implement some properties of a qfl yet:
     "
-    "         id
-    "         module
-    "         size
+    "     changedtick
+    "     efm
+    "     id
+    "     idx
+    "     lines
+    "     size
     "
     " Remove the guard once it does.
     if has('nvim')
-        echo 'A qfl in Neovim does not include the '.a:key.' key. But it''s needed.'
+        echo 'In Neovim, a qfl does NOT have the '.a:property.' property. But it''s needed.'
         return 1
     endif
 endfu
@@ -827,14 +844,15 @@ endfu
 fu! qf#toggle_full_filepath() abort "{{{2
     if s:has_nvim('module') | return | endif
 
-    let qfl = s:getqflist()
+    let pos = getpos('.')
 
+    let qfl = s:getqflist()
     let l:Transformation = empty(get(get(qfl, 0, []), 'module', ''))
     \                          ?    {i,v -> extend(v, {'module': fnamemodify(bufname(v.bufnr), ':t')})}
     \                          :    {i,v -> extend(v, {'module': ''})}
+    let what =  {'items': map(qfl, l:Transformation)}
+    call s:setqflist([], 'r', what)
 
-    let what =  {'items': map(s:getqflist(), l:Transformation)}
-
-    call s:setqflist(qfl, 'r', what)
+    call setpos('.', pos)
 endfu
 
