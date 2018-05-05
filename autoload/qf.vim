@@ -798,10 +798,11 @@ fu! qf#set_matches(origin, group, pat) abort "{{{2
 endfu
 
 fu! s:setqflist(...) abort "{{{2
-    call call(get(b:, 'qf_is_loclist', 0)
-       \         ?     'setloclist'
-       \         :     'setqflist',
-       \      a:000)
+    if get(b:, 'qf_is_loclist', 0)
+        call call('setloclist', [0] + a:000)
+    else
+        call call('setqflist', a:000)
+    endif
 endfu
 
 fu! qf#setup_toc() abort "{{{2
