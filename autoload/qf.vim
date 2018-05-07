@@ -90,7 +90,7 @@ let g:autoloaded_qf = 1
 "             autocmd QuickFixCmdPost cwindow
 "
 "         a plugin:
-"             doautocmd <nomodeline> QuickFixCmdPost grep
+"             doautocmd <nomodeline> QuickFixCmdPost cwindow
 "
 "                 → open qf window
 "                 → FileType qf
@@ -133,7 +133,7 @@ let g:autoloaded_qf = 1
 "
 " As a result, we would need to also trigger `FileType qf`:
 "
-"         doautocmd <nomodeline> QuickFixCmdPost grep
+"         doautocmd <nomodeline> QuickFixCmdPost cwindow
 "         if &bt isnot# 'quickfix'
 "             return
 "         endif
@@ -152,7 +152,7 @@ let g:autoloaded_qf = 1
 "             autocmd QuickFixCmdPost cwindow
 "
 "         a plugin:
-"             doautocmd <nomodeline> QuickFixCmdPost grep
+"             doautocmd <nomodeline> QuickFixCmdPost cwindow
 "
 " … will fire `FileType qf` iff the window is not opened.
 " I don't like a filetype plugin being sourced several times.
