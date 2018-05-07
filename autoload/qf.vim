@@ -90,7 +90,7 @@ let g:autoloaded_qf = 1
 "             autocmd QuickFixCmdPost cwindow
 "
 "         a plugin:
-"             doautocmd <nomodeline> QuickFixCmdPost cwindow
+"             do <nomodeline> QuickFixCmdPost cwindow
 "
 "                 → open qf window
 "                 → FileType qf
@@ -133,11 +133,11 @@ let g:autoloaded_qf = 1
 "
 " As a result, we would need to also trigger `FileType qf`:
 "
-"         doautocmd <nomodeline> QuickFixCmdPost cwindow
+"         do <nomodeline> QuickFixCmdPost cwindow
 "         if &bt isnot# 'quickfix'
 "             return
 "         endif
-"         doautocmd <nomodeline> FileType qf
+"         do <nomodeline> FileType qf
 "
 " To avoid sourcing the qf filetype plugin when populating the qfl, we could use
 " `:noa`:
@@ -152,7 +152,7 @@ let g:autoloaded_qf = 1
 "             autocmd QuickFixCmdPost cwindow
 "
 "         a plugin:
-"             doautocmd <nomodeline> QuickFixCmdPost cwindow
+"             do <nomodeline> QuickFixCmdPost cwindow
 "
 " … will fire `FileType qf` iff the window is not opened.
 " I don't like a filetype plugin being sourced several times.
@@ -670,8 +670,8 @@ fu! qf#open(cmd) abort "{{{2
     " doesn't contain any valid entry (ex: `:Scriptnames`).
     " In that case, we execute sth like:
     "
-    "         doautocmd <nomodeline> QuickFixCmdPost copen
-    "         doautocmd <nomodeline> QuickFixCmdPost lopen
+    "         do <nomodeline> QuickFixCmdPost copen
+    "         do <nomodeline> QuickFixCmdPost lopen
     "
     " Here,  `:copen` and  `:lopen` are  not valid  commands because  they don't
     " populate a qfl. We could probably  use any invented name. But `:copen` and
