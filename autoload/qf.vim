@@ -854,6 +854,12 @@ fu! qf#toggle_full_filepath() abort "{{{2
     let what =  {'items': map(qfl, l:Transformation)}
     call s:setqflist([], 'r', what)
 
+    " For some reason, `w:quickfix_title` is now prefixed by an undesired colon:
+    "         https://github.com/vim/vim/issues/2885
+    "
+    " Remove it.
+    let w:quickfix_title = substitute(w:quickfix_title, '^:', '', '')
+
     call setpos('.', pos)
 endfu
 
