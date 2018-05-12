@@ -327,16 +327,6 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
             return
         endif
 
-        " " to update title later
-        " let title = s:add_filter_indicator_to_title(s:get_title(), a:pat, a:bang)
-
-        " " set the new qfl
-        " let action = s:get_action(a:mod)
-        " call s:setqflist(list, action)
-
-        " " update title
-        " call s:setqflist([], 'a', {'title': title})
-
         let title = s:add_filter_indicator_to_title(s:get_title(), a:pat, a:bang)
         let action = s:get_action(a:mod)
         call s:setqflist([], action, {'items': list, 'title': title})
