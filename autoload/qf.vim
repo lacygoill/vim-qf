@@ -848,6 +848,9 @@ fu! qf#toggle_full_filepath() abort "{{{2
     "         https://github.com/vim/vim/issues/2885
     "
     " Remove it.
+    " TODO:
+    " Remove this code once this PR is merged:
+    "     https://github.com/vim/vim/pull/2905
     let w:quickfix_title = substitute(w:quickfix_title, '^:', '', '')
 
     call setpos('.', pos)
