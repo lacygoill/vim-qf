@@ -8,6 +8,9 @@ let g:autoloaded_qf = 1
 " around `s:matches_any_qfl`. Instead we should create ad hoc syntax file.
 " Look at how Neovim has solved the issue in `ftplugin/qf.vim` for TOC menus.
 
+" TODO:
+" Split the code: one functionality per file.
+
 " Variables {{{1
 " What's the purpose of `s:matches_any_qfl`?{{{
 "
