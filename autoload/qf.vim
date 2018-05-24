@@ -838,7 +838,7 @@ endfu
 fu! qf#toggle_full_filepath() abort "{{{2
     if s:has_nvim('module') | return | endif
 
-    let pos = getcurpos('.')
+    let pos = getcurpos()
 
     let qfl = s:getqflist()
     let l:Transformation = empty(get(get(qfl, 0, []), 'module', ''))
