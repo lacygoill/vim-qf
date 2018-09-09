@@ -625,10 +625,8 @@ fu! s:has_nvim(property) abort "{{{2
     " Neovim doesn't implement some properties of a qfl yet:
     "
     "     changedtick
-    "     efm
-    "     id
     "     idx
-    "     lines
+    "     module
     "     size
     "
     " Remove the guard once it does.
