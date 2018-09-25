@@ -199,6 +199,7 @@ let s:other_plugins = [
     \ 'plugged/vim-fugitive',
     \ 'plugged/vim-gutentags',
     \ 'plugged/vim-makejob',
+    \ 'plugged/vim-quickhl',
     \ 'plugged/vim-rhubarb',
     \ 'plugged/vim-sandwich',
     \ 'plugged/vim-sneak',
