@@ -46,7 +46,7 @@ cnorea <expr> <buffer> cupdate  getcmdtype() is# ':' && getcmdline() is# 'cupdat
 " Mappings {{{1
 
 " disable some keys, to avoid annoying error messages
-call qf#disable_some_keys([ 'a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
+call qf#disable_some_keys(['a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
 
 nno  <buffer><nowait><silent>  cof  :<c-u>call qf#toggle_full_filepath()<cr>
 

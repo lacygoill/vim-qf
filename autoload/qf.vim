@@ -408,11 +408,11 @@ fu! qf#create_matches() abort "{{{2
         if !empty(matches_this_qfl)
             for matches_from_all_origins in values(matches_this_qfl)
                 for a_match in matches_from_all_origins
-                    let [ group, pat ] = [ a_match.group, a_match.pat ]
+                    let [group, pat] = [a_match.group, a_match.pat]
                     if group is? 'conceal'
                         setl cocu=nc cole=3
                     endif
-                    let match_id = call('matchadd',   [ group, pat, 0, -1]
+                    let match_id = call('matchadd',   [group, pat, 0, -1]
                     \                               + (group is? 'conceal'
                     \                                  ?    [{ 'conceal': 'x' }]
                     \                                  :    []
@@ -638,20 +638,20 @@ endfu
 
 fu! s:maybe_resize_height() abort "{{{2
     if winwidth(0) ==# &columns
-        exe min([ 10, len(s:getqflist()) ]).'wincmd _'
+        exe min([10, len(s:getqflist())]).'wincmd _'
     endif
 endfu
 
 fu! qf#open(cmd) abort "{{{2
 "           │
-"           └─ we need to know which command was executed to decide whether
-"              we open the qf window or the ll window
+"           └ we need to know which command was executed to decide whether
+"             we open the qf window or the ll window
 
     "                                 ┌─ all the commands populating a ll seem to begin with the letter l
     "                                 │
-    let [ prefix, size ] = a:cmd =~# '^l'
-                       \ ?     [ 'l', len(getloclist(0)) ]
-                       \ :     [ 'c', len(getqflist())   ]
+    let [prefix, size] = a:cmd =~# '^l'
+                     \ ?     ['l', len(getloclist(0))]
+                     \ :     ['c', len(getqflist())]
 
     let mod = call('lg#window#get_modifier', a:cmd =~# '^l' ? [1] : [])
     "                                                          │
