@@ -351,7 +351,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
     endtry
 endfu
 
-fu! qf#cfilter_complete(arglead, _c, _p) abort "{{{2
+fu! qf#cfilter_complete(arglead, _cmdline, _pos) abort "{{{2
     " Why not filtering the candidates?{{{
     "
     " We don't need to, because the command invoking this completion function is
