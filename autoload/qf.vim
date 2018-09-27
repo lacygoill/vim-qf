@@ -352,15 +352,6 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
 endfu
 
 fu! qf#cfilter_complete(arglead, _cmdline, _pos) abort "{{{2
-    " Why not filtering the candidates?{{{
-    "
-    " We don't need to, because the command invoking this completion function is
-    " defined with the attribute `-complete=custom`, not `-complete=customlist`,
-    " which means Vim performs a basic filtering automatically:
-    "
-    "     • each candidate must begin with `a:arglead`
-    "     • the comparison respects 'ic' and 'scs'
-    " }}}
     return join(['-commented', '-other_plugins', '-tmp'], "\n")
 endfu
 
