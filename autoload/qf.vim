@@ -203,7 +203,6 @@ let s:other_plugins = [
     \ 'plugged/vim-rhubarb',
     \ 'plugged/vim-sandwich',
     \ 'plugged/vim-sneak',
-    \ 'plugged/vim-snippets',
     \ 'plugged/vim-speeddating',
     \ 'plugged/vim-submode',
     \ 'plugged/vim-tmuxify',
