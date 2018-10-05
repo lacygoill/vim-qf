@@ -574,11 +574,28 @@ endfu
 fu! s:get_pat(pat) abort "{{{2
     let pat = a:pat
 
+    " TODO:{{{
+    " We guess the comment leader of the buffers in the qfl, by inspecting
+    " the values of 'cms' in the first buffer of the qfl.
+    " However, `getbufvar()` will return an empty string if we haven't visited
+    " the buffer yet.
+    " Find a way to warn the user that they should visit the first buffer...
+    "}}}
+    let cml = getbufvar(get(get(getqflist(), 0, {}), 'bufnr', 0), '&cms')
+    let cml = escape(matchstr(split(cml, '%s'), '\S\+'), '\')
+    if cml isnot# ''
+        let cml = '\V'.cml.'\m'
+    else
+        " An empty comment leader would make a pattern which matches all the time.
+        " As a result, all the qfl would be emptied.
+        let cml = '"'
+    endif
+
     let arg2pat = {
-    \               '-commented':     '^\s*"',
-    \               '-other_plugins': '\%(^\|/\)\%('.join(s:other_plugins, '\|').'\)',
-    \               '-tmp':           '\%(^\|/\)\%(session\|tmp\)/',
-    \             }
+        \ '-commented':     '^\s*'.cml,
+        \ '-other_plugins': '\%(^\|/\)\%('.join(s:other_plugins, '\|').'\)',
+        \ '-tmp':           '\%(^\|/\)\%(session\|tmp\)/',
+        \ }
 
     " If `:Cfilter` was passed a special argument, interpret it.
     if pat =~# join(keys(arg2pat), '\|')
