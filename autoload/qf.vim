@@ -319,8 +319,9 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
         let pat           = s:get_pat(a:pat)
         let [comp, logic] = s:get_comp_and_logic(a:bang)
         let old_size      = len(list)
-        call filter(list, printf('bufname(v:val.bufnr) %s pat %s v:val.text %s pat',
-        \                         comp, logic, comp))
+        call filter(list,
+            \     printf('fnamemodify(bufname(v:val.bufnr), ":p") %s pat %s v:val.text %s pat',
+            \     comp, logic, comp))
 
         if len(list) ==# old_size
             echo 'No entry was removed'
@@ -335,13 +336,13 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
 
         " tell me what you did and why
         echo printf('(%d) items were removed because they %s match  %s',
-        \           old_size - len(list),
-        \           a:bang
-        \           ?    'DID'
-        \           :    'did NOT',
-        \           strchars(pat) <= 50
-        \           ?    pat
-        \           :    'the pattern')
+            \       old_size - len(list),
+            \       a:bang
+            \       ?    'DID'
+            \       :    'did NOT',
+            \       strchars(pat) <= 50
+            \       ?    pat
+            \       :    'the pattern')
     catch
         return lg#catch_error()
     endtry
