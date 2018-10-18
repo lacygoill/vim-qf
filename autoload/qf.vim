@@ -183,15 +183,12 @@ let s:other_plugins = [
     \ 'autoload/plug.vim',
     \ 'plugged/emmet-vim',
     \ 'plugged/fzf.vim',
-    \ 'plugged/goyo.vim',
-    \ 'plugged/limelight.vim',
     \ 'plugged/potion',
     \ 'plugged/seoul256.vim',
     \ 'plugged/tmux.vim',
     \ 'plugged/ultisnips',
     \ 'plugged/undotree',
     \ 'plugged/unicode.vim',
-    \ 'plugged/vim-abolish',
     \ 'plugged/vim-cheat40',
     \ 'plugged/vim-dirvish',
     \ 'plugged/vim-easy-align',
@@ -202,7 +199,6 @@ let s:other_plugins = [
     \ 'plugged/vim-sandwich',
     \ 'plugged/vim-sneak',
     \ 'plugged/vim-speeddating',
-    \ 'plugged/vim-tmuxify',
     \ 'plugged/vimtex',
     \ ]
 
