@@ -226,26 +226,28 @@ call qf#create_matches()
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
-    \ . 'setl bl< cul< efm< wrap<'
-    \ . '| unlet! b:qf_is_loclist'
-    \ . '| exe "au! my_qf * <buffer>"'
+    \ . "
+    \ setl bl< cul< efm< wrap<
+    \|unlet! b:qf_is_loclist
+    \|exe 'au! my_qf * <buffer>'
     \
-    \ . '| nunmap <buffer> <c-s>'
-    \ . '| nunmap <buffer> <c-t>'
-    \ . '| nunmap <buffer> <c-v><c-v>'
-    \ . '| nunmap <buffer> <cr>'
-    \ . '| nunmap <buffer> cof'
+    \|nunmap <buffer> <c-s>
+    \|nunmap <buffer> <c-t>
+    \|nunmap <buffer> <c-v><c-v>
+    \|nunmap <buffer> <cr>
+    \|nunmap <buffer> cof
     \
-    \ . '| nunmap <buffer> D'
-    \ . '| nunmap <buffer> DD'
-    \ . '| xunmap <buffer> D'
+    \|nunmap <buffer> D
+    \|nunmap <buffer> DD
+    \|xunmap <buffer> D
     \
-    \ . '| nunmap <buffer> q'
+    \|nunmap <buffer> q
     \
-    \ . '| cuna <buffer> cdelete'
-    \ . '| cuna <buffer> cfilter'
-    \ . '| cuna <buffer> cupdate'
-    \ . '| delc Cdelete'
-    \ . '| delc Cfilter'
-    \ . '| delc Cupdate'
+    \|cuna <buffer> cdelete
+    \|cuna <buffer> cfilter
+    \|cuna <buffer> cupdate
+    \|delc Cdelete
+    \|delc Cfilter
+    \|delc Cupdate
+    \"
 
