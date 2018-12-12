@@ -5,6 +5,10 @@ let g:loaded_qf = 1
 
 " Commands {{{1
 
+" `:CC 3` loads the third qfl in the stack, regardless of your current position.
+com! -bar -nargs=1 CC  call qf#cc(<q-args>, 'c')
+com! -bar -nargs=1 LL  call qf#cc(<q-args>, 'l')
+
 com! -bar CFreeStack call qf#cfree_stack(0)
 com! -bar LFreeStack call qf#cfree_stack(1)
 

@@ -308,6 +308,21 @@ fu! qf#open_elsewhere(where) abort "{{{2
     endtry
 endfu
 
+fu! qf#cc(nr, pfx) abort "{{{2
+    let pos = a:pfx is# 'c' ? get(getqflist({'nr': 0}), 'nr', 0) : get(getloclist(0, {'nr': 0}), 'nr', 0)
+    let offset = a:nr - pos
+    try
+        if offset == 0
+            return
+        endif
+        sil exe a:pfx . (offset > 0 ? 'newer' : 'older') . abs(offset)
+    catch
+        echohl ErrorMsg
+        echom v:exception
+        echohl NONE
+    endtry
+endfu
+
 fu! qf#cfilter(bang, pat, mod) abort "{{{2
     try
         " get a qfl with(out) the entries we want to filter
