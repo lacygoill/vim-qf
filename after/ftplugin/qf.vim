@@ -227,7 +227,8 @@ call qf#create_matches()
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
     \ . "
-    \   setl bl< cul< efm< wrap<
+    \   setl bl< cul< wrap<
+    \ | set efm<
     \ | unlet! b:qf_is_loclist
     \ | exe 'au! my_qf * <buffer>'
     \
