@@ -156,7 +156,7 @@ doautocmd <nomodeline> my_qf BufWinEnter
 "
 " The default global value is very long:
 "
-"        put =&g:efm | s/\\\@<!,/\r/g
+"        put =&g:efm | s/\\\@1<!,/\r/g
 "
 " But it seems  it doesn't contain any  value describing the contents  of a qfl.
 " IOW, it's designed to interpret the output of some shell commands and populate
