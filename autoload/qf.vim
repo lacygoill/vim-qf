@@ -286,8 +286,8 @@ fu! qf#open_elsewhere(where) abort "{{{2
         \ || get(b:, 'qf_is_loclist', 0) && get(getloclist(0, {'title': 0}), 'title', '') =~# '^:lh\%[elpgrep]'
             augroup close_noname_window
                 au!
-                au BufWinEnter * if empty(expand('<amatch>')) | close | endif
-                au BufWinEnter * exe 'au! close_noname_window' | aug! close_noname_window
+                au BufWinEnter * if empty(expand('<amatch>')) | sil! close | endif
+                    \ | exe 'au! close_noname_window' | aug! close_noname_window
             augroup END
         endif
 
@@ -753,10 +753,10 @@ fu! qf#open_maybe(cmd) abort "{{{2
         augroup lhelpgrep_window
             au!
             "  ┌─ next time a buffer is displayed in a window
-            "  │                     ┌─ call this function to open the location window
-            "  │                     │
-            au BufWinEnter * call qf#open('lhelpgrep')
-            au BufWinEnter * exe 'au! lhelpgrep_window' | aug! lhelpgrep_window
+            "  │                         ┌─ call this function to open the location window
+            "  │                         │
+            au BufWinEnter * sil! call qf#open('lhelpgrep')
+                \ | exe 'au! lhelpgrep_window' | aug! lhelpgrep_window
 
             " Why you shouldn't use the `nested` flag?{{{
             "
