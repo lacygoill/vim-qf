@@ -287,7 +287,7 @@ fu! qf#open_elsewhere(where) abort "{{{2
             augroup close_noname_window
                 au!
                 au BufWinEnter * if empty(expand('<amatch>')) | close | endif
-                \ |              exe 'au! close_noname_window' | aug! close_noname_window
+                au BufWinEnter * exe 'au! close_noname_window' | aug! close_noname_window
             augroup END
         endif
 
@@ -756,9 +756,7 @@ fu! qf#open_maybe(cmd) abort "{{{2
             "  │                     ┌─ call this function to open the location window
             "  │                     │
             au BufWinEnter * call qf#open('lhelpgrep')
-                         \ | exe 'au! lhelpgrep_window' | aug! lhelpgrep_window
-            "                     │
-            "                     └─ do it only once
+            au BufWinEnter * exe 'au! lhelpgrep_window' | aug! lhelpgrep_window
 
             " Why you shouldn't use the `nested` flag?{{{
             "
