@@ -183,14 +183,14 @@ let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 " └ using `:let` instead of `setl` makes the value more readable
 "   otherwise, we would need to escape any:
 "
-"           • backslash
+"           - backslash
 "
-"           • bar
+"           - bar
 "
 "             here we still escape a bar, but it's only for the regex engine
 "             `:set` would need an additional backslash
 "
-"           • comma
+"           - comma
 "
 "             We need to escape a comma even  with `:let`, because a comma has a
 "             special meaning for 'efm': separation between 2 formats.
@@ -198,9 +198,9 @@ let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 "             But with `:set` we would need a double backslash, because a comma has
 "             also a special meaning for `:set`: separation between 2 option values.
 "
-"           • double quote
+"           - double quote
 "
-"           • space
+"           - space
 
 " Variables {{{1
 

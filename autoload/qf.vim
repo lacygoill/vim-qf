@@ -20,22 +20,22 @@ let g:autoloaded_qf = 1
 "
 " To fix this, we need to achieve 2 things:
 "
-"         • don't apply a match directly from a third-party plugin,
+"         - don't apply a match directly from a third-party plugin,
 "           it must be done from `after/ftplugin/qf.vim`, because the latter
 "           is always sourced whenever we open a qf window
 "
 "           We can't  rely on the buffer  number, nor on the  window id, because
 "           they both change.
 "
-"         • save the information of a match, so that `after/ftplugin/qf.vim`
+"         - save the information of a match, so that `after/ftplugin/qf.vim`
 "           can reapply it
 "
 " We need to bind the information of a  match (HG name, regex) to a qfl (through
 " its 'context' key) or to its id.
 " Atm, I don't want to use the 'context' key because:
 "
-"         • it's not supported in Neovim
-"         • it could be used by another third-party plugin with a data type
+"         - it's not supported in Neovim
+"         - it could be used by another third-party plugin with a data type
 "           different than a dictionary (risk of incompatibility/interference)
 "
 " So, instead, we bind the info to the qfl id in the variable `s:matches_any_qfl`.
@@ -56,8 +56,8 @@ let g:autoloaded_qf = 1
 " Why a list? Because a SINGLE function from a plugin could need to install SEVERAL
 " matches. These final sub-sub-dictionaries contain 2 keys/values:
 "
-"         • 'group' → HG name
-"         • 'pat'   → regex
+"         - 'group' → HG name
+"         - 'pat'   → regex
 "}}}
 " Example of simple value for `s:matches_any_qfl`:{{{
 "
@@ -105,13 +105,13 @@ let g:autoloaded_qf = 1
 "
 " First: we would need to refactor several functions.
 "
-"         • qf#set_matches()
+"         - qf#set_matches()
 "           s:get_id()
 "
 "           → they should be passed a numeric flag, to help them determine
 "             whether we operate on a loclist or a qfl
 "
-"         • `s:get_id()` should stop relying on `b:qf_is_loclist`
+"         - `s:get_id()` should stop relying on `b:qf_is_loclist`
 "            and use the flag we pass instead
 "
 "            This is because when we would invoke `qf#set_matches()`,
@@ -480,8 +480,8 @@ endfu
 
 fu! qf#delete_or_conceal(type, ...) abort "{{{2
     " Purpose:
-    "     • conceal visual block
-    "     • delete anything else (and update the qfl)
+    "     - conceal visual block
+    "     - delete anything else (and update the qfl)
     try
         if index(['char', 'line', 'block'], a:type) >= 0
             let range = [line("'["), line("']")]
@@ -711,12 +711,12 @@ fu! qf#open(cmd) abort "{{{2
 
         " Why do we close the help window?{{{
         "
-        "         • The focus switches to the 1st entry in the
+        "         - The focus switches to the 1st entry in the
         "           it's distracting.
         "
         "           I prefer to first have a look at all the results.
         "
-        "         • If it's opened now, it will be from our current window,
+        "         - If it's opened now, it will be from our current window,
         "           and it may be positioned in a weird place.
         "
         "           I prefer to open it later from the qf window

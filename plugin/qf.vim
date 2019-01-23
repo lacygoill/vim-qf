@@ -77,8 +77,8 @@ com! -nargs=1 -range=% -addr=buffers  LGrepBuffer  call qf#cgrep_buffer(<line1>,
 "
 "                                                      ┌─ replace current loclist
 "                                                      │
-"         • E42:  No Errors         , if you gave the 'r' action to `setloclist()`
-"         • E776: No location list  , "               'f' "
+"         - E42:  No Errors         , if you gave the 'r' action to `setloclist()`
+"         - E776: No location list  , "               'f' "
 "                                                      │
 "                                                      └─ delete all loclists
 "
