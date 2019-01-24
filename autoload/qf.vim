@@ -360,7 +360,11 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
 endfu
 
 fu! qf#cfilter_complete(arglead, _cmdline, _pos) abort "{{{2
-    return join(['-commented', '-other_plugins', '-tmp'], "\n")
+    " We disable `-commented` because it's not reliable.
+    " See fix_me in this file.
+    "
+    "     return join(['-commented', '-other_plugins', '-tmp'], "\n")
+    return join(['-other_plugins', '-tmp'], "\n")
 endfu
 
 fu! qf#cfree_stack(loclist) abort "{{{2
@@ -593,6 +597,11 @@ fu! s:get_pat(pat) abort "{{{2
     " the buffer yet.
     " Find a way to warn the user that they should visit the first buffer...
     "}}}
+    " FIXME: What if there are several filetypes?
+    " Suppose the first buffer where there are entries is a Vim one.
+    " But the second one is a python one.
+    " The  entries in  the python  buffer would  be filtered  using the  comment
+    " leader of Vim, which is totally wrong.
     let cml = getbufvar(get(get(getqflist(), 0, {}), 'bufnr', 0), '&cms')
     let cml = escape(matchstr(split(cml, '%s'), '\S\+'), '\')
     if cml isnot# ''
@@ -612,10 +621,14 @@ fu! s:get_pat(pat) abort "{{{2
     " while they should),  rather than some false positives  (i.e. entries which
     " should *not* be filtered, but they are).
     "}}}
+    "     let arg2pat = {
+    "         \ '-commented':     '^\s*'.cml,
+    "         \ '-other_plugins': '^\S*/\%('.join(s:other_plugins, '\|').'\)',
+    "         \ '-tmp':           '^\S*/\%(session\|tmp\)/\S*\.vim',
+    "         \ }
     let arg2pat = {
         \ '-commented':     '^\s*'.cml,
         \ '-other_plugins': '^\S*/\%('.join(s:other_plugins, '\|').'\)',
-        \ '-tmp':           '^\S*/\%(session\|tmp\)/\S*\.vim',
         \ }
 
     " If `:Cfilter` was passed a special argument, interpret it.
