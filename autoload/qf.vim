@@ -603,10 +603,11 @@ fu! s:get_pat(pat) abort "{{{2
         let cml = '"'
     endif
 
+    "     \ '-other_plugins': '\%(^\|/\)\%('.join(s:other_plugins, '\|').'\)',
     let arg2pat = {
         \ '-commented':     '^\s*'.cml,
-        \ '-other_plugins': '\%(^\|/\)\%('.join(s:other_plugins, '\|').'\)',
-        \ '-tmp':           '\%(^\|/\)\%(session\|tmp\)/',
+        \ '-other_plugins': '^\S*/\%('.join(s:other_plugins, '\|').'\)',
+        \ '-tmp':           '^\S*/\%(session\|tmp\)/\S*\.vim',
         \ }
 
     " If `:Cfilter` was passed a special argument, interpret it.
