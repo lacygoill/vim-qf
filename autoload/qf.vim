@@ -603,9 +603,15 @@ fu! s:get_pat(pat) abort "{{{2
         let cml = '"'
     endif
 
-    " In theory, `\S*` is wrong here.
-    " In practice, I doubt it will cause false positives, because we never use a
+    " In theory, `\S*` is wrong here.{{{
+    "
+    " In practice, I doubt it will cause false negatives, because we never use a
     " space in a session name, and because plugins names don't contain spaces.
+    "
+    " Anyway, I prefer some false negatives (i.e. entries which are not filtered
+    " while they should),  rather than some false positives  (i.e. entries which
+    " should *not* be filtered, but they are).
+    "}}}
     let arg2pat = {
         \ '-commented':     '^\s*'.cml,
         \ '-other_plugins': '^\S*/\%('.join(s:other_plugins, '\|').'\)',
