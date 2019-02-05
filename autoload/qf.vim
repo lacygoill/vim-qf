@@ -179,28 +179,10 @@ let s:KNOWN_PATTERNS  = {
 \                         'double_bar': '^|\s*|\s*\|\s*|\s*|\s*$',
 \                       }
 
-let s:other_plugins = [
-    \ 'autoload/plug.vim',
-    \ 'plugged/emmet-vim',
-    \ 'plugged/fzf.vim',
-    \ 'plugged/potion',
-    \ 'plugged/seoul256.vim',
-    \ 'plugged/tmux.vim',
-    \ 'plugged/ultisnips',
-    \ 'plugged/undotree',
-    \ 'plugged/unicode.vim',
-    \ 'plugged/vim-cheat40',
-    \ 'plugged/vim-dirvish',
-    \ 'plugged/vim-easy-align',
-    \ 'plugged/vim-fugitive',
-    \ 'plugged/vim-gutentags',
-    \ 'plugged/vim-makejob',
-    \ 'plugged/vim-rhubarb',
-    \ 'plugged/vim-sandwich',
-    \ 'plugged/vim-sneak',
-    \ 'plugged/vim-speeddating',
-    \ 'plugged/vimtex',
-    \ ]
+let s:other_plugins = readfile($MYVIMRC)
+call filter(s:other_plugins, {i,v -> v =~# '^\s*Plug\s\+''\%(lacygoill\)\@!'})
+call map(s:other_plugins, {i,v -> 'plugged/' . matchstr(v, '.\{-}/\zs[^,'']*')})
+let s:other_plugins += ['autoload/plug.vim']
 
 " Functions {{{1
 fu! s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2

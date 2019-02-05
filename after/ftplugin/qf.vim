@@ -42,6 +42,7 @@ com! -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 cnorea <expr> <buffer> cupdate  getcmdtype() is# ':' && getcmdpos() ==# 8
 \                               ?    'Cupdate'
 \                               :    'cupdate'
+" }}}2
 
 " Mappings {{{1
 
@@ -77,7 +78,7 @@ augroup my_qf
     au! * <buffer>
     au BufWinEnter <buffer> setl cursorline nowrap
     " FIXME:{{{
-    " If I press `SPC o` to open the TOC menu, and if I write in this file:
+    " If I press `-c` to open the TOC menu, and if I write in this file:
     "
     "         call qf#setup_toc()
     "
