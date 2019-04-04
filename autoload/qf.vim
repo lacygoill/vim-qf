@@ -751,7 +751,7 @@ fu! qf#open_maybe(cmd) abort "{{{2
     "             │  succeed from the help window (with 1st match).
     "             │  But, when `QuickFixCmdPost` is fired, this help window hasn't been created yet.
     "             │
-    "             │  We need to delay `:lwindow` with a fire-once autocmd listening to `BufWinEnter`.
+    "             │  We need to delay `:lwindow` with a one-shot autocmd listening to `BufWinEnter`.
     "             │}}}
     if a:cmd is# 'lhelpgrep'
         augroup lhelpgrep_window
@@ -781,8 +781,8 @@ fu! qf#open_maybe(cmd) abort "{{{2
             " But this time, when it tries to remove the autocmd/augroup, it
             " doesn't exist anymore. Hence the error.
             "
-            " Moral of the story: don't use `nested` all the time, especially
-            " when you install a fire-once autocmd.
+            " Moral of  the story: don't  use `nested` all the  time, especially
+            " when you install a one-shot autocmd.
             "}}}
         augroup END
     else
