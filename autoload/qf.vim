@@ -266,11 +266,7 @@ fu! qf#open_elsewhere(where) abort "{{{2
         " `:helpg` opens another window to display the current entry.
         if  !get(b:, 'qf_is_loclist', 0) && get(    getqflist({'title': 0}), 'title', '') =~# '^:helpg\%[rep]'
         \ || get(b:, 'qf_is_loclist', 0) && get(getloclist(0, {'title': 0}), 'title', '') =~# '^:lh\%[elpgrep]'
-            augroup close_noname_window
-                au!
-                au BufWinEnter * if empty(expand('<amatch>')) | sil! close | endif
-                    \ | exe 'au! close_noname_window' | aug! close_noname_window
-            augroup END
+            au BufWinEnter * ++once if empty(expand('<amatch>')) | sil! close | endif
         endif
 
         exe "norm! \<c-w>\<cr>"
@@ -754,37 +750,10 @@ fu! qf#open_maybe(cmd) abort "{{{2
     "             │  We need to delay `:lwindow` with a one-shot autocmd listening to `BufWinEnter`.
     "             │}}}
     if a:cmd is# 'lhelpgrep'
-        augroup lhelpgrep_window
-            au!
-            "  ┌─ next time a buffer is displayed in a window
-            "  │                         ┌─ call this function to open the location window
-            "  │                         │
-            au BufWinEnter * sil! call qf#open('lhelpgrep')
-                \ | exe 'au! lhelpgrep_window' | aug! lhelpgrep_window
-
-            " Why you shouldn't use the `nested` flag?{{{
-            "
-            " If you use the `nested` flag and you remove the augroup:
-            "
-            "         aug! lhelpgrep_window
-            "
-            " `:lh autocmd` raises the error:
-            "
-            "     Error detected while processing BufWinEnter Auto commands for "*":
-            "     E216: No such group or event: lhelpgrep_window
-            "
-            " The `nested` flag probably causes the autocmd to be fired 2 times
-            " instead of once. The 1st time, when Vim opens the help window,
-            " the autocmd opens the location window and removes itself.
-            " The opening of the location window re-emits `BufWinEnter`, and
-            " since our autocmd has the `nested` flag, it's re-executed.
-            " But this time, when it tries to remove the autocmd/augroup, it
-            " doesn't exist anymore. Hence the error.
-            "
-            " Moral of  the story: don't  use `nested` all the  time, especially
-            " when you install a one-shot autocmd.
-            "}}}
-        augroup END
+        "  ┌─ next time a buffer is displayed in a window
+        "  │                              ┌─ call this function to open the location window
+        "  │                              │
+        au BufWinEnter * ++once sil! call qf#open('lhelpgrep')
     else
         call qf#open(a:cmd)
     endif
