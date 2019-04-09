@@ -175,14 +175,20 @@ let s:matches_any_qfl = {}
 "         call qf#set_matches({origin}, {HG}, {telling_name})
 "}}}
 let s:KNOWN_PATTERNS  = {
-\                         'location'  : '^\v.{-}\|\s*%(\d+)?\s*%(col\s+\d+)?\s*\|\s?',
-\                         'double_bar': '^|\s*|\s*\|\s*|\s*|\s*$',
-\                       }
+    \   'location'  : '^\v.{-}\|\s*%(\d+)?\s*%(col\s+\d+)?\s*\|\s?',
+    \   'double_bar': '^|\s*|\s*\|\s*|\s*|\s*$',
+    \ }
 
-let s:other_plugins = readfile($MYVIMRC)
-call filter(s:other_plugins, {i,v -> v =~# '^\s*Plug\s\+''\%(lacygoill\)\@!'})
-call map(s:other_plugins, {i,v -> 'plugged/' . matchstr(v, '.\{-}/\zs[^,'']*')})
-let s:other_plugins += ['autoload/plug.vim']
+" `$MYVIMRC` is empty when we start with `-Nu /tmp/vimrc`.
+if $MYVIMRC is# ''
+    let s:other_plugins = ['autoload/plug.vim']
+else
+    let s:other_plugins = readfile($MYVIMRC)
+    call filter(s:other_plugins, {i,v -> v =~# '^\s*Plug\s\+''\%(lacygoill\)\@!'})
+    call map(s:other_plugins, {i,v -> 'plugged/' . matchstr(v, '.\{-}/\zs[^,'']*')})
+    let s:other_plugins += ['autoload/plug.vim']
+endif
+
 
 " Functions {{{1
 fu! s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
