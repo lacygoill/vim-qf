@@ -225,10 +225,9 @@ call qf#create_matches()
 
 " Teardown {{{1
 
-let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
-    \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
     \ . "
-    \   setl bl< cul< wrap<
+    \ | setl bl< cul< wrap<
     \ | set efm<
     \ | unlet! b:qf_is_loclist
     \ | exe 'au! my_qf * <buffer>'
