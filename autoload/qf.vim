@@ -690,17 +690,15 @@ fu! qf#open(cmd) abort "{{{2
     " Here,  `:copen` and  `:lopen` are  not valid  commands because  they don't
     " populate a qfl. We could probably  use any invented name. But `:copen` and
     "  `:lopen`  make the  code more  readable. The command  name expresses  our
-    " intention:
-    "
-    "         we want to open the qf window unconditionally
+    " intention: we want to open the qf window unconditionally
     let cmd = expand('<amatch>') =~# '^[cl]open$' ? 'open' : 'window'
     let how_to_open = mod =~# '^vert'
                   \ ?     mod.' '.prefix.cmd.40
                   \ :     mod.' '.prefix.cmd.max([min([10, size]), 1])
     "                                        │    │
-    "                                        │    └── at most 10 lines height
-    "                                        └── at least 1 line height (if the loclist is empty,
-    "                                                                    `lwindow 0` would raise an error)
+    "                                        │    └ at most 10 lines height
+    "                                        └ at least 1 line height (if the loclist is empty,
+    "                                                                  `lwindow 0` would raise an error)
 
     " it will fail if there's no loclist
     try
@@ -712,21 +710,21 @@ fu! qf#open(cmd) abort "{{{2
     if a:cmd is# 'helpgrep'
         call timer_start(0, { -> execute('helpc')})
         "                                 │
-        "                                 └─ close the help window in the current tabpage
-        "                                    if there's one (otherwise doesn't do anything)
+        "                                 └ close the help window in the current tabpage
+        "                                   if there's one (otherwise doesn't do anything)
 
         " Why do we close the help window?{{{
         "
-        "         - The focus switches to the 1st entry in the
-        "           it's distracting.
+        "    - The focus switches to the 1st entry in the qfl;
+        "      it's distracting.
         "
-        "           I prefer to first have a look at all the results.
+        "      I prefer to first have a look at all the results.
         "
-        "         - If it's opened now, it will be from our current window,
-        "           and it may be positioned in a weird place.
+        "    - If it's opened now, it will be from our current window,
+        "      and it may be positioned in a weird place.
         "
-        "           I prefer to open it later from the qf window
-        "           this way, they will be positioned next to each other.
+        "      I prefer to open it later from the qf window;
+        "      this way, they will be positioned next to each other.
         "}}}
         " Why don't we close it for `:lh`, only `:helpg`?{{{
         " Because, the location list is attached to this help window.
