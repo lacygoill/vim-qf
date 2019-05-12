@@ -605,14 +605,10 @@ fu! s:get_pat(pat) abort "{{{2
     " while they should),  rather than some false positives  (i.e. entries which
     " should *not* be filtered, but they are).
     "}}}
-    "     let arg2pat = {
-    "         \ '-commented':     '^\s*'.cml,
-    "         \ '-other_plugins': '^\S*/\%('.join(s:other_plugins, '\|').'\)',
-    "         \ '-tmp':           '^\S*/\%(session\|tmp\)/\S*\.vim',
-    "         \ }
     let arg2pat = {
         \ '-commented':     '^\s*'.cml,
         \ '-other_plugins': '^\S*/\%('.join(s:other_plugins, '\|').'\)',
+        \ '-tmp':           '^\S*/\%(session\|tmp\)/\S*\.vim',
         \ }
 
     " If `:Cfilter` was passed a special argument, interpret it.
