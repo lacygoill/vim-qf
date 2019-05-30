@@ -64,7 +64,7 @@ nno  <buffer><nowait><silent>  <c-t>       :<c-u>call qf#open_elsewhere('tabpage
 
 nno  <buffer><nowait><silent>  <cr>        <cr>:norm! zv<cr>
 
-nno  <buffer><nowait><silent>  q      :<c-u>let g:my_stl_list_position = 0 <bar> close<cr>
+nno  <buffer><nowait><silent>  q      :<c-u>call qf#quit()<cr>
 
 nno  <buffer><nowait><silent>  D      :<c-u>set opfunc=qf#delete_or_conceal<cr>g@
 nno  <buffer><nowait><silent>  DD     :<c-u>set opfunc=qf#delete_or_conceal<bar>exe 'norm! '.v:count1.'g@_'<cr>

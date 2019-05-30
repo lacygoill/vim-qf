@@ -191,6 +191,14 @@ endif
 
 
 " Functions {{{1
+fu! qf#quit() abort "{{{2
+    if reg_recording() isnot# ''
+        return feedkeys('q', 'int')[-1]
+    endif
+    let g:my_stl_list_position = 0
+    close!
+endfu
+
 fu! s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
     let pat = a:pat
     let bang = a:bang ? '!' : ''
@@ -232,10 +240,8 @@ fu! qf#align() abort "{{{2
     let ul_save = &l:ul
     setl modifiable ul=-1
 
-    " prepend the first occurrence of a bar with a literal C-a
-    sil! exe "%!sed 's/|/\<c-a>|/1'"
-    " do the same for the 2nd occurrence
-    sil! exe "%!sed 's/|/\<c-a>|/2'"
+    " prepend the first two occurrences of a bar with a literal C-a
+    sil! exe "%!sed 's/|/\<c-a>|/1; s/|/\<c-a>|/2'"
     " sort the text using the C-a's as delimiters
     sil! exe "%!column -s '\<c-a>' -t"
 
