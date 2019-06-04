@@ -75,12 +75,12 @@ com! -nargs=1 -range=% -addr=buffers  LGrepBuffer  call qf#cgrep_buffer(<line1>,
 " If you have an autocmd emptying the location list, there won't be anything for
 " Vim to display in the new window. This will raise the error:
 "
-"                                                      ┌─ replace current loclist
-"                                                      │
-"         - E42:  No Errors         , if you gave the 'r' action to `setloclist()`
-"         - E776: No location list  , "               'f' "
-"                                                      │
-"                                                      └─ delete all loclists
+"                                                  ┌─ replace current loclist
+"                                                  │
+"     - E42:  No Errors         , if you gave the 'r' action to `setloclist()`
+"     - E776: No location list  , "               'f' "
+"                                                  │
+"                                                  └─ delete all loclists
 "
 " Besides,  at the  moment,  the  'f' (free)  action  passed to  `setloclist()`
 " doesn't exist in Neovim.
