@@ -196,7 +196,11 @@ fu! qf#quit() abort "{{{2
         return feedkeys('q', 'int')[-1]
     endif
     let g:my_stl_list_position = 0
-    close!
+    if winnr('$') > 1
+        close!
+    else
+        q!
+    endif
 endfu
 
 fu! s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
