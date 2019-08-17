@@ -193,7 +193,7 @@ endif
 " Functions {{{1
 fu! qf#quit() abort "{{{2
     if reg_recording() isnot# ''
-        return feedkeys('q', 'int')[-1]
+        return feedkeys('q', 'in')[-1]
     endif
     let g:my_stl_list_position = 0
     if winnr('$') > 1
