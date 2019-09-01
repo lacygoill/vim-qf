@@ -184,8 +184,8 @@ if $MYVIMRC is# ''
     let s:other_plugins = ['autoload/plug.vim']
 else
     let s:other_plugins = readfile($MYVIMRC)
-    call filter(s:other_plugins, {i,v -> v =~# '^\s*Plug\s\+''\%(lacygoill\)\@!'})
-    call map(s:other_plugins, {i,v -> 'plugged/' . matchstr(v, '.\{-}/\zs[^,'']*')})
+    call filter(s:other_plugins, {_,v -> v =~# '^\s*Plug\s\+''\%(lacygoill\)\@!'})
+    call map(s:other_plugins, {_,v -> 'plugged/' . matchstr(v, '.\{-}/\zs[^,'']*')})
     let s:other_plugins += ['autoload/plug.vim']
 endif
 
@@ -448,17 +448,17 @@ fu! qf#cupdate(mod) abort "{{{2
         "
         " In this case, we want the text field to stay the same (hence `v.text`).
         "}}}
-        "                                           │
-        call map(list, { i,v -> extend(v, { 'text': get(getbufline(v.bufnr, v.lnum), 0, v.text) }) })
-        "                       │
-        "                       └─ There will be a conflict between the old value
-        "                          associated to the key `text`, and the new one.
+        "                                         │
+        call map(list, {_,v -> extend(v, {'text': get(getbufline(v.bufnr, v.lnum), 0, v.text)})})
+        "                      │
+        "                      └ There will be a conflict between the old value
+        "                        associated to the key `text`, and the new one.
         "
-        "                          And   in  case   of   conflict,  by   default
-        "                          `extend()` overwrites the  old value with the
-        "                          new  one.
-        "                          So,  in effect,  `extend()` will  replace the
-        "                          old text with the new one.
+        "                        And   in  case   of   conflict,  by   default
+        "                        `extend()` overwrites the  old value with the
+        "                        new  one.
+        "                        So,  in effect,  `extend()` will  replace the
+        "                        old text with the new one.
 
         " set this new qfl
         let action = s:get_action(a:mod)
@@ -624,7 +624,7 @@ fu! s:get_pat(pat) abort "{{{2
     " If `:Cfilter` was passed a special argument, interpret it.
     if pat =~# join(keys(arg2pat), '\|')
         let pat = split(pat, '\s\+')
-        call map(pat, {i,v -> arg2pat[v]})
+        call map(pat, {_,v -> arg2pat[v]})
         let pat = join(pat, '\|')
         return pat
     else
@@ -808,7 +808,7 @@ fu! qf#setup_toc() abort "{{{2
     " we only want the texts, not their location
     setl modifiable
     sil %d_
-    call setline(1, map(llist, {i,v -> v.text}))
+    call setline(1, map(llist, {_,v -> v.text}))
     setl nomodifiable nomodified
     let &syntax = getbufvar(bufnr, '&syntax')
 endfu
@@ -838,8 +838,8 @@ fu! qf#toggle_full_filepath() abort "{{{2
 
     let qfl = s:getqflist()
     let l:Transformation = empty(get(get(qfl, 0, []), 'module', ''))
-    \                          ?    {i,v -> extend(v, {'module': fnamemodify(bufname(v.bufnr), ':t')})}
-    \                          :    {i,v -> extend(v, {'module': ''})}
+    \                          ?    {_,v -> extend(v, {'module': fnamemodify(bufname(v.bufnr), ':t')})}
+    \                          :    {_,v -> extend(v, {'module': ''})}
     let what =  {'items': map(qfl, l:Transformation)}
     call s:setqflist([], 'r', what)
 
