@@ -3,6 +3,9 @@ if exists('g:loaded_qf')
 endif
 let g:loaded_qf = 1
 
+" TODO: Maybe implement a popup window to preview the context of some entry in the qfl.
+" https://github.com/bfrg/vim-qf-preview
+
 " Commands {{{1
 
 " `:CC 3` loads the third qfl in the stack, regardless of your current position.

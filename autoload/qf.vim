@@ -20,23 +20,23 @@ let g:autoloaded_qf = 1
 "
 " To fix this, we need to achieve 2 things:
 "
-"         - don't apply a match directly from a third-party plugin,
-"           it must be done from `after/ftplugin/qf.vim`, because the latter
-"           is always sourced whenever we open a qf window
+"    - don't apply a match directly from a third-party plugin,
+"      it must be done from `after/ftplugin/qf.vim`, because the latter
+"      is always sourced whenever we open a qf window
 "
-"           We can't  rely on the buffer  number, nor on the  window id, because
-"           they both change.
+"      We can't  rely on the buffer  number, nor on the  window id, because
+"      they both change.
 "
-"         - save the information of a match, so that `after/ftplugin/qf.vim`
-"           can reapply it
+"    - save the information of a match, so that `after/ftplugin/qf.vim`
+"      can reapply it
 "
 " We need to bind the information of a  match (HG name, regex) to a qfl (through
 " its 'context' key) or to its id.
 " Atm, I don't want to use the 'context' key because:
 "
-"         - it's not supported in Neovim
-"         - it could be used by another third-party plugin with a data type
-"           different than a dictionary (risk of incompatibility/interference)
+"    - it's not supported in Neovim
+"    - it could be used by another third-party plugin with a data type
+"      different than a dictionary (risk of incompatibility/interference)
 "
 " So, instead, we bind the info to the qfl id in the variable `s:matches_any_qfl`.
 "}}}
@@ -196,11 +196,7 @@ fu! qf#quit() abort "{{{2
         return feedkeys('q', 'in')[-1]
     endif
     let g:my_stl_list_position = 0
-    if winnr('$') > 1
-        close!
-    else
-        q!
-    endif
+    q
 endfu
 
 fu! s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
@@ -282,7 +278,7 @@ fu! qf#open_elsewhere(where) abort "{{{2
         " `:helpg` opens another window to display the current entry.
         if  !get(b:, 'qf_is_loclist', 0) && get(    getqflist({'title': 0}), 'title', '') =~# '^:helpg\%[rep]'
         \ || get(b:, 'qf_is_loclist', 0) && get(getloclist(0, {'title': 0}), 'title', '') =~# '^:lh\%[elpgrep]'
-            au BufWinEnter * ++once if empty(expand('<amatch>')) | sil! close | endif
+            au BufWinEnter * ++once if empty(expand('<amatch>')) | sil! q | endif
         endif
 
         exe "norm! \<c-w>\<cr>"
@@ -294,7 +290,7 @@ fu! qf#open_elsewhere(where) abort "{{{2
             tab sp
             let new = win_getid()
             call win_gotoid(orig)
-            close
+            q
             call win_gotoid(new)
         endif
     catch
