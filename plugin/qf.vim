@@ -55,8 +55,8 @@ com! -nargs=1 -range=% -addr=buffers  LGrepBuffer  call qf#cgrep_buffer(<line1>,
 "         " From `:h setloclist()`:
 "         "
 "         "         For a location list window, the DISPLAYED LOCATION LIST is modified.
-"         "               └──────────────────┤
-"         "                                  └ != regular window
+"         "               ├──────────────────┘
+"         "               └ != regular window
 "         "
 "         " When WinNew is fired, there's probably NO displayed location list yet.
 "         " So, the  autocmd fails to mutate  the location list, which  is good,
@@ -78,12 +78,12 @@ com! -nargs=1 -range=% -addr=buffers  LGrepBuffer  call qf#cgrep_buffer(<line1>,
 " If you have an autocmd emptying the location list, there won't be anything for
 " Vim to display in the new window. This will raise the error:
 "
-"                                                  ┌─ replace current loclist
-"                                                  │
-"     - E42:  No Errors         , if you gave the 'r' action to `setloclist()`
-"     - E776: No location list  , "               'f' "
-"                                                  │
-"                                                  └─ delete all loclists
+"                                                 ┌ replace current loclist
+"                                                 │
+"    - E42:  No Errors         , if you gave the 'r' action to `setloclist()`
+"    - E776: No location list  , "               'f' "
+"                                                 │
+"                                                 └ delete all loclists
 "
 " Besides,  at the  moment,  the  'f' (free)  action  passed to  `setloclist()`
 " doesn't exist in Neovim.
@@ -93,14 +93,13 @@ com! -nargs=1 -range=% -addr=buffers  LGrepBuffer  call qf#cgrep_buffer(<line1>,
 augroup my_quickfix
     au!
 
-    " FIXME:
-    "     https://github.com/romainl/vim-qf/pull/70
+    " FIXME: https://github.com/romainl/vim-qf/pull/70
     "
     " Should we re-add the nested flag in all autocmds in this plugin?
 
-    "  ┌─ after a quickfix command is run
-    "  │                                             ┌─ expanded into the name of the command
-    "  │                                             │  which was run
+    "  ┌ after a quickfix command is run
+    "  │                                             ┌ expanded into the name of the command
+    "  │                                             │ which was run
     "  │                                             │
     au QuickFixCmdPost * call qf#open_maybe(expand('<amatch>'))
 

@@ -56,8 +56,8 @@ let g:autoloaded_qf = 1
 " Why a list? Because a SINGLE function from a plugin could need to install SEVERAL
 " matches. These final sub-sub-dictionaries contain 2 keys/values:
 "
-"         - 'group' → HG name
-"         - 'pat'   → regex
+"    - 'group' → HG name
+"    - 'pat'   → regex
 "}}}
 " Example of simple value for `s:matches_any_qfl`:{{{
 "
@@ -105,24 +105,24 @@ let g:autoloaded_qf = 1
 "
 " First: we would need to refactor several functions.
 "
-"         - qf#set_matches()
-"           s:get_id()
+"    - qf#set_matches()
+"      s:get_id()
 "
-"           → they should be passed a numeric flag, to help them determine
-"             whether we operate on a loclist or a qfl
+"      → they should be passed a numeric flag, to help them determine
+"        whether we operate on a loclist or a qfl
 "
-"         - `s:get_id()` should stop relying on `b:qf_is_loclist`
-"            and use the flag we pass instead
+"    - `s:get_id()` should stop relying on `b:qf_is_loclist`
+"       and use the flag we pass instead
 "
-"            This is because when we would invoke `qf#set_matches()`,
-"            the qf window would NOT have been opened, so there would
-"            be no `b:qf_is_loclist`.
+"       This is because when we would invoke `qf#set_matches()`,
+"       the qf window would NOT have been opened, so there would
+"       be no `b:qf_is_loclist`.
 "
-"            It couldn't even rely on the expression populating `b:qf_is_loclist`:
+"       It couldn't even rely on the expression populating `b:qf_is_loclist`:
 "
-"                    get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
+"         get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
 "
-"            … because, again, there would be no qf window yet.
+"       ... because, again, there would be no qf window yet.
 "
 " Second:
 " Suppose the qf window is already opened, and one of our plugin creates a new qfl,
@@ -224,7 +224,7 @@ endfu
 
 fu! qf#align() abort "{{{2
     " align the columns (more readable)
-    " EXCEPT when the qfl is populated by `:WTF`
+    " *except* when the qfl is populated by `:WTF`
     let is_wtf =   !get(b:, 'qf_is_loclist', 0)
     \            && get(getqflist({'title':0}), 'title', '') is# 'WTF'
 
@@ -237,22 +237,24 @@ fu! qf#align() abort "{{{2
     " We won't try to undo the edition, so don't save anything in the undotree.
     " Useful to lower memory consumption if qfl is big.
     " For more info, see `:h clear-undo`.
-    let ul_save = &l:ul
+    let [ul_save, bufnr] = [&l:ul, bufnr('%')]
     setl modifiable ul=-1
 
-    " prepend the first two occurrences of a bar with a literal C-a
-    sil! exe "%!sed 's/|/\<c-a>|/1; s/|/\<c-a>|/2'"
-    " sort the text using the C-a's as delimiters
-    sil! exe "%!column -s '\<c-a>' -t"
-
-    let &l:ul = ul_save
-    setl nomodifiable nomodified
+    try
+        " prepend the first two occurrences of a bar with a literal C-a
+        sil! exe "%!sed 's/|/\<c-a>|/1; s/|/\<c-a>|/2'"
+        " sort the text using the C-a's as delimiters
+        sil! exe "%!column -s '\<c-a>' -t"
+    finally
+        call setbufvar(bufnr, '&ul', ul_save)
+        setl nomodifiable nomodified
+    endtry
 
     " We could also install this autocmd in our vimrc:{{{
     "
-    "         au BufReadPost quickfix call s:qf_align()
+    "     au BufReadPost quickfix call s:qf_align()
     "
-    " … where `s:qf_align()` would contain commands to align the columns.
+    " ... where `s:qf_align()` would contain commands to align the columns.
     "
     " It would work most of the time, including after `:helpg foo`.
     " But it wouldn't work after `:lh foo`.
@@ -307,9 +309,7 @@ fu! qf#cc(nr, pfx) abort "{{{2
         endif
         sil exe a:pfx . (offset > 0 ? 'newer' : 'older') . abs(offset)
     catch
-        echohl ErrorMsg
-        echom v:exception
-        echohl NONE
+        return lg#catch_error()
     endtry
 endfu
 
@@ -474,8 +474,8 @@ endfu
 
 fu! qf#delete_or_conceal(type, ...) abort "{{{2
     " Purpose:
-    "     - conceal visual block
-    "     - delete anything else (and update the qfl)
+    "    - conceal visual block
+    "    - delete anything else (and update the qfl)
     try
         if index(['char', 'line', 'block'], a:type) >= 0
             let range = [line("'["), line("']")]
@@ -532,22 +532,22 @@ endfu
 fu! s:get_action(mod) abort "{{{2
     return a:mod =~# '^keep' ? ' ' : 'r'
     "                           │     │
-    "                           │     └─ don't create a new list, just replace the current one
-    "                           └─ create a new list
+    "                           │     └ don't create a new list, just replace the current one
+    "                           └ create a new list
 endfu
 
 fu! s:get_comp_and_logic(bang) abort "{{{2
-    "                                ┌─ the pattern MUST match the path of the buffer
-    "                                │  do not make the comparison strict no matter what (`=~#`)
-    "                                │  `:ilist` respects 'ignorecase'
-    "                                │  `:Cfilter` should do the same
+    "                                ┌ the pattern MUST match the path of the buffer
+    "                                │ do not make the comparison strict no matter what (`=~#`)
+    "                                │ `:ilist` respects 'ignorecase'
+    "                                │ `:Cfilter` should do the same
     "                                │
-    "                                │     ┌─ OR the text must match
+    "                                │     ┌ OR the text must match
     "                                │     │
     return a:bang ? ['!~', '&&'] : ['=~', '||']
     "                 │     │
-    "                 │     └─ AND the text must not match the pattern
-    "                 └─ the pattern must NOT MATCH the path of the buffer
+    "                 │     └ AND the text must not match the pattern
+    "                 └ the pattern must NOT MATCH the path of the buffer
 endfu
 
 fu! s:get_id() abort "{{{2
@@ -672,7 +672,7 @@ fu! qf#open(cmd) abort "{{{2
 "           └ we need to know which command was executed to decide whether
 "             we open the qf window or the ll window
 
-    "                                 ┌─ all the commands populating a ll seem to begin with the letter l
+    "                                 ┌ all the commands populating a ll seem to begin with the letter l
     "                                 │
     let [prefix, size] = a:cmd =~# '^l'
                      \ ?     ['l', len(getloclist(0))]
@@ -740,24 +740,24 @@ fu! qf#open(cmd) abort "{{{2
 endfu
 
 fu! qf#open_maybe(cmd) abort "{{{2
-    "             ┌─ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
-    "             │  But, contrary to `:helpg`, the location list is local to a window.
-    "             │  Which one?
-    "             │  The one where we executed `:lh`? No.
-    "             │  The help window opened by `:lh`? Yes.
+    "             ┌ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
+    "             │ But, contrary to `:helpg`, the location list is local to a window.
+    "             │ Which one?
+    "             │ The one where we executed `:lh`? No.
+    "             │ The help window opened by `:lh`? Yes.
     "             │
-    "             │  So, the ll window will NOT be associated with the window where we executed
-    "             │  `:lh`, but to the help window (with 1st match).
+    "             │ So, the ll window will NOT be associated with the window where we executed
+    "             │ `:lh`, but to the help window (with 1st match).
     "             │
-    "             │  And, `:cwindow` will succeed from any window, but `:lwindow` can only
-    "             │  succeed from the help window (with 1st match).
-    "             │  But, when `QuickFixCmdPost` is fired, this help window hasn't been created yet.
+    "             │ And, `:cwindow` will succeed from any window, but `:lwindow` can only
+    "             │ succeed from the help window (with 1st match).
+    "             │ But, when `QuickFixCmdPost` is fired, this help window hasn't been created yet.
     "             │
-    "             │  We need to delay `:lwindow` with a one-shot autocmd listening to `BufWinEnter`.
+    "             │ We need to delay `:lwindow` with a one-shot autocmd listening to `BufWinEnter`.
     "             │}}}
     if a:cmd is# 'lhelpgrep'
-        "  ┌─ next time a buffer is displayed in a window
-        "  │                              ┌─ call this function to open the location window
+        "  ┌ next time a buffer is displayed in a window
+        "  │                              ┌ call this function to open the location window
         "  │                              │
         au BufWinEnter * ++once sil! call qf#open('lhelpgrep')
     else

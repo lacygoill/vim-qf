@@ -74,9 +74,10 @@ xno  <buffer><nowait><silent>  D      :<c-u>call qf#delete_or_conceal('vis')<cr>
 
 setl nobuflisted
 
+setl cursorline nowrap
+
 augroup my_qf
     au! * <buffer>
-    au BufWinEnter <buffer> setl cursorline nowrap
     " FIXME:{{{
     " If I press `-c` to open the TOC menu, and if I write in this file:
     "
@@ -112,7 +113,7 @@ augroup my_qf
     " We could prefix it with `:noa`, but then the new syntax file
     " (help, markdown, man, …) would NOT be sourced.
     "
-    "
+    " ---
     "
     " If I install this autocmd
     "
@@ -124,24 +125,6 @@ augroup my_qf
     "}}}
     au Syntax <buffer> call qf#setup_toc()
 augroup END
-" When  `:lh` populates  a  loclist  and opens  a  location  window, there's  no
-" `BufWinEnter` right after `FileType qf`.
-" I don't know why. Imo, there should be. There is one for `:helpg`.
-" Anyway, because of this, our window-local settings won't be applied in a window
-" opened by `:lh`. We want them, so fire `BufWinEnter`.
-doautocmd <nomodeline> my_qf BufWinEnter
-
-" Update:
-" Atm, there's no `BufWinEnter` even after `:helpg`, but that's only because
-" we removed the `nested` flag to the autocmd opening the qf window inside:
-"
-"         ~/.vim/plugged/vim-qf/plugin/qf.vim
-"
-"         au QuickFixCmdPost * call qf#open_maybe(expand('<amatch>'))
-"                             ^
-"                             no nested flag
-"
-" If you add the nested flag back, `:helpg` will fire `BufWinEnter`, but NOT `:lh`.
 
 " efm {{{2
 " Why do we set 'efm'?{{{
@@ -167,7 +150,7 @@ doautocmd <nomodeline> my_qf BufWinEnter
 "
 " Yes, if we didn't align the text in the qfl:
 "
-"         let &l:efm = '%f\|%l col %c\|%m'
+"     let &l:efm = '%f\|%l col %c\|%m'
 "
 " But the  alignment adds extra whitespace,  so our current value  needs to take
 " them into account.
@@ -178,30 +161,29 @@ doautocmd <nomodeline> my_qf BufWinEnter
 "                              │ (see :h `efm-ignore`)
 "                              │
 let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
-"└┤             └──┤
-" │                └ scanf() notation for `%\s%\+`(see :h efm-ignore, “pattern matching“)
-" │
-" └ using `:let` instead of `setl` makes the value more readable
-"   otherwise, we would need to escape any:
+"│              ├──┘
+"│              └ scanf() notation for `%\s%\+`(see :h efm-ignore, “pattern matching“)
+"└ using `:let` instead of `setl` makes the value more readable
+"  otherwise, we would need to escape any:
 "
-"           - backslash
+"    - backslash
 "
-"           - bar
+"    - bar
 "
-"             here we still escape a bar, but it's only for the regex engine
-"             `:set` would need an additional backslash
+"      here we still escape a bar, but it's only for the regex engine
+"      `:set` would need an additional backslash
 "
-"           - comma
+"    - comma
 "
-"             We need to escape a comma even  with `:let`, because a comma has a
-"             special meaning for 'efm': separation between 2 formats.
+"      We need to escape a comma even  with `:let`, because a comma has a
+"      special meaning for 'efm': separation between 2 formats.
 "
-"             But with `:set` we would need a double backslash, because a comma has
-"             also a special meaning for `:set`: separation between 2 option values.
+"      But with `:set` we would need a double backslash, because a comma has
+"      also a special meaning for `:set`: separation between 2 option values.
 "
-"           - double quote
+"    - double quote
 "
-"           - space
+"    - space
 
 " Variables {{{1
 
