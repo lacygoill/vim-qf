@@ -183,12 +183,12 @@ let s:KNOWN_PATTERNS  = {
 if $MYVIMRC is# ''
     let s:other_plugins = ['autoload/plug.vim']
 else
-    let s:other_plugins = readfile($MYVIMRC)
-    call filter(s:other_plugins, {_,v -> v =~# '^\s*Plug\s\+''\%(lacygoill\)\@!'})
+    let vimrc_file = has('nvim') ? $HOME..'/.vim/vimrc' : $MYVIMRC
+    let s:other_plugins = readfile(vimrc_file)
+    call filter(s:other_plugins, {_,v -> v =~# '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)'})
     call map(s:other_plugins, {_,v -> 'plugged/' . matchstr(v, '.\{-}/\zs[^,'']*')})
     let s:other_plugins += ['autoload/plug.vim']
 endif
-
 
 " Functions {{{1
 fu! qf#quit() abort "{{{2
@@ -324,7 +324,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
             \     printf('fnamemodify(bufname(v:val.bufnr), ":p") %s pat %s v:val.text %s pat',
             \     comp, logic, comp))
 
-        if len(list) ==# old_size
+        if len(list) == old_size
             echo 'No entry was removed'
             return
         endif
@@ -662,7 +662,7 @@ fu! s:has_nvim(property) abort "{{{2
 endfu
 
 fu! s:maybe_resize_height() abort "{{{2
-    if winwidth(0) ==# &columns
+    if winwidth(0) == &columns
         exe min([10, len(s:getqflist())]).'wincmd _'
     endif
 endfu
@@ -710,10 +710,17 @@ fu! qf#open(cmd) abort "{{{2
     endtry
 
     if a:cmd is# 'helpgrep'
-        call timer_start(0, { -> execute('helpc')})
-        "                                 │
-        "                                 └ close the help window in the current tabpage
-        "                                   if there's one (otherwise doesn't do anything)
+        " Other events you could listen to:{{{
+        "
+        "     SafeState *
+        "     BufWinEnter *
+        "     BufEnter *
+        "     CursorMoved *
+        "}}}
+        au BufReadPost * ++once helpc
+        "                       │
+        "                       └ close the help window in the current tabpage
+        "                         if there's one (otherwise doesn't do anything)
 
         " Why do we close the help window?{{{
         "
