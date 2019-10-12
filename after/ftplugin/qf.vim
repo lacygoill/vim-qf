@@ -1,11 +1,7 @@
 " Commands {{{1
 " Cdelete {{{2
 
-com! -bar -buffer -range Cdelete call qf#delete_or_conceal('Ex', <line1>, <line2>)
-
-cnorea <expr> <buffer> cdelete  getcmdtype() is# ':' && getcmdpos() == 8
-\                               ?    'Cdelete'
-\                               :    'cdelete'
+com -bar -buffer -range Cdelete call qf#delete_or_conceal('Ex', <line1>, <line2>)
 
 " Cfilter {{{2
 " Documentation:{{{
@@ -21,12 +17,8 @@ cnorea <expr> <buffer> cdelete  getcmdtype() is# ':' && getcmdpos() == 8
 " Do not give the `-bar` attribute to the commands.
 " It would break a pattern containing a bar (for example, for an alternation).
 
-com! -bang -buffer -nargs=? -complete=custom,qf#cfilter_complete Cfilter
+com -bang -buffer -nargs=? -complete=custom,qf#cfilter_complete Cfilter
 \                           call qf#cfilter(<bang>0, <q-args>, <q-mods>)
-
-cnorea <expr> <buffer> cfilter  getcmdtype() is# ':' && getcmdpos() == 8
-\                               ?    'Cfilter'
-\                               :    'cfilter'
 
 " Cupdate {{{2
 
@@ -37,12 +29,7 @@ cnorea <expr> <buffer> cfilter  getcmdtype() is# ':' && getcmdpos() == 8
 "         noa cfdo %s/pat/rep/ge | update
 "         Cupdate
 
-com! -bar -buffer Cupdate call qf#cupdate(<q-mods>)
-
-cnorea <expr> <buffer> cupdate  getcmdtype() is# ':' && getcmdpos() == 8
-\                               ?    'Cupdate'
-\                               :    'cupdate'
-" }}}2
+com -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 
 " Mappings {{{1
 
@@ -188,7 +175,7 @@ let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 " Variables {{{1
 
 " Are we viewing a location list or a quickfix list?
-let b:qf_is_loclist = get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
+const b:qf_is_loclist = get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
 
 " Alignment {{{1
 
@@ -226,9 +213,6 @@ let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
     \
     \ | exe 'nunmap <buffer> q'
     \
-    \ | exe 'cuna <buffer> cdelete'
-    \ | exe 'cuna <buffer> cfilter'
-    \ | exe 'cuna <buffer> cupdate'
     \ | delc Cdelete
     \ | delc Cfilter
     \ | delc Cupdate

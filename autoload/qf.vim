@@ -174,24 +174,25 @@ let s:matches_any_qfl = {}
 "
 "         call qf#set_matches({origin}, {HG}, {telling_name})
 "}}}
-let s:KNOWN_PATTERNS  = {
+const s:KNOWN_PATTERNS  = {
     \   'location'  : '^\v.{-}\|\s*%(\d+)?\s*%(col\s+\d+)?\s*\|\s?',
     \   'double_bar': '^|\s*|\s*\|\s*|\s*|\s*$',
     \ }
 
 " `$MYVIMRC` is empty when we start with `-Nu /tmp/vimrc`.
 if $MYVIMRC is# ''
-    let s:other_plugins = ['autoload/plug.vim']
+    let s:OTHER_PLUGINS = ['autoload/plug.vim']
 else
-    let vimrc_file = has('nvim') ? $HOME..'/.vim/vimrc' : $MYVIMRC
-    let s:other_plugins = readfile(vimrc_file)
-    call filter(s:other_plugins, {_,v -> v =~# '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)'})
-    call map(s:other_plugins, {_,v -> 'plugged/' . matchstr(v, '.\{-}/\zs[^,'']*')})
-    let s:other_plugins += ['autoload/plug.vim']
+    let s:VIMRC_FILE = has('nvim') ? $HOME..'/.vim/vimrc' : $MYVIMRC
+    let s:OTHER_PLUGINS = readfile(s:VIMRC_FILE) | unlet! s:VIMRC_FILE
+    call filter(s:OTHER_PLUGINS, {_,v -> v =~# '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)'})
+    call map(s:OTHER_PLUGINS, {_,v -> 'plugged/' . matchstr(v, '.\{-}/\zs[^,'']*')})
+    let s:OTHER_PLUGINS += ['autoload/plug.vim']
+    lockvar s:OTHER_PLUGINS
 endif
 
 " Functions {{{1
-fu! qf#quit() abort "{{{2
+fu qf#quit() abort "{{{2
     if reg_recording() isnot# ''
         return feedkeys('q', 'in')[-1]
     endif
@@ -199,7 +200,7 @@ fu! qf#quit() abort "{{{2
     q
 endfu
 
-fu! s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
+fu s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
     let pat = a:pat
     let bang = a:bang ? '!' : ''
 
@@ -222,7 +223,7 @@ fu! s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
             \ :     a:title.'   [:filter'.bang.' '.pat.']'
 endfu
 
-fu! qf#align() abort "{{{2
+fu qf#align() abort "{{{2
     " align the columns (more readable)
     " *except* when the qfl is populated by `:WTF`
     let is_wtf =   !get(b:, 'qf_is_loclist', 0)
@@ -265,7 +266,7 @@ fu! qf#align() abort "{{{2
     "}}}
 endfu
 
-fu! qf#open_elsewhere(where) abort "{{{2
+fu qf#open_elsewhere(where) abort "{{{2
     try
         " In a qf window populated by `:helpg` or `:lh`, `C-w CR` opens a window
         " with an unnamed buffer. We don't want that.
@@ -300,7 +301,7 @@ fu! qf#open_elsewhere(where) abort "{{{2
     endtry
 endfu
 
-fu! qf#cc(nr, pfx) abort "{{{2
+fu qf#cc(nr, pfx) abort "{{{2
     let pos = a:pfx is# 'c' ? get(getqflist({'nr': 0}), 'nr', 0) : get(getloclist(0, {'nr': 0}), 'nr', 0)
     let offset = a:nr - pos
     try
@@ -313,7 +314,7 @@ fu! qf#cc(nr, pfx) abort "{{{2
     endtry
 endfu
 
-fu! qf#cfilter(bang, pat, mod) abort "{{{2
+fu qf#cfilter(bang, pat, mod) abort "{{{2
     try
         " get a qfl with(out) the entries we want to filter
         let list          = s:getqflist()
@@ -349,7 +350,7 @@ fu! qf#cfilter(bang, pat, mod) abort "{{{2
     endtry
 endfu
 
-fu! qf#cfilter_complete(arglead, _cmdline, _pos) abort "{{{2
+fu qf#cfilter_complete(arglead, _cmdline, _pos) abort "{{{2
     " We disable `-commented` because it's not reliable.
     " See fix_me in this file.
     "
@@ -357,7 +358,7 @@ fu! qf#cfilter_complete(arglead, _cmdline, _pos) abort "{{{2
     return join(['-other_plugins', '-tmp'], "\n")
 endfu
 
-fu! qf#cfree_stack(loclist) abort "{{{2
+fu qf#cfree_stack(loclist) abort "{{{2
     if a:loclist
         call setloclist(0, [], 'f')
         lhi
@@ -367,7 +368,7 @@ fu! qf#cfree_stack(loclist) abort "{{{2
     endif
 endfu
 
-fu! qf#cgrep_buffer(lnum1, lnum2, pat, loclist) abort "{{{2
+fu qf#cgrep_buffer(lnum1, lnum2, pat, loclist) abort "{{{2
     let pfx1 = a:loclist ? 'l' : 'c'
     let pfx2 = a:loclist ? 'l' : ''
     let range = a:lnum1.','.a:lnum2
@@ -394,7 +395,7 @@ fu! qf#cgrep_buffer(lnum1, lnum2, pat, loclist) abort "{{{2
     endif
 endfu
 
-fu! qf#create_matches() abort "{{{2
+fu qf#create_matches() abort "{{{2
     try
         let id = s:get_id()
 
@@ -420,7 +421,7 @@ fu! qf#create_matches() abort "{{{2
     endtry
 endfu
 
-fu! qf#cupdate(mod) abort "{{{2
+fu qf#cupdate(mod) abort "{{{2
     try
         " to restore later
         let pos   = line('.')
@@ -472,7 +473,7 @@ fu! qf#cupdate(mod) abort "{{{2
     endtry
 endfu
 
-fu! qf#delete_or_conceal(type, ...) abort "{{{2
+fu qf#delete_or_conceal(type, ...) abort "{{{2
     " Purpose:
     "    - conceal visual block
     "    - delete anything else (and update the qfl)
@@ -523,20 +524,20 @@ fu! qf#delete_or_conceal(type, ...) abort "{{{2
     endtry
 endfu
 
-fu! qf#disable_some_keys(keys) abort "{{{2
+fu qf#disable_some_keys(keys) abort "{{{2
     for a_key in a:keys
         sil! exe 'nno  <buffer><nowait><silent>  '.a_key.'  <nop>'
     endfor
 endfu
 
-fu! s:get_action(mod) abort "{{{2
+fu s:get_action(mod) abort "{{{2
     return a:mod =~# '^keep' ? ' ' : 'r'
     "                           │     │
     "                           │     └ don't create a new list, just replace the current one
     "                           └ create a new list
 endfu
 
-fu! s:get_comp_and_logic(bang) abort "{{{2
+fu s:get_comp_and_logic(bang) abort "{{{2
     "                                ┌ the pattern MUST match the path of the buffer
     "                                │ do not make the comparison strict no matter what (`=~#`)
     "                                │ `:ilist` respects 'ignorecase'
@@ -550,7 +551,7 @@ fu! s:get_comp_and_logic(bang) abort "{{{2
     "                 └ the pattern must NOT MATCH the path of the buffer
 endfu
 
-fu! s:get_id() abort "{{{2
+fu s:get_id() abort "{{{2
     " TODO: 'id' is missing in Neovim.{{{
     "
     " Therefore, `s:get_id()` always returns `0` in Neovim.
@@ -577,7 +578,7 @@ fu! s:get_id() abort "{{{2
     endtry
 endfu
 
-fu! s:get_pat(pat) abort "{{{2
+fu s:get_pat(pat) abort "{{{2
     let pat = a:pat
 
     " TODO:{{{
@@ -613,7 +614,7 @@ fu! s:get_pat(pat) abort "{{{2
     "}}}
     let arg2pat = {
         \ '-commented':     '^\s*'.cml,
-        \ '-other_plugins': '^\S*/\%('.join(s:other_plugins, '\|').'\)',
+        \ '-other_plugins': '^\S*/\%('.join(s:OTHER_PLUGINS, '\|').'\)',
         \ '-tmp':           '^\S*/\%(session\|tmp\)/\S*\.vim',
         \ }
 
@@ -635,17 +636,17 @@ fu! s:get_pat(pat) abort "{{{2
     endif
 endfu
 
-fu! s:get_title() abort "{{{2
+fu s:get_title() abort "{{{2
     return get(b:, 'qf_is_loclist', 0)
        \ ?     get(getloclist(0, {'title': 0}), 'title', '')
        \ :     get(getqflist({'title': 0}), 'title', '')
 endfu
 
-fu! s:getqflist() abort "{{{2
+fu s:getqflist() abort "{{{2
     return get(b:, 'qf_is_loclist', 0)  ? getloclist(0) : getqflist()
 endfu
 
-fu! s:has_nvim(property) abort "{{{2
+fu s:has_nvim(property) abort "{{{2
     " TODO:
     " Neovim doesn't implement some properties of a qfl yet:
     "
@@ -661,16 +662,16 @@ fu! s:has_nvim(property) abort "{{{2
     endif
 endfu
 
-fu! s:maybe_resize_height() abort "{{{2
+fu s:maybe_resize_height() abort "{{{2
     if winwidth(0) == &columns
         exe min([10, len(s:getqflist())]).'wincmd _'
     endif
 endfu
 
-fu! qf#open(cmd) abort "{{{2
-"           │
-"           └ we need to know which command was executed to decide whether
-"             we open the qf window or the ll window
+fu qf#open(cmd) abort "{{{2
+"          │
+"          └ we need to know which command was executed to decide whether
+"            we open the qf window or the ll window
 
     "                                 ┌ all the commands populating a ll seem to begin with the letter l
     "                                 │
@@ -746,7 +747,7 @@ fu! qf#open(cmd) abort "{{{2
     endif
 endfu
 
-fu! qf#open_maybe(cmd) abort "{{{2
+fu qf#open_maybe(cmd) abort "{{{2
     "             ┌ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
     "             │ But, contrary to `:helpg`, the location list is local to a window.
     "             │ Which one?
@@ -772,7 +773,7 @@ fu! qf#open_maybe(cmd) abort "{{{2
     endif
 endfu
 
-fu! qf#set_matches(origin, group, pat) abort "{{{2
+fu qf#set_matches(origin, group, pat) abort "{{{2
     try
         let id = s:get_id()
         if !has_key(s:matches_any_qfl, id)
@@ -789,7 +790,7 @@ fu! qf#set_matches(origin, group, pat) abort "{{{2
     endtry
 endfu
 
-fu! s:setqflist(...) abort "{{{2
+fu s:setqflist(...) abort "{{{2
     if get(b:, 'qf_is_loclist', 0)
         call call('setloclist', [0] + a:000)
     else
@@ -797,7 +798,7 @@ fu! s:setqflist(...) abort "{{{2
     endif
 endfu
 
-fu! qf#setup_toc() abort "{{{2
+fu qf#setup_toc() abort "{{{2
     if get(w:, 'quickfix_title') !~# '\<TOC$' || &syntax isnot# 'qf'
         return
     endif
@@ -816,7 +817,7 @@ fu! qf#setup_toc() abort "{{{2
     let &syntax = getbufvar(bufnr, '&syntax')
 endfu
 
-fu! qf#stl_position() abort "{{{2
+fu qf#stl_position() abort "{{{2
     if getqflist() !=# []
         let g:my_stl_list_position = 1
         " Why?{{{
@@ -834,7 +835,7 @@ fu! qf#stl_position() abort "{{{2
     endif
 endfu
 
-fu! qf#toggle_full_filepath() abort "{{{2
+fu qf#toggle_full_filepath() abort "{{{2
     if s:has_nvim('module') | return | endif
 
     let pos = getcurpos()
