@@ -36,11 +36,11 @@ com -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 " disable some keys, to avoid annoying error messages
 call qf#disable_some_keys(['a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
 
-nno  <buffer><nowait><silent>  cof  :<c-u>call qf#toggle_full_filepath()<cr>
+nno <buffer><nowait><silent> cof :<c-u>call qf#toggle_full_filepath()<cr>
 
-nno  <buffer><nowait><silent>  <c-s>       :<c-u>call qf#open_elsewhere('split')<cr>
-nno  <buffer><nowait><silent>  <c-v><c-v>  :<c-u>call qf#open_elsewhere('vert split')<cr>
-nno  <buffer><nowait><silent>  <c-t>       :<c-u>call qf#open_elsewhere('tabpage')<cr>
+nno <buffer><nowait><silent> <c-s>      :<c-u>call qf#open_elsewhere('split')<cr>
+nno <buffer><nowait><silent> <c-v><c-v> :<c-u>call qf#open_elsewhere('vert split')<cr>
+nno <buffer><nowait><silent> <c-t>      :<c-u>call qf#open_elsewhere('tabpage')<cr>
 " FYI:{{{
 "
 " By default:
@@ -49,13 +49,13 @@ nno  <buffer><nowait><silent>  <c-t>       :<c-u>call qf#open_elsewhere('tabpage
 "     C-w t  moves the focus to the top window in the current tab page
 "}}}
 
-nno  <buffer><nowait><silent>  <cr>        <cr>:norm! zv<cr>
+nno <buffer><nowait><silent> <cr> <cr>:norm! zv<cr>
 
-nno  <buffer><nowait><silent>  q      :<c-u>call qf#quit()<cr>
+nno <buffer><nowait><silent> q :<c-u>call qf#quit()<cr>
 
-nno  <buffer><nowait><silent>  D      :<c-u>set opfunc=qf#delete_or_conceal<cr>g@
-nno  <buffer><nowait><silent>  DD     :<c-u>set opfunc=qf#delete_or_conceal<bar>exe 'norm! '.v:count1.'g@_'<cr>
-xno  <buffer><nowait><silent>  D      :<c-u>call qf#delete_or_conceal('vis')<cr>
+nno <buffer><nowait><silent> D  :<c-u>set opfunc=qf#delete_or_conceal<cr>g@
+nno <buffer><nowait><silent> DD :<c-u>set opfunc=qf#delete_or_conceal<bar>exe 'norm! '.v:count1.'g@_'<cr>
+xno <buffer><nowait><silent> D  :<c-u>call qf#delete_or_conceal('vis')<cr>
 
 " Options {{{1
 
@@ -195,26 +195,26 @@ call qf#create_matches()
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ . "
+    \ ..'
     \ | setl bl< cul< wrap<
     \ | set efm<
     \ | unlet! b:qf_is_loclist
-    \ | exe 'au! my_qf * <buffer>'
+    \ | exe "au! my_qf * <buffer>"
     \
-    \ | exe 'nunmap <buffer> <c-s>'
-    \ | exe 'nunmap <buffer> <c-t>'
-    \ | exe 'nunmap <buffer> <c-v><c-v>'
-    \ | exe 'nunmap <buffer> <cr>'
-    \ | exe 'nunmap <buffer> cof'
+    \ | exe "nunmap <buffer> <c-s>"
+    \ | exe "nunmap <buffer> <c-t>"
+    \ | exe "nunmap <buffer> <c-v><c-v>"
+    \ | exe "nunmap <buffer> <cr>"
+    \ | exe "nunmap <buffer> cof"
     \
-    \ | exe 'nunmap <buffer> D'
-    \ | exe 'nunmap <buffer> DD'
-    \ | exe 'xunmap <buffer> D'
+    \ | exe "nunmap <buffer> D"
+    \ | exe "nunmap <buffer> DD"
+    \ | exe "xunmap <buffer> D"
     \
-    \ | exe 'nunmap <buffer> q'
+    \ | exe "nunmap <buffer> q"
     \
     \ | delc Cdelete
     \ | delc Cfilter
     \ | delc Cupdate
-    \ "
+    \ '
 

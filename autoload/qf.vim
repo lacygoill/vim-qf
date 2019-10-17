@@ -186,7 +186,7 @@ else
     let s:VIMRC_FILE = has('nvim') ? $HOME..'/.vim/vimrc' : $MYVIMRC
     let s:OTHER_PLUGINS = readfile(s:VIMRC_FILE) | unlet! s:VIMRC_FILE
     call filter(s:OTHER_PLUGINS, {_,v -> v =~# '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)'})
-    call map(s:OTHER_PLUGINS, {_,v -> 'plugged/' . matchstr(v, '.\{-}/\zs[^,'']*')})
+    call map(s:OTHER_PLUGINS, {_,v -> 'plugged/'..matchstr(v, '.\{-}/\zs[^,'']*')})
     let s:OTHER_PLUGINS += ['autoload/plug.vim']
     lockvar s:OTHER_PLUGINS
 endif
@@ -216,11 +216,11 @@ fu s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
     "         [:filter pat1] [:filter pat2]      ✘
     "         [:filter pat1 & pat2]              ✔
     "}}}
-    let filter_indicator = '\s*\[:filter'.(a:bang ? '!' : '!\@!')
+    let filter_indicator = '\s*\[:filter'..(a:bang ? '!' : '!\@!')
     let has_already_been_filtered = match(a:title, filter_indicator) >= 0
     return has_already_been_filtered
-            \ ?     substitute(a:title, '\ze\]$', (a:bang ? ' | ' : ' \& ').pat, '')
-            \ :     a:title.'   [:filter'.bang.' '.pat.']'
+            \ ?     substitute(a:title, '\ze\]$', (a:bang ? ' | ' : ' \& ')..pat, '')
+            \ :     a:title..'   [:filter'..bang..' '..pat..']'
 endfu
 
 fu qf#align() abort "{{{2
@@ -308,7 +308,7 @@ fu qf#cc(nr, pfx) abort "{{{2
         if offset == 0
             return
         endif
-        sil exe a:pfx . (offset > 0 ? 'newer' : 'older') . abs(offset)
+        sil exe a:pfx..(offset > 0 ? 'newer' : 'older')..abs(offset)
     catch
         return lg#catch_error()
     endtry
@@ -350,7 +350,7 @@ fu qf#cfilter(bang, pat, mod) abort "{{{2
     endtry
 endfu
 
-fu qf#cfilter_complete(arglead, _cmdline, _pos) abort "{{{2
+fu qf#cfilter_complete(_a, _l, _p) abort "{{{2
     " We disable `-commented` because it's not reliable.
     " See fix_me in this file.
     "
@@ -371,11 +371,11 @@ endfu
 fu qf#cgrep_buffer(lnum1, lnum2, pat, loclist) abort "{{{2
     let pfx1 = a:loclist ? 'l' : 'c'
     let pfx2 = a:loclist ? 'l' : ''
-    let range = a:lnum1.','.a:lnum2
+    let range = a:lnum1..','..a:lnum2
 
     " ┌ we don't want the title of the qfl separating `:` from `cexpr`
     " │
-    exe pfx1.'expr []'
+    exe pfx1..'expr []'
     "                    ┌ if the pattern is absent from a buffer,
     "                    │ it will raise an error
     "                    │
@@ -386,12 +386,12 @@ fu qf#cgrep_buffer(lnum1, lnum2, pat, loclist) abort "{{{2
     let cmd = printf('sil! noa %sbufdo %svimgrepadd /%s/gj %%', range, pfx2, a:pat)
     exe cmd
 
-    exe pfx1.'window'
+    exe pfx1..'window'
 
     if a:loclist
-        call setloclist(0, [], 'a', {'title': ':'.cmd})
+        call setloclist(0, [], 'a', {'title': ':'..cmd})
     else
-        call setqflist([], 'a', {'title': ':'.cmd})
+        call setqflist([], 'a', {'title': ':'..cmd})
     endif
 endfu
 
@@ -467,7 +467,7 @@ fu qf#cupdate(mod) abort "{{{2
         call s:maybe_resize_height()
 
         " restore position
-        exe 'norm! '.pos.'G'
+        exe 'norm! '..pos..'G'
     catch
         return lg#catch_error()
     endtry
@@ -489,7 +489,7 @@ fu qf#delete_or_conceal(type, ...) abort "{{{2
                 " … but the match would disappear when we change the focused window,
                 " probably because the visual marks would be set in another buffer.
                 let [vcol1, vcol2] = [virtcol("'<"), virtcol("'>")]
-                let pat = '\v%'.vcol1.'v.*%'.vcol2.'v.'
+                let pat = '\v%'..vcol1..'v.*%'..vcol2..'v.'
                 call matchadd('Conceal', pat, 0, -1, {'Conceal' : 'x'})
                 setl cocu=nc cole=3
                 return
@@ -518,7 +518,7 @@ fu qf#delete_or_conceal(type, ...) abort "{{{2
         call s:maybe_resize_height()
 
         " restore position
-        exe 'norm! '.pos.'G'
+        exe 'norm! '..pos..'G'
     catch
         return lg#catch_error()
     endtry
@@ -526,7 +526,7 @@ endfu
 
 fu qf#disable_some_keys(keys) abort "{{{2
     for a_key in a:keys
-        sil! exe 'nno  <buffer><nowait><silent>  '.a_key.'  <nop>'
+        sil! exe 'nno  <buffer><nowait><silent>  '..a_key..'  <nop>'
     endfor
 endfu
 
@@ -596,7 +596,7 @@ fu s:get_pat(pat) abort "{{{2
     let cml = getbufvar(get(get(getqflist(), 0, {}), 'bufnr', 0), '&cms')
     let cml = escape(matchstr(split(cml, '%s'), '\S\+'), '\')
     if cml isnot# ''
-        let cml = '\V'.cml.'\m'
+        let cml = '\V'..cml..'\m'
     else
         " An empty comment leader would make a pattern which matches all the time.
         " As a result, all the qfl would be emptied.
@@ -613,8 +613,8 @@ fu s:get_pat(pat) abort "{{{2
     " should *not* be filtered, but they are).
     "}}}
     let arg2pat = {
-        \ '-commented':     '^\s*'.cml,
-        \ '-other_plugins': '^\S*/\%('.join(s:OTHER_PLUGINS, '\|').'\)',
+        \ '-commented':     '^\s*'..cml,
+        \ '-other_plugins': '^\S*/\%('..join(s:OTHER_PLUGINS, '\|')..'\)',
         \ '-tmp':           '^\S*/\%(session\|tmp\)/\S*\.vim',
         \ }
 
@@ -657,14 +657,14 @@ fu s:has_nvim(property) abort "{{{2
     "
     " Remove the guard once it does.
     if has('nvim')
-        echo 'In Neovim, a qfl does NOT have the '.a:property.' property. But it''s needed.'
+        echo 'In Neovim, a qfl does NOT have the '..a:property..' property. But it''s needed.'
         return 1
     endif
 endfu
 
 fu s:maybe_resize_height() abort "{{{2
     if winwidth(0) == &columns
-        exe min([10, len(s:getqflist())]).'wincmd _'
+        exe min([10, len(s:getqflist())])..'wincmd _'
     endif
 endfu
 
@@ -696,12 +696,12 @@ fu qf#open(cmd) abort "{{{2
     " intention: we want to open the qf window unconditionally
     let cmd = expand('<amatch>') =~# '^[cl]open$' ? 'open' : 'window'
     let how_to_open = mod =~# '^vert'
-                  \ ?     mod.' '.prefix.cmd.40
-                  \ :     mod.' '.prefix.cmd.max([min([10, size]), 1])
-    "                                        │    │
-    "                                        │    └ at most 10 lines height
-    "                                        └ at least 1 line height (if the loclist is empty,
-    "                                                                  `lwindow 0` would raise an error)
+                  \ ?     mod..' '..prefix..cmd..' '..40
+                  \ :     mod..' '..prefix..cmd..' '..max([min([10, size]), 1])
+    "                                                 │    │
+    "                                                 │    └ at most 10 lines height
+    "                                                 └ at least 1 line height (if the loclist is empty,
+    "                                                                           `lwindow 0` would raise an error)
 
     " it will fail if there's no loclist
     try
@@ -711,14 +711,19 @@ fu qf#open(cmd) abort "{{{2
     endtry
 
     if a:cmd is# 'helpgrep'
-        " Other events you could listen to:{{{
+        " You could also listent to `SafeState`.{{{
         "
-        "     SafeState *
-        "     BufWinEnter *
-        "     BufEnter *
-        "     CursorMoved *
+        " Don't use `BufWinEnter` or `BufReadPost`; it could raise `E788`:
+        "
+        "     $ vim +'helpg foobar' +'helpg wont_find_this' +'helpg wont_find_this'
+        "     Error detected while processing BufWinEnter Autocommands for "*":~
+        "     E788: Not allowed to edit another buffer now~
+        "
+        " Don't use `BufEnter`; it could raise `E426`:
+        "
+        "     $ vim +'helpg wont_find_this' +h
         "}}}
-        au BufReadPost * ++once helpc
+        au CursorMoved * ++once helpc
         "                       │
         "                       └ close the help window in the current tabpage
         "                         if there's one (otherwise doesn't do anything)
