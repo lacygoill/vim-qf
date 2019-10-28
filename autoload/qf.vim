@@ -550,34 +550,7 @@ fu qf#open(cmd) abort "{{{2
     endtry
 
     if a:cmd is# 'helpgrep'
-        if !has('nvim')
-            " You could also listent to `SafeState`.{{{
-            "
-            " Don't use `BufWinEnter` or `BufReadPost`; it could raise `E788`:
-            "
-            "     $ vim -Nu NONE +'au QuickFixCmdPost * cw10|au bufwinenter * ++once helpc' +'helpg foobar' +'helpg wont_find_this' +'helpg wont_find_this'
-            "     E788: Not allowed to edit another buffer now~
-            "
-            " Don't use `BufEnter`; it could raise `E426`:
-            "
-            "     $ vim +'helpg wont_find_this' +h
-            "}}}
-            au CursorMoved * ++once helpc
-            "                       │
-            "                       └ close the help window in the current tabpage
-            "                         if there's one (otherwise doesn't do anything)
-        else
-            " Why not `CursorMoved`?{{{
-            "
-            " It would fail: https://github.com/neovim/neovim/issues/11308
-            "
-            " But don't  worry, `BufWinEnter` doesn't  seem to be able  to raise
-            " E788 in Nvim, only in Vim.
-            "}}}
-            au BufWinEnter * ++once helpc
-        endif
-
-        " Why do we close the help window?{{{
+        " Why do you close the help window?{{{
         "
         "    - The focus switches to the 1st entry in the qfl;
         "      it's distracting.
@@ -590,14 +563,40 @@ fu qf#open(cmd) abort "{{{2
         "      I prefer to open it later from the qf window;
         "      this way, they will be positioned next to each other.
         "}}}
-        " Why don't we close it for `:lh`, only `:helpg`?{{{
+        "   Why don't you close it for `:lh`, only `:helpg`?{{{
+        "
         " Because, the location list is attached to this help window.
         " If we close it, the ll window will be closed too.
         "}}}
-        " Why the delay?{{{
+
+        " You could also listen to `SafeState`.{{{
+        "
+        " Don't use `BufWinEnter` or `BufReadPost`; it could raise `E788`:
+        "
+        "     $ vim -Nu NONE +'au QuickFixCmdPost * cw10|au bufwinenter * ++once helpc' +'helpg foobar' +'helpg wont_find_this' +'helpg wont_find_this'
+        "     E788: Not allowed to edit another buffer now~
+        "
+        " Don't use `BufEnter`; it could raise `E426`:
+        "
+        "     $ vim +'helpg wont_find_this' +h
+        "
+        " ---
+        "
+        " In Nvim, `BufWinEnter` doesn't seem to  be able to raise E788, but for
+        " some reason, it makes the cursor move on the last entry in the qfl; it
+        " should stay on the first.
+        "}}}
+        " Why the autocmd?{{{
         "
         " If we don't delay, `:helpclose` fails.
-        " Probably because the help window hasn't been opened yet.}}}
+        " Probably because the help window hasn't been opened yet.
+        "}}}
+        " Why the timer?{{{
+        "
+        " It doesn't work otherwise in Nvim:
+        " https://github.com/neovim/neovim/issues/11308
+        "}}}
+        au CursorMoved * ++once call timer_start(0, {-> execute('helpc')})
     endif
 endfu
 
