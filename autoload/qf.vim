@@ -569,34 +569,36 @@ fu qf#open(cmd) abort "{{{2
         " If we close it, the ll window will be closed too.
         "}}}
 
-        " You could also listen to `SafeState`.{{{
+        " Why the delay?{{{
         "
-        " Don't use `BufWinEnter` or `BufReadPost`; it could raise `E788`:
+        " It doesn't work otherwise.
+        " Probably because the help window hasn't been opened yet.
+        "}}}
+        " Do *not* listen to any other event.{{{
         "
+        " They are full of pitfalls.
+        "
+        " For example, `BufWinEnter` or `BufReadPost` may raise `E788` (only in Vim):
+        "
+        "                                                   vvvvvvvvvvv
         "     $ vim -Nu NONE +'au QuickFixCmdPost * cw10|au bufwinenter * ++once helpc' +'helpg foobar' +'helpg wont_find_this' +'helpg wont_find_this'
         "     E788: Not allowed to edit another buffer now~
         "
-        " Don't use `BufEnter`; it could raise `E426`:
+        " And `BufEnter` may raise `E426` and `E433`:
         "
-        "     $ vim +'helpg wont_find_this' +h
+        "     $ vim -Nu NONE +'au QuickFixCmdPost * cw10|au bufenter * ++once helpc' +'helpg wont_find_this' +h
         "
-        " ---
+        " Besides,  in Nvim,  `BufWinEnter` makes  the cursor  move on  the last
+        " entry in the qfl, while it should stay on the first.
         "
-        " In Nvim, `BufWinEnter` doesn't seem to  be able to raise E788, but for
-        " some reason, it makes the cursor move on the last entry in the qfl; it
-        " should stay on the first.
-        "}}}
-        " Why the autocmd?{{{
-        "
-        " If we don't delay, `:helpclose` fails.
-        " Probably because the help window hasn't been opened yet.
-        "}}}
-        " Why the timer?{{{
-        "
-        " It doesn't work otherwise in Nvim:
         " https://github.com/neovim/neovim/issues/11308
         "}}}
-        au CursorMoved * ++once call timer_start(0, {-> execute('helpc')})
+        if !has('nvim')
+            au SafeState * ++once helpc
+        else
+            " TODO: Once Nvim supports `SafeState`, remove this.
+            call timer_start(0, {-> execute('helpc')})
+        endif
     endif
 endfu
 
