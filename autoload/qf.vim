@@ -191,36 +191,13 @@ else
     lockvar s:OTHER_PLUGINS
 endif
 
-" Functions {{{1
+" Interface {{{1
 fu qf#quit() abort "{{{2
     if reg_recording() isnot# ''
         return feedkeys('q', 'in')[-1]
     endif
     let g:my_stl_list_position = 0
     q
-endfu
-
-fu s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
-    let pat = a:pat
-    let bang = a:bang ? '!' : ''
-
-    " What is this “filter indicator”?{{{
-    "
-    " If the  qfl has already  been filtered, we  don't want to  add another
-    " `[:filter pat]`  in the title. Too  verbose. Instead we want to  add a
-    " “branch” or a “concat”:
-    "
-    "         [:filter! pat1] [:filter! pat2]    ✘
-    "         [:filter! pat1 | pat2]             ✔
-    "
-    "         [:filter pat1] [:filter pat2]      ✘
-    "         [:filter pat1 & pat2]              ✔
-    "}}}
-    let filter_indicator = '\s*\[:filter'..(a:bang ? '!' : '!\@!')
-    let has_already_been_filtered = match(a:title, filter_indicator) >= 0
-    return has_already_been_filtered
-            \ ?     substitute(a:title, '\ze\]$', (a:bang ? ' | ' : ' \& ')..pat, '')
-            \ :     a:title..'   [:filter'..bang..' '..pat..']'
 endfu
 
 fu qf#align() abort "{{{2
@@ -530,6 +507,242 @@ fu qf#disable_some_keys(keys) abort "{{{2
     endfor
 endfu
 
+fu qf#open(cmd) abort "{{{2
+"          │
+"          └ we need to know which command was executed to decide whether
+"            we open the qf window or the ll window
+
+    "                                 ┌ all the commands populating a ll seem to begin with the letter l
+    "                                 │
+    let [prefix, size] = a:cmd =~# '^l'
+                     \ ?     ['l', len(getloclist(0))]
+                     \ :     ['c', len(getqflist())]
+
+    let mod = call('lg#window#get_modifier', a:cmd =~# '^l' ? [1] : [])
+    "                                                          │
+    "            flag meaning we're going to open a loc window ┘
+
+    " In some of our  plugins, we may want to open the qf  window even though it
+    " doesn't contain any valid entry (ex: `:Scriptnames`).
+    " In that case, we execute sth like:
+    "
+    "         do <nomodeline> QuickFixCmdPost copen
+    "         do <nomodeline> QuickFixCmdPost lopen
+    "
+    " Here,  `:copen` and  `:lopen` are  not valid  commands because  they don't
+    " populate a qfl. We could probably  use any invented name. But `:copen` and
+    "  `:lopen`  make the  code more  readable. The command  name expresses  our
+    " intention: we want to open the qf window unconditionally
+    let cmd = expand('<amatch>') =~# '^[cl]open$' ? 'open' : 'window'
+    let how_to_open = mod =~# '^vert'
+                  \ ?     mod..' '..prefix..cmd..' '..40
+                  \ :     mod..' '..prefix..cmd..' '..max([min([10, size]), 1])
+    "                                                 │    │
+    "                                                 │    └ at most 10 lines height
+    "                                                 └ at least 1 line height (if the loclist is empty,
+    "                                                                           `lwindow 0` would raise an error)
+
+    " it will fail if there's no loclist
+    try
+        exe how_to_open
+    catch
+        return lg#catch_error()
+    endtry
+
+    if a:cmd is# 'helpgrep'
+        if !has('nvim')
+            " You could also listent to `SafeState`.{{{
+            "
+            " Don't use `BufWinEnter` or `BufReadPost`; it could raise `E788`:
+            "
+            "     $ vim -Nu NONE +'au QuickFixCmdPost * cw10|au bufwinenter * ++once helpc' +'helpg foobar' +'helpg wont_find_this' +'helpg wont_find_this'
+            "     E788: Not allowed to edit another buffer now~
+            "
+            " Don't use `BufEnter`; it could raise `E426`:
+            "
+            "     $ vim +'helpg wont_find_this' +h
+            "}}}
+            au CursorMoved * ++once helpc
+            "                       │
+            "                       └ close the help window in the current tabpage
+            "                         if there's one (otherwise doesn't do anything)
+        else
+            " Why not `CursorMoved`?{{{
+            "
+            " It would fail: https://github.com/neovim/neovim/issues/11308
+            "
+            " But don't  worry, `BufWinEnter` doesn't  seem to be able  to raise
+            " E788 in Nvim, only in Vim.
+            "}}}
+            au BufWinEnter * ++once helpc
+        endif
+
+        " Why do we close the help window?{{{
+        "
+        "    - The focus switches to the 1st entry in the qfl;
+        "      it's distracting.
+        "
+        "      I prefer to first have a look at all the results.
+        "
+        "    - If it's opened now, it will be from our current window,
+        "      and it may be positioned in a weird place.
+        "
+        "      I prefer to open it later from the qf window;
+        "      this way, they will be positioned next to each other.
+        "}}}
+        " Why don't we close it for `:lh`, only `:helpg`?{{{
+        " Because, the location list is attached to this help window.
+        " If we close it, the ll window will be closed too.
+        "}}}
+        " Why the delay?{{{
+        "
+        " If we don't delay, `:helpclose` fails.
+        " Probably because the help window hasn't been opened yet.}}}
+    endif
+endfu
+
+fu qf#open_maybe(cmd) abort "{{{2
+    "             ┌ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
+    "             │ But, contrary to `:helpg`, the location list is local to a window.
+    "             │ Which one?
+    "             │ The one where we executed `:lh`? No.
+    "             │ The help window opened by `:lh`? Yes.
+    "             │
+    "             │ So, the ll window will NOT be associated with the window where we executed
+    "             │ `:lh`, but to the help window (with 1st match).
+    "             │
+    "             │ And, `:cwindow` will succeed from any window, but `:lwindow` can only
+    "             │ succeed from the help window (with 1st match).
+    "             │ But, when `QuickFixCmdPost` is fired, this help window hasn't been created yet.
+    "             │
+    "             │ We need to delay `:lwindow` with a one-shot autocmd listening to `BufWinEnter`.
+    "             │}}}
+    if a:cmd is# 'lhelpgrep'
+        "  ┌ next time a buffer is displayed in a window
+        "  │                              ┌ call this function to open the location window
+        "  │                              │
+        au BufWinEnter * ++once sil! call qf#open('lhelpgrep')
+    else
+        call qf#open(a:cmd)
+    endif
+endfu
+
+fu qf#set_matches(origin, group, pat) abort "{{{2
+    try
+        let id = s:get_id()
+        if !has_key(s:matches_any_qfl, id)
+            let s:matches_any_qfl[id] = {}
+        endif
+        let matches_this_qfl_this_origin = get(s:matches_any_qfl[id], a:origin, [])
+        let pat = get(s:KNOWN_PATTERNS, a:pat, a:pat)
+        call extend(s:matches_any_qfl[id], { a:origin : extend( matches_this_qfl_this_origin,
+        \                                                       [{ 'group': a:group, 'pat': pat }]
+        \                                                     )})
+
+    catch
+        return lg#catch_error()
+    endtry
+endfu
+
+fu qf#setup_toc() abort "{{{2
+    if get(w:, 'quickfix_title') !~# '\<TOC$' || &syntax isnot# 'qf'
+        return
+    endif
+
+    let llist = getloclist(0)
+    if empty(llist)
+        return
+    endif
+
+    let bufnr = llist[0].bufnr
+    " we only want the texts, not their location
+    setl modifiable
+    sil %d_
+    call setline(1, map(llist, {_,v -> v.text}))
+    setl nomodifiable nomodified
+    let &syntax = getbufvar(bufnr, '&syntax')
+endfu
+
+fu qf#stl_position() abort "{{{2
+    if getqflist() !=# []
+        let g:my_stl_list_position = 1
+        " Why?{{{
+        "
+        " We need to  redraw the statusline to see the  indicator after a vimtex
+        " compilation. From `:h :redraws`:
+        "
+        "     Useful to update the status  line(s) when 'statusline' includes an
+        "     item that doesn't cause automatic updating.
+        "}}}
+        redraws
+    else
+        " don't display '[]' in the statusline if the qfl is empty
+        let g:my_stl_list_position = 0
+    endif
+endfu
+
+fu qf#toggle_full_filepath() abort "{{{2
+    if s:has_nvim('module') | return | endif
+
+    let pos = getcurpos()
+
+    let qfl = s:getqflist()
+    let l:Transformation = empty(get(get(qfl, 0, []), 'module', ''))
+    \                          ?    {_,v -> extend(v, {'module': fnamemodify(bufname(v.bufnr), ':t')})}
+    \                          :    {_,v -> extend(v, {'module': ''})}
+    let what =  {'items': map(qfl, l:Transformation)}
+    call s:setqflist([], 'r', what)
+
+    call setpos('.', pos)
+endfu
+
+fu qf#undo_ftplugin() abort "{{{2
+    setl bl< cul< wrap<
+    set efm<
+    unlet! b:qf_is_loclist
+    au! my_qf * <buffer>
+
+    nunmap <buffer> <c-s>
+    nunmap <buffer> <c-t>
+    nunmap <buffer> <c-v><c-v>
+    nunmap <buffer> <cr>
+    nunmap <buffer> cof
+
+    nunmap <buffer> D
+    nunmap <buffer> DD
+    xunmap <buffer> D
+
+    nunmap <buffer> q
+
+    delc Cdelete
+    delc Cfilter
+    delc Cupdate
+endfu
+"}}}1
+" Utilities {{{1
+fu s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
+    let pat = a:pat
+    let bang = a:bang ? '!' : ''
+
+    " What is this “filter indicator”?{{{
+    "
+    " If the  qfl has already  been filtered, we  don't want to  add another
+    " `[:filter pat]`  in the title. Too  verbose. Instead we want to  add a
+    " “branch” or a “concat”:
+    "
+    "         [:filter! pat1] [:filter! pat2]    ✘
+    "         [:filter! pat1 | pat2]             ✔
+    "
+    "         [:filter pat1] [:filter pat2]      ✘
+    "         [:filter pat1 & pat2]              ✔
+    "}}}
+    let filter_indicator = '\s*\[:filter'..(a:bang ? '!' : '!\@!')
+    let has_already_been_filtered = match(a:title, filter_indicator) >= 0
+    return has_already_been_filtered
+            \ ?     substitute(a:title, '\ze\]$', (a:bang ? ' | ' : ' \& ')..pat, '')
+            \ :     a:title..'   [:filter'..bang..' '..pat..']'
+endfu
+
 fu s:get_action(mod) abort "{{{2
     return a:mod =~# '^keep' ? ' ' : 'r'
     "                           │     │
@@ -668,190 +881,11 @@ fu s:maybe_resize_height() abort "{{{2
     endif
 endfu
 
-fu qf#open(cmd) abort "{{{2
-"          │
-"          └ we need to know which command was executed to decide whether
-"            we open the qf window or the ll window
-
-    "                                 ┌ all the commands populating a ll seem to begin with the letter l
-    "                                 │
-    let [prefix, size] = a:cmd =~# '^l'
-                     \ ?     ['l', len(getloclist(0))]
-                     \ :     ['c', len(getqflist())]
-
-    let mod = call('lg#window#get_modifier', a:cmd =~# '^l' ? [1] : [])
-    "                                                          │
-    "            flag meaning we're going to open a loc window ┘
-
-    " In some of our  plugins, we may want to open the qf  window even though it
-    " doesn't contain any valid entry (ex: `:Scriptnames`).
-    " In that case, we execute sth like:
-    "
-    "         do <nomodeline> QuickFixCmdPost copen
-    "         do <nomodeline> QuickFixCmdPost lopen
-    "
-    " Here,  `:copen` and  `:lopen` are  not valid  commands because  they don't
-    " populate a qfl. We could probably  use any invented name. But `:copen` and
-    "  `:lopen`  make the  code more  readable. The command  name expresses  our
-    " intention: we want to open the qf window unconditionally
-    let cmd = expand('<amatch>') =~# '^[cl]open$' ? 'open' : 'window'
-    let how_to_open = mod =~# '^vert'
-                  \ ?     mod..' '..prefix..cmd..' '..40
-                  \ :     mod..' '..prefix..cmd..' '..max([min([10, size]), 1])
-    "                                                 │    │
-    "                                                 │    └ at most 10 lines height
-    "                                                 └ at least 1 line height (if the loclist is empty,
-    "                                                                           `lwindow 0` would raise an error)
-
-    " it will fail if there's no loclist
-    try
-        exe how_to_open
-    catch
-        return lg#catch_error()
-    endtry
-
-    if a:cmd is# 'helpgrep'
-        " You could also listent to `SafeState`.{{{
-        "
-        " Don't use `BufWinEnter` or `BufReadPost`; it could raise `E788`:
-        "
-        "     $ vim +'helpg foobar' +'helpg wont_find_this' +'helpg wont_find_this'
-        "     Error detected while processing BufWinEnter Autocommands for "*":~
-        "     E788: Not allowed to edit another buffer now~
-        "
-        " Don't use `BufEnter`; it could raise `E426`:
-        "
-        "     $ vim +'helpg wont_find_this' +h
-        "}}}
-        au CursorMoved * ++once helpc
-        "                       │
-        "                       └ close the help window in the current tabpage
-        "                         if there's one (otherwise doesn't do anything)
-
-        " Why do we close the help window?{{{
-        "
-        "    - The focus switches to the 1st entry in the qfl;
-        "      it's distracting.
-        "
-        "      I prefer to first have a look at all the results.
-        "
-        "    - If it's opened now, it will be from our current window,
-        "      and it may be positioned in a weird place.
-        "
-        "      I prefer to open it later from the qf window;
-        "      this way, they will be positioned next to each other.
-        "}}}
-        " Why don't we close it for `:lh`, only `:helpg`?{{{
-        " Because, the location list is attached to this help window.
-        " If we close it, the ll window will be closed too.
-        "}}}
-        " Why the delay?{{{
-        "
-        " If we don't delay, `:helpclose` fails.
-        " Probably because the help window hasn't been opened yet.}}}
-    endif
-endfu
-
-fu qf#open_maybe(cmd) abort "{{{2
-    "             ┌ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
-    "             │ But, contrary to `:helpg`, the location list is local to a window.
-    "             │ Which one?
-    "             │ The one where we executed `:lh`? No.
-    "             │ The help window opened by `:lh`? Yes.
-    "             │
-    "             │ So, the ll window will NOT be associated with the window where we executed
-    "             │ `:lh`, but to the help window (with 1st match).
-    "             │
-    "             │ And, `:cwindow` will succeed from any window, but `:lwindow` can only
-    "             │ succeed from the help window (with 1st match).
-    "             │ But, when `QuickFixCmdPost` is fired, this help window hasn't been created yet.
-    "             │
-    "             │ We need to delay `:lwindow` with a one-shot autocmd listening to `BufWinEnter`.
-    "             │}}}
-    if a:cmd is# 'lhelpgrep'
-        "  ┌ next time a buffer is displayed in a window
-        "  │                              ┌ call this function to open the location window
-        "  │                              │
-        au BufWinEnter * ++once sil! call qf#open('lhelpgrep')
-    else
-        call qf#open(a:cmd)
-    endif
-endfu
-
-fu qf#set_matches(origin, group, pat) abort "{{{2
-    try
-        let id = s:get_id()
-        if !has_key(s:matches_any_qfl, id)
-            let s:matches_any_qfl[id] = {}
-        endif
-        let matches_this_qfl_this_origin = get(s:matches_any_qfl[id], a:origin, [])
-        let pat = get(s:KNOWN_PATTERNS, a:pat, a:pat)
-        call extend(s:matches_any_qfl[id], { a:origin : extend( matches_this_qfl_this_origin,
-        \                                                       [{ 'group': a:group, 'pat': pat }]
-        \                                                     )})
-
-    catch
-        return lg#catch_error()
-    endtry
-endfu
-
 fu s:setqflist(...) abort "{{{2
     if get(b:, 'qf_is_loclist', 0)
         call call('setloclist', [0] + a:000)
     else
         call call('setqflist', a:000)
     endif
-endfu
-
-fu qf#setup_toc() abort "{{{2
-    if get(w:, 'quickfix_title') !~# '\<TOC$' || &syntax isnot# 'qf'
-        return
-    endif
-
-    let llist = getloclist(0)
-    if empty(llist)
-        return
-    endif
-
-    let bufnr = llist[0].bufnr
-    " we only want the texts, not their location
-    setl modifiable
-    sil %d_
-    call setline(1, map(llist, {_,v -> v.text}))
-    setl nomodifiable nomodified
-    let &syntax = getbufvar(bufnr, '&syntax')
-endfu
-
-fu qf#stl_position() abort "{{{2
-    if getqflist() !=# []
-        let g:my_stl_list_position = 1
-        " Why?{{{
-        "
-        " We need to  redraw the statusline to see the  indicator after a vimtex
-        " compilation. From `:h :redraws`:
-        "
-        "     Useful to update the status  line(s) when 'statusline' includes an
-        "     item that doesn't cause automatic updating.
-        "}}}
-        redraws
-    else
-        " don't display '[]' in the statusline if the qfl is empty
-        let g:my_stl_list_position = 0
-    endif
-endfu
-
-fu qf#toggle_full_filepath() abort "{{{2
-    if s:has_nvim('module') | return | endif
-
-    let pos = getcurpos()
-
-    let qfl = s:getqflist()
-    let l:Transformation = empty(get(get(qfl, 0, []), 'module', ''))
-    \                          ?    {_,v -> extend(v, {'module': fnamemodify(bufname(v.bufnr), ':t')})}
-    \                          :    {_,v -> extend(v, {'module': ''})}
-    let what =  {'items': map(qfl, l:Transformation)}
-    call s:setqflist([], 'r', what)
-
-    call setpos('.', pos)
 endfu
 

@@ -195,26 +195,5 @@ call qf#create_matches()
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ ..'
-    \ | setl bl< cul< wrap<
-    \ | set efm<
-    \ | unlet! b:qf_is_loclist
-    \ | exe "au! my_qf * <buffer>"
-    \
-    \ | exe "nunmap <buffer> <c-s>"
-    \ | exe "nunmap <buffer> <c-t>"
-    \ | exe "nunmap <buffer> <c-v><c-v>"
-    \ | exe "nunmap <buffer> <cr>"
-    \ | exe "nunmap <buffer> cof"
-    \
-    \ | exe "nunmap <buffer> D"
-    \ | exe "nunmap <buffer> DD"
-    \ | exe "xunmap <buffer> D"
-    \
-    \ | exe "nunmap <buffer> q"
-    \
-    \ | delc Cdelete
-    \ | delc Cfilter
-    \ | delc Cupdate
-    \ '
+    \ ..'| call qf#undo_ftplugin()'
 
