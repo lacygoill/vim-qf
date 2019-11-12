@@ -30,32 +30,22 @@ com -bang -buffer -nargs=? -complete=custom,qf#cfilter_complete Cfilter
 "         Cupdate
 
 com -bar -buffer Cupdate call qf#cupdate(<q-mods>)
-
+"}}}1
 " Mappings {{{1
 
 " disable some keys, to avoid annoying error messages
 call qf#disable_some_keys(['a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
 
-nno <buffer><nowait><silent> cof :<c-u>call qf#toggle_full_filepath()<cr>
-
-nno <buffer><nowait><silent> <c-s>      :<c-u>call qf#open_elsewhere('split')<cr>
-nno <buffer><nowait><silent> <c-v><c-v> :<c-u>call qf#open_elsewhere('vert split')<cr>
-nno <buffer><nowait><silent> <c-t>      :<c-u>call qf#open_elsewhere('tabpage')<cr>
-" FYI:{{{
-"
-" By default:
-"
-"     C-w T  moves the current window to a new tab page
-"     C-w t  moves the focus to the top window in the current tab page
-"}}}
-
 nno <buffer><nowait><silent> <cr> <cr>:norm! zv<cr>
-
-nno <buffer><nowait><silent> q :<c-u>call qf#quit()<cr>
+nno <buffer><nowait><silent> z<cr> <c-w><cr>zv
 
 nno <buffer><nowait><silent> D  :<c-u>set opfunc=qf#delete_or_conceal<cr>g@
 nno <buffer><nowait><silent> DD :<c-u>set opfunc=qf#delete_or_conceal<bar>exe 'norm! '.v:count1.'g@_'<cr>
 xno <buffer><nowait><silent> D  :<c-u>call qf#delete_or_conceal('vis')<cr>
+
+nno <buffer><nowait><silent> cof :<c-u>call qf#toggle_full_filepath()<cr>
+
+nno <buffer><nowait><silent> q :<c-u>call qf#quit()<cr>
 
 " Options {{{1
 

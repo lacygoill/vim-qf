@@ -243,41 +243,6 @@ fu qf#align() abort "{{{2
     "}}}
 endfu
 
-fu qf#open_elsewhere(where) abort "{{{2
-    try
-        " In a qf window populated by `:helpg` or `:lh`, `C-w CR` opens a window
-        " with an unnamed buffer. We don't want that.
-        "
-        " Why does that happen?
-        "
-        " By  default, pressing  Enter  in  a qf  window  populated by  `:helpg`
-        " displays the current entry in a NEW window (contrary to other commands
-        " populating the qfl).  `C-w CR` ALSO opens a new window.
-        "
-        " So, my  guess is  that `C-w CR`  opens a new  window, then  from there
-        " `:helpg` opens another window to display the current entry.
-        if  !get(b:, 'qf_is_loclist', 0) && get(    getqflist({'title': 0}), 'title', '') =~# '^:helpg\%[rep]'
-        \ || get(b:, 'qf_is_loclist', 0) && get(getloclist(0, {'title': 0}), 'title', '') =~# '^:lh\%[elpgrep]'
-            au BufWinEnter * ++once if empty(expand('<amatch>')) | sil! q | endif
-        endif
-
-        exe "norm! \<c-w>\<cr>"
-        if a:where is# 'vert split'
-            wincmd H
-
-        elseif a:where is# 'tabpage'
-            let orig = win_getid()
-            tab sp
-            let new = win_getid()
-            call win_gotoid(orig)
-            q
-            call win_gotoid(new)
-        endif
-    catch
-        return lg#catch_error()
-    endtry
-endfu
-
 fu qf#cc(nr, pfx) abort "{{{2
     let pos = a:pfx is# 'c' ? get(getqflist({'nr': 0}), 'nr', 0) : get(getloclist(0, {'nr': 0}), 'nr', 0)
     let offset = a:nr - pos
@@ -703,15 +668,14 @@ fu qf#undo_ftplugin() abort "{{{2
     unlet! b:qf_is_loclist
     au! my_qf * <buffer>
 
-    nunmap <buffer> <c-s>
-    nunmap <buffer> <c-t>
-    nunmap <buffer> <c-v><c-v>
     nunmap <buffer> <cr>
-    nunmap <buffer> cof
+    nunmap <buffer> z<cr>
 
     nunmap <buffer> D
     nunmap <buffer> DD
     xunmap <buffer> D
+
+    nunmap <buffer> cof
 
     nunmap <buffer> q
 
