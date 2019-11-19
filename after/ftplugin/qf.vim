@@ -56,19 +56,20 @@ setl cursorline nowrap
 augroup my_qf
     au! * <buffer>
     " FIXME:{{{
+    "
     " If I press `-c` to open the TOC menu, and if I write in this file:
     "
-    "         call qf#setup_toc()
+    "     call qf#setup_toc()
     "
     " The function isn't called. No syntax highlighting. Why?
     " If I install this autocmd:
     "
-    "         au FileType qf call qf#setup_toc()
+    "     au FileType qf call qf#setup_toc()
     "
     " Same result.
     " If I install this autocmd
     "
-    "         au Syntax qf call qf#setup_toc()
+    "     au Syntax qf call qf#setup_toc()
     "
     " It works. Why?
     "
@@ -81,11 +82,11 @@ augroup my_qf
     "
     " We need it to prevent the autocmd to nest too deep:
     "
-    "         Vim(let):E218: autocommand nesting too deep
+    "     Vim(let):E218: autocommand nesting too deep
     "
     " This error comes from the command (in `qf#setup_toc()`):
     "
-    "         let &syntax = getbufvar(bufnr, '&syntax')
+    "     let &syntax = getbufvar(bufnr, '&syntax')
     "
     " We could prefix it with `:noa`, but then the new syntax file
     " (help, markdown, man, …) would NOT be sourced.
@@ -94,9 +95,9 @@ augroup my_qf
     "
     " If I install this autocmd
     "
-    "         au Syntax <buffer> call qf#setup_toc()
+    "     au Syntax <buffer> call qf#setup_toc()
     "
-    " It works. What does <buffer> mean here? What's the difference with `qf`?
+    " It works. What does `<buffer>` mean here? What's the difference with `qf`?
     " I think it's expanded into a buffer number. So it limits the scope of
     " the autocmd to the current buffer, when its syntax option is set.
     "}}}

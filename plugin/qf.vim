@@ -24,15 +24,30 @@ com -nargs=1 -range=% -addr=buffers  LGrepBuffer  call qf#cgrep_buffer(<line1>, 
 augroup my_quickfix
     au!
 
-    " FIXME: https://github.com/romainl/vim-qf/pull/70
+    " Do *not* remove the `++nested` flag.{{{
     "
-    " Should we re-add the nested flag in all autocmds in this plugin?
-
-    "  ┌ after a quickfix command is run
-    "  │                                             ┌ expanded into the name of the command
-    "  │                                             │ which was run
+    " Without, the status line may be wrong whenever you open the qf window via sth like:
+    "
+    "     do <nomodeline> QuickFixCmdPost copen
+    "
+    " This is because:
+    "
+    "    - when `:do` is run, it triggers the next autocmd
+    "
+    "    - the autocmd opens the qf window, but without `++nested`, it does not trigger `WinLeave`
+    "
+    "    - if you update the value of `'stl'` from an autocmd listening to `WinLeave`,
+    "      the value is not correctly updated
+    "
+    " ---
+    "
+    " More generally, other plugins may need to be informed when the qf window is opened.
+    " See: https://github.com/romainl/vim-qf/pull/70
+    "}}}
+    au QuickFixCmdPost * ++nested call qf#open_maybe(expand('<amatch>'))
     "  │                                             │
-    au QuickFixCmdPost * call qf#open_maybe(expand('<amatch>'))
+    "  │                                             └ name of the command which was run
+    "  └ after a quickfix command is run
 
     " show position in quickfix list (not in location list)
     " location list is too easily populated by various commands (like `:Man`)

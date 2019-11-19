@@ -8,8 +8,7 @@ let g:autoloaded_qf = 1
 " around `s:matches_any_qfl`. Instead we should create ad hoc syntax file.
 " Look at how Neovim has solved the issue in `ftplugin/qf.vim` for TOC menus.
 
-" TODO:
-" Split the code: one functionality per file.
+" TODO: Split the code: one functionality per file.
 
 " Variables {{{1
 " What's the purpose of `s:matches_any_qfl`?{{{
@@ -74,7 +73,7 @@ let g:autoloaded_qf = 1
 " In a plugin, when we populate a qfl and want to apply a match to its window,
 " we invoke:
 "
-"         call qf#set_matches({origin}, {HG}, {pat})
+"     call qf#set_matches({origin}, {HG}, {pat})
 "
 " It will register a match in `s:matches_any_qfl`.
 " Then, we invoke `qf#create_matches()` to create the matches.
@@ -136,11 +135,11 @@ let g:autoloaded_qf = 1
 "
 " As a result, we would need to also trigger `FileType qf`:
 "
-"         do <nomodeline> QuickFixCmdPost cwindow
-"         if &bt isnot# 'quickfix'
-"             return
-"         endif
-"         do <nomodeline> FileType qf
+"     do <nomodeline> QuickFixCmdPost cwindow
+"     if &bt isnot# 'quickfix'
+"         return
+"     endif
+"     do <nomodeline> FileType qf
 "
 " To avoid sourcing the qf filetype plugin when populating the qfl, we could use
 " `:noa`:
@@ -168,11 +167,11 @@ let s:matches_any_qfl = {}
 " apply a match, add it to this dictionary, with a telling name. Then, instead
 " of writing this:
 "
-"         call qf#set_matches({origin}, {HG}, {complex_regex})
+"     call qf#set_matches({origin}, {HG}, {complex_regex})
 "
-" … you can write this:
+" ... you can write this:
 "
-"         call qf#set_matches({origin}, {HG}, {telling_name})
+"     call qf#set_matches({origin}, {HG}, {telling_name})
 "}}}
 const s:KNOWN_PATTERNS  = {
     \   'location'  : '^\v.{-}\|\s*%(\d+)?\s*%(col\s+\d+)?\s*\|\s?',
@@ -637,8 +636,8 @@ fu qf#stl_position() abort "{{{2
         " We need to  redraw the statusline to see the  indicator after a vimtex
         " compilation. From `:h :redraws`:
         "
-        "     Useful to update the status  line(s) when 'statusline' includes an
-        "     item that doesn't cause automatic updating.
+        " > Useful to update the status  line(s) when 'statusline' includes an
+        " > item that doesn't cause automatic updating.
         "}}}
         redraws
     else
@@ -648,8 +647,6 @@ fu qf#stl_position() abort "{{{2
 endfu
 
 fu qf#toggle_full_filepath() abort "{{{2
-    if s:has_nvim('module') | return | endif
-
     let pos = getcurpos()
 
     let qfl = s:getqflist()
@@ -730,22 +727,6 @@ fu s:get_comp_and_logic(bang) abort "{{{2
 endfu
 
 fu s:get_id() abort "{{{2
-    " TODO: 'id' is missing in Neovim.{{{
-    "
-    " Therefore, `s:get_id()` always returns `0` in Neovim.
-    " Atm, it doesn't seem to cause any issue:
-    " qf#create_matches()  and qf#set_matches()  (the  only  functions to  call
-    " `s:get_id()`) work as expected.
-    "
-    " However, make sure there's no issue.
-    " If there's none, maybe it means `s:get_id()` is useless...
-    " Anyway, in  the future,  we should not  rely on  `qf#create_matches()` and
-    " `qf#set_matches()`. We should remove all these 3 functions:
-    "
-    "     qf#create_matches()
-    "     qf#set_matches()
-    "     s:get_id()
-    "}}}
     try
         let l:Getqflist_id = get(b:, 'qf_is_loclist', 0)
                          \ ?    function('getloclist', [0] + [{'id': 0}])
@@ -822,22 +803,6 @@ endfu
 
 fu s:getqflist() abort "{{{2
     return get(b:, 'qf_is_loclist', 0)  ? getloclist(0) : getqflist()
-endfu
-
-fu s:has_nvim(property) abort "{{{2
-    " TODO:
-    " Neovim doesn't implement some properties of a qfl yet:
-    "
-    "     changedtick
-    "     idx
-    "     module
-    "     size
-    "
-    " Remove the guard once it does.
-    if has('nvim')
-        echo 'In Neovim, a qfl does NOT have the '..a:property..' property. But it''s needed.'
-        return 1
-    endif
 endfu
 
 fu s:maybe_resize_height() abort "{{{2
