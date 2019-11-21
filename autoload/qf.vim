@@ -278,7 +278,7 @@ fu qf#cfilter(bang, pat, mod) abort "{{{2
         call s:maybe_resize_height()
 
         " tell me what you did and why
-        echo printf('(%d) items were removed because they %s match  %s',
+        echo printf('(%d) items were removed because they %s match %s',
             \       old_size - len(list),
             \       a:bang
             \       ?    'DID'
@@ -702,7 +702,7 @@ fu s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
     let has_already_been_filtered = match(a:title, filter_indicator) >= 0
     return has_already_been_filtered
             \ ?     substitute(a:title, '\ze\]$', (a:bang ? ' | ' : ' \& ')..pat, '')
-            \ :     a:title..'   [:filter'..bang..' '..pat..']'
+            \ :     a:title..' [:filter'..bang..' '..pat..']'
 endfu
 
 fu s:get_action(mod) abort "{{{2
