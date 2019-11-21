@@ -52,5 +52,8 @@ augroup my_quickfix
     " show position in quickfix list (not in location list)
     " location list is too easily populated by various commands (like `:Man`)
     au QuickFixCmdPost [^l]* call qf#stl_position()
+
+    au User MyFlags call statusline#hoist('buffer', '%{qf#statusline#buffer()}', 0, {'ft': 'qf'})
+    au User MyFlags call statusline#hoist('window', '    %-15(%l/%L%) ', 0, {'ft': 'qf'})
 augroup END
 

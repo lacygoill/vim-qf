@@ -187,7 +187,7 @@ else
     call filter(s:OTHER_PLUGINS, {_,v -> v =~# '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)'})
     call map(s:OTHER_PLUGINS, {_,v -> 'plugged/'..matchstr(v, '.\{-}/\zs[^,'']*')})
     let s:OTHER_PLUGINS += ['autoload/plug.vim']
-    lockvar s:OTHER_PLUGINS
+    lockvar! s:OTHER_PLUGINS
 endif
 
 " Interface {{{1
