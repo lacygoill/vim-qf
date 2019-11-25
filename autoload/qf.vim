@@ -195,7 +195,6 @@ fu qf#quit() abort "{{{2
     if reg_recording() isnot# ''
         return feedkeys('q', 'in')[-1]
     endif
-    let g:my_stl_list_position = 0
     q
 endfu
 
@@ -626,24 +625,6 @@ fu qf#setup_toc() abort "{{{2
     call setline(1, map(llist, {_,v -> v.text}))
     setl nomodifiable nomodified
     let &syntax = getbufvar(bufnr, '&syntax')
-endfu
-
-fu qf#stl_position() abort "{{{2
-    if getqflist() !=# []
-        let g:my_stl_list_position = 1
-        " Why?{{{
-        "
-        " We need to  redraw the statusline to see the  indicator after a vimtex
-        " compilation. From `:h :redraws`:
-        "
-        " > Useful to update the status  line(s) when 'statusline' includes an
-        " > item that doesn't cause automatic updating.
-        "}}}
-        redraws
-    else
-        " don't display '[]' in the statusline if the qfl is empty
-        let g:my_stl_list_position = 0
-    endif
 endfu
 
 fu qf#toggle_full_filepath() abort "{{{2
