@@ -55,9 +55,5 @@ augroup my_quickfix
     "  │                                             │
     "  │                                             └ name of the command which was run
     "  └ after a quickfix command is run
-
-    au FileType qf call lg#set_stl(
-        \ '%{qf#statusline#buffer()}%=    %-'..winwidth(0)/8..'(%l/%L%) ',
-        \ '%{get(b:, "qf_is_loclist", 0) ? "[LL] ": "[QF] "}%=    %-'..winwidth(0)/8..'(%l/%L%) ')
 augroup END
 

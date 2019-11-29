@@ -104,6 +104,10 @@ augroup my_qf
     au Syntax <buffer> call qf#setup_toc()
 augroup END
 
+call lg#set_stl(
+    \ '%{qf#statusline#buffer()}%=    %-'..winwidth(0)/8..'(%l/%L%) ',
+    \ '%{get(b:, "qf_is_loclist", 0) ? "[LL] ": "[QF] "}%=    %-'..winwidth(0)/8..'(%l/%L%) ')
+
 " efm {{{2
 " Why do we set 'efm'?{{{
 "
@@ -162,6 +166,7 @@ let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 "    - double quote
 "
 "    - space
+"}}}2
 
 " Variables {{{1
 
