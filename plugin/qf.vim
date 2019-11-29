@@ -26,7 +26,13 @@ augroup my_quickfix
 
     " Do *not* remove the `++nested` flag.{{{
     "
-    " Without, the status line may be wrong whenever you open the qf window via sth like:
+    " Other plugins may need to be informed when the qf window is opened.
+    " See: https://github.com/romainl/vim-qf/pull/70
+    "
+    " ---
+    "
+    " For example,  without `++nested`, the status  line of the window  which is
+    " left may be wrong whenever you open the qf window via sth like:
     "
     "     do <nomodeline> QuickFixCmdPost copen
     "
@@ -39,17 +45,18 @@ augroup my_quickfix
     "    - if you update the value of `'stl'` from an autocmd listening to `WinLeave`,
     "      the value is not correctly updated
     "
-    " ---
-    "
-    " More generally, other plugins may need to be informed when the qf window is opened.
-    " See: https://github.com/romainl/vim-qf/pull/70
+    " Atm, this example only affects Nvim, and  it could be fixed in the future,
+    " once we  don't need  autocmds to  set the status  line anymore  (i.e. when
+    " 8.1.1372 is ported and we can  use `g:statusline_winid`); but it shows the
+    " importance of  `++nested`, and  how its  absence can  create hard-to-debug
+    " issues.
     "}}}
     au QuickFixCmdPost * ++nested call qf#open_maybe(expand('<amatch>'))
     "  │                                             │
     "  │                                             └ name of the command which was run
     "  └ after a quickfix command is run
 
-    au FileType qf call lg#set_stl('qf',
+    au FileType qf call lg#set_stl(
         \ '%{qf#statusline#buffer()}%=    %-'..winwidth(0)/8..'(%l/%L%) ',
         \ '%{get(b:, "qf_is_loclist", 0) ? "[LL] ": "[QF] "}%=    %-'..winwidth(0)/8..'(%l/%L%) ')
 augroup END
