@@ -36,7 +36,18 @@ com -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 " disable some keys, to avoid annoying error messages
 call qf#disable_some_keys(['a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
 
-nno <buffer><nowait><silent> <cr> <cr>:norm! zv<cr>
+nno <buffer><nowait><silent> <c-s>      :<c-u>call qf#open_elsewhere('split')<cr>
+nno <buffer><nowait><silent> <c-v><c-v> :<c-u>call qf#open_elsewhere('vert split')<cr>
+nno <buffer><nowait><silent> <c-t>      :<c-u>call qf#open_elsewhere('tabpage')<cr>
+" FYI:{{{
+"
+" By default:
+"
+"     C-w T  moves the current window to a new tab page
+"     C-w t  moves the focus to the top window in the current tab page
+"}}}
+
+nno <buffer><nowait><silent>  <cr> <cr>:norm! zv<cr>
 nno <buffer><nowait><silent> z<cr> <c-w><cr>zv
 
 nno <buffer><nowait><silent> D  :<c-u>set opfunc=qf#delete_or_conceal<cr>g@
@@ -104,9 +115,19 @@ augroup my_qf
     au Syntax <buffer> call qf#setup_toc()
 augroup END
 
+" the 4  spaces before `%l`  make sure that  the line address  is well-separated
+" from the title, even when the latter is long and the terminal window is narrow
 call lg#set_stl(
-    \ '%{qf#statusline#buffer()}%=    %-'..winwidth(0)/8..'(%l/%L%) ',
-    \ '%{get(b:, "qf_is_loclist", 0) ? "[LL] ": "[QF] "}%=    %-'..winwidth(0)/8..'(%l/%L%) ')
+    \ '%{qf#statusline#title(1)}%=    %l/%L ',
+    \ '%{qf#statusline#title(0)}%=    %l/%L ')
+" Once Nvim supports `g:statusline_winid`, refactor this function call into this:{{{
+"
+"     let &l:stl = '%{qf#statusline#title()}%=    %l/%L '
+"
+" And inside `qf#statusline#title()`, replace `! a:is_focused` with:
+"
+"     g:statusline_winid != win_getid()
+"}}}
 
 " efm {{{2
 " Why do we set 'efm'?{{{

@@ -218,9 +218,9 @@ fu qf#align() abort "{{{2
 
     try
         " prepend the first two occurrences of a bar with a literal C-a
-        sil! exe "%!sed 's/|/\<c-a>|/1; s/|/\<c-a>|/2'"
+        sil! %!sed 's/|/\x01|/1; s/|/\x01|/2'
         " sort the text using the C-a's as delimiters
-        sil! exe "%!column -s '\<c-a>' -t"
+        sil! %!column -s $'\x01' -t
     finally
         call setbufvar(bufnr, '&ul', ul_save)
         setl nomodifiable nomodified
@@ -471,9 +471,35 @@ fu qf#disable_some_keys(keys) abort "{{{2
 endfu
 
 fu qf#open(cmd) abort "{{{2
-"          │
-"          └ we need to know which command was executed to decide whether
-"            we open the qf window or the ll window
+    "             ┌ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
+    "             │ But, contrary to `:helpg`, the location list is local to a window.
+    "             │ Which one?
+    "             │ The one where we executed `:lh`? No.
+    "             │ The help window opened by `:lh`? Yes.
+    "             │
+    "             │ So, the ll window will NOT be associated with the window where we executed
+    "             │ `:lh`, but to the help window (with 1st match).
+    "             │
+    "             │ And, `:cwindow` will succeed from any window, but `:lwindow` can only
+    "             │ succeed from the help window (with 1st match).
+    "             │ But, when `QuickFixCmdPost` is fired, this help window hasn't been created yet.
+    "             │
+    "             │ We need to delay `:lwindow` with a one-shot autocmd listening to `BufWinEnter`.
+    "             │}}}
+    if a:cmd is# 'lhelpgrep'
+        "  ┌ next time a buffer is displayed in a window
+        "  │                              ┌ call this function to open the location window
+        "  │                              │
+        au BufWinEnter * ++once sil! call s:open('lhelpgrep')
+    else
+        call s:open(a:cmd)
+    endif
+endfu
+
+fu s:open(cmd) abort
+"         │
+"         └ we need to know which command was executed to decide whether
+"           we open the qf window or the ll window
 
     "                                 ┌ all the commands populating a ll seem to begin with the letter l
     "                                 │
@@ -498,12 +524,21 @@ fu qf#open(cmd) abort "{{{2
     " intention: we want to open the qf window unconditionally
     let cmd = expand('<amatch>') =~# '^[cl]open$' ? 'open' : 'window'
     let how_to_open = mod =~# '^vert'
-                  \ ?     mod..' '..prefix..cmd..' '..40
-                  \ :     mod..' '..prefix..cmd..' '..max([min([10, size]), 1])
-    "                                                 │    │
-    "                                                 │    └ at most 10 lines height
-    "                                                 └ at least 1 line height (if the loclist is empty,
-    "                                                                           `lwindow 0` would raise an error)
+        \ ?     mod..' '..prefix..cmd..' '..40
+        \ :     mod..' '..prefix..cmd..' '..max([min([10, size]), &wmh + 2])
+    "                                       │    │
+    "                                       │    └ at most 10 lines high
+    "                                       └ at least `&wmh + 2` lines high
+    " Why `&wmh + 2`?{{{
+    "
+    " First, the number passed to `:[cl]{open|window}`  must be at least 1, even
+    " if the qfl is empty. E.g., `:lwindow 0` would raise `E939`.
+    "
+    " Second, if `'ea'` is  reset, and the qf window is only 1  or 2 lines high,
+    " pressing Enter on the qf entry would raise `E36`.
+    " In general, the issue is triggered when  the qf window is `&wmh + 1` lines
+    " high or lower.
+    "}}}
 
     " it will fail if there's no loclist
     try
@@ -565,30 +600,22 @@ fu qf#open(cmd) abort "{{{2
     endif
 endfu
 
-fu qf#open_maybe(cmd) abort "{{{2
-    "             ┌ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
-    "             │ But, contrary to `:helpg`, the location list is local to a window.
-    "             │ Which one?
-    "             │ The one where we executed `:lh`? No.
-    "             │ The help window opened by `:lh`? Yes.
-    "             │
-    "             │ So, the ll window will NOT be associated with the window where we executed
-    "             │ `:lh`, but to the help window (with 1st match).
-    "             │
-    "             │ And, `:cwindow` will succeed from any window, but `:lwindow` can only
-    "             │ succeed from the help window (with 1st match).
-    "             │ But, when `QuickFixCmdPost` is fired, this help window hasn't been created yet.
-    "             │
-    "             │ We need to delay `:lwindow` with a one-shot autocmd listening to `BufWinEnter`.
-    "             │}}}
-    if a:cmd is# 'lhelpgrep'
-        "  ┌ next time a buffer is displayed in a window
-        "  │                              ┌ call this function to open the location window
-        "  │                              │
-        au BufWinEnter * ++once sil! call qf#open('lhelpgrep')
-    else
-        call qf#open(a:cmd)
-    endif
+fu qf#open_elsewhere(where) abort "{{{2
+    try
+        exe "norm! \<c-w>\<cr>"
+        if a:where is# 'vert split'
+            wincmd H
+        elseif a:where is# 'tabpage'
+            let orig = win_getid()
+            tab sp
+            let new = win_getid()
+            call win_gotoid(orig)
+            q
+            call win_gotoid(new)
+        endif
+    catch
+        return lg#catch_error()
+    endtry
 endfu
 
 fu qf#set_matches(origin, group, pat) abort "{{{2
@@ -645,6 +672,10 @@ fu qf#undo_ftplugin() abort "{{{2
     set efm<
     unlet! b:qf_is_loclist
     au! my_qf * <buffer>
+
+    nunmap <buffer> <c-s>
+    nunmap <buffer> <c-v><c-v>
+    nunmap <buffer> <c-t>
 
     nunmap <buffer> <cr>
     nunmap <buffer> z<cr>

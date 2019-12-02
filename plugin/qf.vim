@@ -6,6 +6,11 @@ let g:loaded_qf = 1
 " TODO: Maybe implement a popup window to preview the context of some entry in the qfl.
 " https://github.com/bfrg/vim-qf-preview
 
+" Options {{{1
+
+" don't let the default qf filetype plugin set `'stl'`, we'll do it ourselves
+let g:qf_disable_statusline = 1
+
 " Commands {{{1
 
 " `:CC 3` loads the third qfl in the stack, regardless of your current position.
@@ -51,9 +56,9 @@ augroup my_quickfix
     " importance of  `++nested`, and  how its  absence can  create hard-to-debug
     " issues.
     "}}}
-    au QuickFixCmdPost * ++nested call qf#open_maybe(expand('<amatch>'))
-    "  │                                             │
-    "  │                                             └ name of the command which was run
+    au QuickFixCmdPost * ++nested call qf#open(expand('<amatch>'))
+    "  │                                       │
+    "  │                                       └ name of the command which was run
     "  └ after a quickfix command is run
 augroup END
 
