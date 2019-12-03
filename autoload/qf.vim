@@ -602,7 +602,7 @@ endfu
 
 fu qf#open_elsewhere(where) abort "{{{2
     try
-        exe "norm! \<c-w>\<cr>"
+        exe "norm! \<c-w>\<cr>zv"
         if a:where is# 'vert split'
             wincmd H
         elseif a:where is# 'tabpage'
