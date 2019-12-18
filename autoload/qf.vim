@@ -376,8 +376,8 @@ fu qf#cupdate(mod) abort "{{{2
         " But, if the buffer is unloaded, it will just return an empty list.
         " From `:h getbufline()`:
         "
-        "     This function  works only  for loaded  buffers.  For  unloaded and
-        "     non-existing buffers, an empty |List| is returned.
+        " > This function  works only  for loaded  buffers.  For  unloaded and
+        " > non-existing buffers, an empty |List| is returned.
         "
         " Therefore, if  an entry in  the qfl is present  in a buffer  which you
         " didn't visit in the past, it  won't be loaded, and `getbufline()` will
@@ -488,9 +488,9 @@ fu qf#open(cmd) abort "{{{2
     "             │}}}
     if a:cmd is# 'lhelpgrep'
         "  ┌ next time a buffer is displayed in a window
-        "  │                              ┌ call this function to open the location window
-        "  │                              │
-        au BufWinEnter * ++once sil! call s:open('lhelpgrep')
+        "  │                         ┌ call this function to open the location window
+        "  │                         │
+        au BufWinEnter * ++once call s:open('lhelpgrep')
     else
         call s:open(a:cmd)
     endif
@@ -594,7 +594,6 @@ fu s:open(cmd) abort
         if !has('nvim')
             au SafeState * ++once helpc
         else
-            " TODO: Once Nvim supports `SafeState`, remove this.
             call timer_start(0, {-> execute('helpc')})
         endif
     endif
@@ -684,7 +683,7 @@ fu qf#undo_ftplugin() abort "{{{2
     nunmap <buffer> DD
     xunmap <buffer> D
 
-    nunmap <buffer> cof
+    nunmap <buffer> com
 
     nunmap <buffer> q
 

@@ -54,7 +54,7 @@ nno <buffer><nowait><silent> D  :<c-u>set opfunc=qf#delete_or_conceal<cr>g@
 nno <buffer><nowait><silent> DD :<c-u>set opfunc=qf#delete_or_conceal<bar>exe 'norm! '.v:count1.'g@_'<cr>
 xno <buffer><nowait><silent> D  :<c-u>call qf#delete_or_conceal('vis')<cr>
 
-nno <buffer><nowait><silent> cof :<c-u>call qf#toggle_full_filepath()<cr>
+nno <buffer><nowait><silent> com :<c-u>call qf#toggle_full_filepath()<cr>
 
 nno <buffer><nowait><silent> q :<c-u>call qf#quit()<cr>
 
