@@ -25,9 +25,10 @@ com -bang -buffer -nargs=? -complete=custom,qf#cfilter_complete Cfilter
 " `:Cupdate` updates the text of each entry in the current qfl.
 " Useful after a refactoring, to have a visual feedback.
 " Example:
-"         PQ grep -IRn pat /tmp/some_dir/
-"         noa cfdo %s/pat/rep/ge | update
-"         Cupdate
+"
+"     PQ grep -IRn pat /tmp/some_dir/
+"     noa cfdo %s/pat/rep/ge | update
+"     Cupdate
 
 com -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 "}}}1
@@ -196,6 +197,19 @@ const b:qf_is_loclist = get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
 
 " Alignment {{{1
 
+" We could also install this autocmd in our vimrc:{{{
+"
+"     au BufReadPost quickfix call s:qf_align()
+"
+" ... where `s:qf_align()` would contain commands to align the columns.
+"
+" It would work most of the time, including after `:helpg foo`.
+" But it wouldn't work after `:lh foo`.
+"
+" Because `BufReadPost quickfix` wouldn't be fired, and the function wouldn't be
+" called. However, `FileType  qf` is emitted, so  the `qf` filetype plugin  is a
+" better place to format the contents of a quickfix buffer.
+"}}}
 call qf#align()
 
 " Matches {{{1

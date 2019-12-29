@@ -60,13 +60,13 @@ let g:autoloaded_qf = 1
 "}}}
 " Example of simple value for `s:matches_any_qfl`:{{{
 "
-"    ┌ qf id
-"    │     ┌ origin
-"    │     │
-" { '1': {'myfuncs:search_todo':
-" \                             [{'group': 'Conceal', 'pat': '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?'},
-" \                              {'group': 'Todo',    'pat': '\cfixme\|todo'}]
-" \      }}
+"        ┌ qf id
+"        │     ┌ origin
+"        │     │
+"     { '1': {'myfuncs:search_todo':
+"     \                             [{'group': 'Conceal', 'pat': '^.\{-}|\s*\d\+\%(\s\+col\s\+\d\+\s*\)\=\s*|\s\='},
+"     \                              {'group': 'Todo',    'pat': '\cfixme\|todo'}]
+"     \      }}
 "}}}
 " How is it used?{{{
 "
@@ -174,8 +174,8 @@ let s:matches_any_qfl = {}
 "     call qf#set_matches({origin}, {HG}, {telling_name})
 "}}}
 const s:KNOWN_PATTERNS  = {
-    \   'location'  : '^\v.{-}\|\s*%(\d+)?\s*%(col\s+\d+)?\s*\|\s?',
-    \   'double_bar': '^|\s*|\s*\|\s*|\s*|\s*$',
+    \ 'location'  : '^.\{-}|\s*\%(\d\+\)\=\s*\%(col\s\+\d\+\)\=\s*|\s\=',
+    \ 'double_bar': '^|\s*|\s*\|\s*|\s*|\s*$',
     \ }
 
 " `$MYVIMRC` is empty when we start with `-Nu /tmp/vimrc`.
@@ -201,12 +201,9 @@ endfu
 fu qf#align() abort "{{{2
     " align the columns (more readable)
     " *except* when the qfl is populated by `:WTF`
-    let is_wtf =   !get(b:, 'qf_is_loclist', 0)
-    \            && get(getqflist({'title':0}), 'title', '') is# 'WTF'
+    let is_wtf = !get(b:, 'qf_is_loclist', 0) && get(getqflist({'title':0}), 'title', '') is# 'WTF'
 
-    if    is_wtf
-    \ || !executable('column')
-    \ || !executable('sed')
+    if is_wtf || !executable('column') || !executable('sed')
         return
     endif
 
@@ -218,27 +215,13 @@ fu qf#align() abort "{{{2
 
     try
         " prepend the first two occurrences of a bar with a literal C-a
-        sil! %!sed 's/|/\x01|/1; s/|/\x01|/2'
+        sil %!sed 's/|/\x01|/1; s/|/\x01|/2'
         " sort the text using the C-a's as delimiters
-        sil! %!column -s $'\x01' -t
+        sil %!column -s $'\x01' -t
     finally
         call setbufvar(bufnr, '&ul', ul_save)
         setl nomodifiable nomodified
     endtry
-
-    " We could also install this autocmd in our vimrc:{{{
-    "
-    "     au BufReadPost quickfix call s:qf_align()
-    "
-    " ... where `s:qf_align()` would contain commands to align the columns.
-    "
-    " It would work most of the time, including after `:helpg foo`.
-    " But it wouldn't work after `:lh foo`.
-    "
-    " Because `BufReadPost quickfix` wouldn't be fired, and the function wouldn't be
-    " called. However, `FileType  qf` is emitted, so  the `qf` filetype plugin  is a
-    " better place to format the contents of a quickfix buffer.
-    "}}}
 endfu
 
 fu qf#cc(nr, pfx) abort "{{{2
@@ -426,10 +409,10 @@ fu qf#delete_or_conceal(type, ...) abort "{{{2
                 "
                 "     let pat = '\%V.*\%V'
                 "
-                " … but the match would disappear when we change the focused window,
+                " ... but the match would disappear when we change the focused window,
                 " probably because the visual marks would be set in another buffer.
                 let [vcol1, vcol2] = [virtcol("'<"), virtcol("'>")]
-                let pat = '\v%'..vcol1..'v.*%'..vcol2..'v.'
+                let pat = '\%'..vcol1..'v.*\%'..vcol2..'v.'
                 call matchadd('Conceal', pat, 0, -1, {'Conceal' : 'x'})
                 setl cocu=nc cole=3
                 return
@@ -466,7 +449,7 @@ endfu
 
 fu qf#disable_some_keys(keys) abort "{{{2
     for a_key in a:keys
-        sil! exe 'nno  <buffer><nowait><silent>  '..a_key..'  <nop>'
+        sil exe 'nno <buffer><nowait><silent> '..a_key..' <nop>'
     endfor
 endfu
 
