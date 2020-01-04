@@ -4,9 +4,9 @@ fu qf#statusline#title(is_focused) abort
     " So even if the  function is called for a *non-focused*  qf window, you can
     " reliably query a buffer/window variable local to the latter.
     let pfx = get(b:, 'qf_is_loclist', 0) ? '[LL] ': '[QF] '
-    if ! exists('w:quickfix_title') || w:quickfix_title =~# '\<TOC$'
+    if !exists('w:quickfix_title') || w:quickfix_title =~# '\<TOC$'
         return ''
-    elseif ! a:is_focused
+    elseif !a:is_focused
         return pfx
     else
         let len = len(w:quickfix_title)

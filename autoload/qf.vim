@@ -144,7 +144,7 @@ let g:autoloaded_qf = 1
 " To avoid sourcing the qf filetype plugin when populating the qfl, we could use
 " `:noa`:
 "
-"         noa call setqflist(…)
+"     noa call setqflist(…)
 "
 " Conclusion:
 " Even with all  that, the qf filetype  plugin would be sourced twice  if the qf
@@ -347,8 +347,7 @@ endfu
 fu qf#cupdate(mod) abort "{{{2
     try
         " to restore later
-        let pos   = line('.')
-        let title = s:get_title()
+        let pos = line('.')
 
         " get a qfl where the text is updated
         let list = s:getqflist()
@@ -382,10 +381,7 @@ fu qf#cupdate(mod) abort "{{{2
 
         " set this new qfl
         let action = s:get_action(a:mod)
-        call s:setqflist(list, action)
-
-        " restore title
-        call s:setqflist([], 'a', {'title': title})
+        call s:setqflist([], action, {'items': list})
 
         call s:maybe_resize_height()
 
@@ -425,18 +421,14 @@ fu qf#delete_or_conceal(type, ...) abort "{{{2
             return
         endif
         " for future restoration
-        let pos   = min(range)
-        let title = s:get_title()
+        let pos = min(range)
 
         " get a qfl without the entries we want to delete
         let list = s:getqflist()
         call remove(list, range[0]-1, range[1]-1)
 
         " set this new qfl
-        call s:setqflist(list, 'r')
-
-        " restore title
-        call s:setqflist(list, 'r', {'title': title})
+        call s:setqflist([], 'r', {'items':list})
 
         call s:maybe_resize_height()
 
@@ -641,9 +633,9 @@ fu qf#toggle_full_filepath() abort "{{{2
 
     let qfl = s:getqflist()
     let l:Transformation = empty(get(get(qfl, 0, []), 'module', ''))
-    \                          ?    {_,v -> extend(v, {'module': fnamemodify(bufname(v.bufnr), ':t')})}
-    \                          :    {_,v -> extend(v, {'module': ''})}
-    let what =  {'items': map(qfl, l:Transformation)}
+        \ ? {_,v -> extend(v, {'module': fnamemodify(bufname(v.bufnr), ':t')})}
+        \ : {_,v -> extend(v, {'module': ''})}
+    let what = {'items': map(qfl, l:Transformation)}
     call s:setqflist([], 'r', what)
 
     call setpos('.', pos)
