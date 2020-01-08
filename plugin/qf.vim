@@ -56,9 +56,9 @@ augroup my_quickfix
     " importance of  `++nested`, and  how its  absence can  create hard-to-debug
     " issues.
     "}}}
-    au QuickFixCmdPost * ++nested call qf#open(expand('<amatch>'))
-    "  │                                       │
-    "  │                                       └ name of the command which was run
+    au QuickFixCmdPost * ++nested call qf#open_auto(expand('<amatch>'))
+    "  │                                            │
+    "  │                                            └ name of the command which was run
     "  └ after a quickfix command is run
 augroup END
 

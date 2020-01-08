@@ -46,9 +46,9 @@ call qf#disable_some_keys(['a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x']
 nno <buffer><nowait><silent> <c-q> :<c-u>Csave default<cr>
 nno <buffer><nowait><silent> <c-r> :<c-u>Crestore default<cr>
 
-nno <buffer><nowait><silent> <c-s>      :<c-u>call qf#open_elsewhere('split')<cr>
-nno <buffer><nowait><silent> <c-v><c-v> :<c-u>call qf#open_elsewhere('vert split')<cr>
-nno <buffer><nowait><silent> <c-t>      :<c-u>call qf#open_elsewhere('tabpage')<cr>
+nno <buffer><nowait><silent> <c-s>      :<c-u>call qf#open_manual('split')<cr>
+nno <buffer><nowait><silent> <c-v><c-v> :<c-u>call qf#open_manual('vert split')<cr>
+nno <buffer><nowait><silent> <c-t>      :<c-u>call qf#open_manual('tabpage')<cr>
 " FYI:{{{
 "
 " By default:
@@ -57,8 +57,8 @@ nno <buffer><nowait><silent> <c-t>      :<c-u>call qf#open_elsewhere('tabpage')<
 "     C-w t  moves the focus to the top window in the current tab page
 "}}}
 
-nno <buffer><nowait><silent>  <cr> <cr>:norm! zv<cr>
-nno <buffer><nowait><silent> z<cr> <c-w><cr>zv
+nno <buffer><nowait><silent> <cr> :<c-u>call qf#open_manual('nosplit')<cr>
+nmap <buffer><nowait><silent> <c-w><cr> <c-s>
 
 nno <buffer><nowait><silent> D  :<c-u>set opfunc=qf#conceal_or_delete<cr>g@
 nno <buffer><nowait><silent> DD :<c-u>set opfunc=qf#conceal_or_delete<bar>exe 'norm! '.v:count1.'g@_'<cr>

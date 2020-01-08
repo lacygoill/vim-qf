@@ -445,7 +445,7 @@ fu qf#disable_some_keys(keys) abort "{{{2
     endfor
 endfu
 
-fu qf#open(cmd) abort "{{{2
+fu qf#open_auto(cmd) abort "{{{2
     "             ┌ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
     "             │ But, contrary to `:helpg`, the location list is local to a window.
     "             │ Which one?
@@ -472,9 +472,9 @@ fu qf#open(cmd) abort "{{{2
 endfu
 
 fu s:open(cmd) abort
-"         │
-"         └ we need to know which command was executed to decide whether
-"           we open the qf window or the ll window
+    "     │
+    "     └ we need to know which command was executed to decide whether
+    "       we open the qf window or the ll window
 
     "                                 ┌ all the commands populating a ll seem to begin with the letter l
     "                                 │
@@ -490,8 +490,8 @@ fu s:open(cmd) abort
     " doesn't contain any valid entry (ex: `:Scriptnames`).
     " In that case, we execute sth like:
     "
-    "         do <nomodeline> QuickFixCmdPost copen
-    "         do <nomodeline> QuickFixCmdPost lopen
+    "     do <nomodeline> QuickFixCmdPost copen
+    "     do <nomodeline> QuickFixCmdPost lopen
     "
     " Here,  `:copen` and  `:lopen` are  not valid  commands because  they don't
     " populate a qfl. We could probably  use any invented name. But `:copen` and
@@ -501,20 +501,19 @@ fu s:open(cmd) abort
     let how_to_open = mod =~# '^vert'
         \ ?     mod..' '..prefix..cmd..' '..40
         \ :     mod..' '..prefix..cmd..' '..max([min([10, size]), &wmh + 2])
-    "                                       │    │
-    "                                       │    └ at most 10 lines high
-    "                                       └ at least `&wmh + 2` lines high
-    " Why `&wmh + 2`?{{{
-    "
-    " First, the number passed to `:[cl]{open|window}`  must be at least 1, even
-    " if the qfl is empty. E.g., `:lwindow 0` would raise `E939`.
-    "
-    " Second, if `'ea'` is  reset, and the qf window is only 1  or 2 lines high,
-    " pressing Enter on the qf entry would raise `E36`.
-    " In general, the issue is triggered when  the qf window is `&wmh + 1` lines
-    " high or lower.
-    "}}}
-
+     "                                       │    │
+     "                                       │    └ at most 10 lines high
+     "                                       └ at least `&wmh + 2` lines high
+     " Why `&wmh + 2`?{{{
+     "
+     " First, the number passed to `:[cl]{open|window}`  must be at least 1, even
+     " if the qfl is empty. E.g., `:lwindow 0` would raise `E939`.
+     "
+     " Second, if `'ea'` is  reset, and the qf window is only 1  or 2 lines high,
+     " pressing Enter on the qf entry would raise `E36`.
+     " In general, the issue is triggered when  the qf window is `&wmh + 1` lines
+     " high or lower.
+     "}}}
     " it will fail if there's no loclist
     try
         exe how_to_open
@@ -574,8 +573,12 @@ fu s:open(cmd) abort
     endif
 endfu
 
-fu qf#open_elsewhere(where) abort "{{{2
+fu qf#open_manual(where) abort "{{{2
     try
+        if a:where is# 'nosplit'
+            exe "norm! \<cr>zv" | return
+        endif
+
         exe "norm! \<c-w>\<cr>zv"
         if a:where is# 'vert split'
             wincmd H
@@ -655,7 +658,7 @@ fu qf#undo_ftplugin() abort "{{{2
     nunmap <buffer> <c-t>
 
     nunmap <buffer> <cr>
-    nunmap <buffer> z<cr>
+    nunmap <buffer> <c-w><cr>
 
     nunmap <buffer> D
     nunmap <buffer> DD
