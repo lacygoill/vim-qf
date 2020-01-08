@@ -1,7 +1,13 @@
 " Commands {{{1
-" Cdelete {{{2
+" Csave / Crestore / Cremove {{{2
 
-com -bar -buffer -range Cdelete call qf#delete_or_conceal('Ex', <line1>, <line2>)
+com -bar -buffer -bang -complete=custom,qf#save_restore#complete -nargs=1 Csave call qf#save_restore#save(<q-args>, <bang>0)
+com -bar -buffer -complete=custom,qf#save_restore#complete -nargs=1 Crestore call qf#save_restore#restore(<q-args>)
+com -bar -buffer -bang -complete=custom,qf#save_restore#complete -nargs=1 Cremove call qf#save_restore#remove(<q-args>, <bang>0)
+
+" Cconceal {{{2
+
+com -bar -buffer -range Cconceal call qf#conceal_or_delete('Ex', <line1>, <line2>)
 
 " Cfilter {{{2
 " Documentation:{{{
@@ -37,6 +43,9 @@ com -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 " disable some keys, to avoid annoying error messages
 call qf#disable_some_keys(['a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
 
+nno <buffer><nowait><silent> <c-q> :<c-u>Csave default<cr>
+nno <buffer><nowait><silent> <c-r> :<c-u>Crestore default<cr>
+
 nno <buffer><nowait><silent> <c-s>      :<c-u>call qf#open_elsewhere('split')<cr>
 nno <buffer><nowait><silent> <c-v><c-v> :<c-u>call qf#open_elsewhere('vert split')<cr>
 nno <buffer><nowait><silent> <c-t>      :<c-u>call qf#open_elsewhere('tabpage')<cr>
@@ -51,9 +60,9 @@ nno <buffer><nowait><silent> <c-t>      :<c-u>call qf#open_elsewhere('tabpage')<
 nno <buffer><nowait><silent>  <cr> <cr>:norm! zv<cr>
 nno <buffer><nowait><silent> z<cr> <c-w><cr>zv
 
-nno <buffer><nowait><silent> D  :<c-u>set opfunc=qf#delete_or_conceal<cr>g@
-nno <buffer><nowait><silent> DD :<c-u>set opfunc=qf#delete_or_conceal<bar>exe 'norm! '.v:count1.'g@_'<cr>
-xno <buffer><nowait><silent> D  :<c-u>call qf#delete_or_conceal('vis')<cr>
+nno <buffer><nowait><silent> D  :<c-u>set opfunc=qf#conceal_or_delete<cr>g@
+nno <buffer><nowait><silent> DD :<c-u>set opfunc=qf#conceal_or_delete<bar>exe 'norm! '.v:count1.'g@_'<cr>
+xno <buffer><nowait><silent> D  :<c-u>call qf#conceal_or_delete('vis')<cr>
 
 nno <buffer><nowait><silent> com :<c-u>call qf#toggle_full_filepath()<cr>
 

@@ -201,7 +201,7 @@ endfu
 fu qf#align() abort "{{{2
     " align the columns (more readable)
     " *except* when the qfl is populated by `:WTF`
-    let is_wtf = !get(b:, 'qf_is_loclist', 0) && get(getqflist({'title':0}), 'title', '') is# 'WTF'
+    let is_wtf = !get(b:, 'qf_is_loclist', 0) && getqflist({'title':0}).title is# 'WTF'
 
     if is_wtf || !executable('column') || !executable('sed')
         return
@@ -392,7 +392,7 @@ fu qf#cupdate(mod) abort "{{{2
     endtry
 endfu
 
-fu qf#delete_or_conceal(type, ...) abort "{{{2
+fu qf#conceal_or_delete(type, ...) abort "{{{2
     " Purpose:
     "    - conceal visual block
     "    - delete anything else (and update the qfl)
@@ -647,6 +647,9 @@ fu qf#undo_ftplugin() abort "{{{2
     unlet! b:qf_is_loclist
     au! my_qf * <buffer>
 
+    nunmap <buffer> <c-q>
+    nunmap <buffer> <c-r>
+
     nunmap <buffer> <c-s>
     nunmap <buffer> <c-v><c-v>
     nunmap <buffer> <c-t>
@@ -662,7 +665,11 @@ fu qf#undo_ftplugin() abort "{{{2
 
     nunmap <buffer> q
 
-    delc Cdelete
+    delc Csave
+    delc Crestore
+    delc Cremove
+
+    delc Cconceal
     delc Cfilter
     delc Cupdate
 endfu
@@ -760,7 +767,7 @@ fu s:get_pat(pat) abort "{{{2
     let arg2pat = {
         \ '-commented':     '^\s*'..cml,
         \ '-other_plugins': '^\S*/\%('..join(s:OTHER_PLUGINS, '\|')..'\)',
-        \ '-tmp':           '^\S*/\%(session\|tmp\)/\S*\.vim',
+        \ '-tmp':           '^\S*/\%(qfl\|session\|tmp\)/\S*\.vim',
         \ }
 
     " If `:Cfilter` was passed a special argument, interpret it.
