@@ -94,7 +94,7 @@ endfu
 
 fu qf#save_restore#save(fname, bang) abort "{{{2
     if b:qf_is_loclist
-        echo '[Csave] sorry, only a quickfix list can be saved, not a location list' | return
+        return s:error('[Csave] sorry, only a quickfix list can be saved, not a location list')
     endif
     let fname = s:expand(a:fname)
     if filereadable(fname) && !a:bang
@@ -167,19 +167,25 @@ fu qf#save_restore#remove(fname, bang) abort "{{{2
     " accident while we want `:Crestore`.
     " Asking for a bang reduces the risk of such accidents.
     "}}}
-    if !a:bang | echohl ErrorMsg | echo '[Cremove] add a bang' | echohl NONE | return | endif
+    if !a:bang | return s:error('[Cremove] add a bang') | endif
     let fname = s:expand(a:fname)
     if !filereadable(fname)
-        echo '[Cdelete] cannot remove '..fname..' ; file not readable' | return
+        echo '[Cremove] cannot remove '..fname..' ; file not readable' | return
     endif
     if delete(fname)
-        echo '[Cdelete] failed to remove '..fname
+        echo '[Cremove] failed to remove '..fname
     else
-        echo '[Cdelete] removed '..fname
+        echo '[Cremove] removed '..fname
     endif
 endfu
 "}}}1
 " Util {{{1
+fu s:error(msg) abort "{{{2
+    echohl ErrorMsg
+    echo a:msg
+    echohl NONE
+endfu
+
 fu s:expand(fname) abort "{{{2
     return s:QFL_DIR..'/'..a:fname..'.vim'
 endfu

@@ -32,9 +32,9 @@ com -bang -buffer -nargs=? -complete=custom,qf#cfilter_complete Cfilter
 " Useful after a refactoring, to have a visual feedback.
 " Example:
 "
-"     PQ grep -IRn pat /tmp/some_dir/
-"     noa cfdo %s/pat/rep/ge | update
-"     Cupdate
+"     :cgete system('grep -IRn pat /tmp/some_dir/')
+"     :noa cfdo %s/pat/rep/ge | update
+"     :Cupdate
 
 com -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 "}}}1
@@ -61,7 +61,7 @@ nno <buffer><nowait><silent> <cr> :<c-u>call qf#open_manual('nosplit')<cr>
 nmap <buffer><nowait><silent> <c-w><cr> <c-s>
 
 nno <buffer><nowait><silent> D  :<c-u>set opfunc=qf#conceal_or_delete<cr>g@
-nno <buffer><nowait><silent> DD :<c-u>set opfunc=qf#conceal_or_delete<bar>exe 'norm! '.v:count1.'g@_'<cr>
+nno <buffer><nowait><silent> DD :<c-u>set opfunc=qf#conceal_or_delete<bar>exe 'norm! '..v:count1..'g@_'<cr>
 xno <buffer><nowait><silent> D  :<c-u>call qf#conceal_or_delete('vis')<cr>
 
 nno <buffer><nowait><silent> com :<c-u>call qf#toggle_full_filepath()<cr>
@@ -127,7 +127,7 @@ augroup END
 
 " the 4  spaces before `%l`  make sure that  the line address  is well-separated
 " from the title, even when the latter is long and the terminal window is narrow
-call lg#set_stl(
+sil! call lg#set_stl(
     \ '%{qf#statusline#title(1)}%=    %l/%L ',
     \ '%{qf#statusline#title(0)}%=    %l/%L ')
 " Once Nvim supports `g:statusline_winid`, refactor this function call into this:{{{

@@ -574,6 +574,7 @@ fu s:open(cmd) abort
 endfu
 
 fu qf#open_manual(where) abort "{{{2
+    let sb_was_on = &sb | set nosb
     try
         if a:where is# 'nosplit'
             exe "norm! \<cr>zv" | return
@@ -581,7 +582,7 @@ fu qf#open_manual(where) abort "{{{2
 
         exe "norm! \<c-w>\<cr>zv"
         if a:where is# 'vert split'
-            wincmd H
+            wincmd L
         elseif a:where is# 'tabpage'
             let orig = win_getid()
             tab sp
@@ -592,6 +593,8 @@ fu qf#open_manual(where) abort "{{{2
         endif
     catch
         return lg#catch_error()
+    finally
+        if sb_was_on | set sb | endif
     endtry
 endfu
 
