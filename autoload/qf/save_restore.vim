@@ -98,7 +98,7 @@ fu qf#save_restore#save(fname, bang) abort "{{{2
     endif
     let fname = s:expand(a:fname)
     if filereadable(fname) && !a:bang
-        echo printf('[Csave] %s is an existing file; add ! to overwrite', fname) | return
+        return s:error('[Csave] '..fname..' is an existing file; add ! to overwrite')
     endif
     let items = getqflist({'items': 0}).items
     if empty(items) | echo '[Csave] no quickfix list to save' | return | endif
@@ -154,6 +154,10 @@ endfu
 
 fu qf#save_restore#restore(fname) abort "{{{2
     let fname = s:expand(a:fname)
+    if !filereadable(fname)
+        echo '[Crestore] '..fname..' is not readable'
+        return
+    endif
     exe 'so '..fnameescape(fname)
     cw
     echo '[Crestore] quickfix list restored from '..fname

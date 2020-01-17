@@ -574,6 +574,9 @@ fu s:open(cmd) abort
 endfu
 
 fu qf#open_manual(where) abort "{{{2
+    let size = b:qf_is_loclist ? getloclist(0, {'size': 0}).size : getqflist({'size': 0}).size
+    if empty(size) | echo (b:qf_is_loclist ? 'location' : 'quickfix')..' list is empty' | return | endif
+
     let sb_was_on = &sb | set nosb
     try
         if a:where is# 'nosplit'
