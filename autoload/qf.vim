@@ -681,8 +681,6 @@ fu qf#undo_ftplugin() abort "{{{2
     delc Cconceal
     delc Cfilter
     delc Cupdate
-
-    delc CshellOutput2qfl
 endfu
 "}}}1
 " Utilities {{{1

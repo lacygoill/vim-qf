@@ -38,9 +38,6 @@ com -bang -buffer -nargs=? -complete=custom,qf#cfilter_complete Cfilter
 
 com -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 
-" Cshelloutput2qfl {{{2
-
-com -bar -buffer CshellOutput2qfl call qf#shelloutput2qfl#main()
 "}}}1
 " Mappings {{{1
 
