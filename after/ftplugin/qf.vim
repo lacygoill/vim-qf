@@ -229,6 +229,8 @@ call qf#align()
 " The  2nd time  we display  a  qf buffer  in  the same  window, there's  no
 " guarantee that we're going to conceal anything.
 "}}}
+" FIXME: This creates an issue when we press `gO` in an Nvim help buffer to get the TOC.
+" The conceal is disabled on the current line even in normal mode; it should not.
 setl cocu< cole<
 call clearmatches()
 call qf#create_matches()
