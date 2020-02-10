@@ -14,14 +14,21 @@ let g:qf_disable_statusline = 1
 " Commands {{{1
 
 " `:CC 3` loads the third qfl in the stack, regardless of your current position.
-com -bar -nargs=1 CC  call qf#cc(<q-args>, 'c')
-com -bar -nargs=1 LL  call qf#cc(<q-args>, 'l')
+com -bar -nargs=1 CC call qf#cc(<q-args>, 'c')
+com -bar -nargs=1 LL call qf#cc(<q-args>, 'l')
+" TODO: Get rid of `:CC` and `:LL` once 8.1.1281 has been ported to Nvim.{{{
+"
+" The  latter  patch has  extended  `:[cl]history`  to  allow  it to  select  an
+" arbitrary qfl in the stack, via a count.
+"
+" Just use `:[count]chi` and `:[count]lhi`.
+"}}}
 
 com -bar CFreeStack call qf#cfree_stack(0)
 com -bar LFreeStack call qf#cfree_stack(1)
 
-com -nargs=1 -range=% -addr=buffers  CGrepBuffer  call qf#cgrep_buffer(<line1>, <line2>, <q-args>, 0)
-com -nargs=1 -range=% -addr=buffers  LGrepBuffer  call qf#cgrep_buffer(<line1>, <line2>, <q-args>, 1)
+com -nargs=1 -range=% -addr=buffers CGrepBuffer call qf#cgrep_buffer(<line1>, <line2>, <q-args>, 0)
+com -nargs=1 -range=% -addr=buffers LGrepBuffer call qf#cgrep_buffer(<line1>, <line2>, <q-args>, 1)
 
 " Autocmds {{{1
 

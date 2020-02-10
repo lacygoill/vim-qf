@@ -89,7 +89,7 @@ endif
 
 " Interface {{{1
 fu qf#save_restore#complete(_a, _l, _p) abort "{{{2
-    return join(map(glob($HOME..'/.vim/qfl/*.vim', 0, 1), {_,v -> fnamemodify(v, ':t:r')}), "\n")
+    return join(map(glob($HOME..'/.vim/qfl/*.txt', 0, 1), {_,v -> fnamemodify(v, ':t:r')}), "\n")
 endfu
 
 fu qf#save_restore#save(fname, bang) abort "{{{2
@@ -191,6 +191,13 @@ fu s:error(msg) abort "{{{2
 endfu
 
 fu s:expand(fname) abort "{{{2
-    return s:QFL_DIR..'/'..a:fname..'.vim'
+    " Do *not* use the `.vim` extension?{{{
+    "
+    " It  would lead  to too  many spurious  matches when  we use  this kind  of
+    " `:vimgrep` command:
+    "
+    "     :vim /pat/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
+    "}}}
+    return s:QFL_DIR..'/'..a:fname..'.txt'
 endfu
 

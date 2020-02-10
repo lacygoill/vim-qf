@@ -203,7 +203,7 @@ let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 " Variables {{{1
 
 " Are we viewing a location list or a quickfix list?
-const b:qf_is_loclist = get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
+const b:qf_is_loclist = getwininfo(win_getid())[0].loclist
 
 " Alignment {{{1
 
