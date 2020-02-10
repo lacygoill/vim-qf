@@ -196,7 +196,7 @@ fu s:expand(fname) abort "{{{2
     " It  would lead  to too  many spurious  matches when  we use  this kind  of
     " `:vimgrep` command:
     "
-    "     :vim /pat/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
+    "     :vim /pat/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** $MYVIMRC
     "}}}
     return s:QFL_DIR..'/'..a:fname..'.txt'
 endfu

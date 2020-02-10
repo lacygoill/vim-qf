@@ -14,8 +14,8 @@ let g:qf_disable_statusline = 1
 " Commands {{{1
 
 " `:CC 3` loads the third qfl in the stack, regardless of your current position.
-com -bar -nargs=1 CC call qf#cc(<q-args>, 'c')
-com -bar -nargs=1 LL call qf#cc(<q-args>, 'l')
+com -bar -nargs=? CC call qf#cc(<q-args>, 'c')
+com -bar -nargs=? LL call qf#cc(<q-args>, 'l')
 " TODO: Get rid of `:CC` and `:LL` once 8.1.1281 has been ported to Nvim.{{{
 "
 " The  latter  patch has  extended  `:[cl]history`  to  allow  it to  select  an

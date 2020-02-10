@@ -182,7 +182,7 @@ const s:KNOWN_PATTERNS  = {
 if $MYVIMRC is# ''
     let s:OTHER_PLUGINS = ['autoload/plug.vim']
 else
-    let s:VIMRC_FILE = has('nvim') ? $HOME..'/.vim/vimrc' : $MYVIMRC
+    let s:VIMRC_FILE = $MYVIMRC
     let s:OTHER_PLUGINS = readfile(s:VIMRC_FILE) | unlet! s:VIMRC_FILE
     call filter(s:OTHER_PLUGINS, {_,v -> v =~# '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)'})
     call map(s:OTHER_PLUGINS, {_,v -> 'plugged/'..matchstr(v, '.\{-}/\zs[^,'']*')})
@@ -225,6 +225,11 @@ fu qf#align() abort "{{{2
 endfu
 
 fu qf#cc(nr, pfx) abort "{{{2
+    if a:nr is# ''
+        exe a:pfx is# 'c' ? 'cc' : 'll'
+        return
+    endif
+
     let pos = a:pfx is# 'c' ? get(getqflist({'nr': 0}), 'nr', 0) : get(getloclist(0, {'nr': 0}), 'nr', 0)
     let offset = a:nr - pos
     try
