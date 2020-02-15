@@ -100,6 +100,7 @@ fu qf#save_restore#save(fname, bang) abort "{{{2
     if filereadable(fname) && !a:bang
         return s:error('[Csave] '..fname..' is an existing file; add ! to overwrite')
     endif
+    let g:LAST_QFL = fname
     let items = getqflist({'items': 0}).items
     if empty(items) | echo '[Csave] no quickfix list to save' | return | endif
     " Explanation:{{{
@@ -127,13 +128,21 @@ fu qf#save_restore#save(fname, bang) abort "{{{2
     " Without, there  would be a  risk of  getting null characters,  which would
     " later break the sourcing of the file.
     " This is because a backslash has a special meaning, even in the replacement
-    " part of a substitution; we need to make sure it's parsed literally.
+    " part of a substitution.
+    "
+    " From `:h :s%`
+    "
+    " >    The special meaning is also used inside the third argument {sub} of
+    " >    the |substitute()| function with the following exceptions:
+    " >    ...
     "
     " MWE:
     "
     "     let dict = {'a': 'b\nc'}
     "     echo substitute('%s', '%s', string(dict), '') =~# '\%x00'
     "     1~
+    "
+    " We need to make sure it's parsed literally.
     "
     " ---
     "
@@ -146,14 +155,23 @@ fu qf#save_restore#save(fname, bang) abort "{{{2
     "            ^
     "
     " And again, those backslashes must be parsed literally by `substitute()`.
+    "
+    " ---
+    "
+    " Similar issue with `&` which has a special meaning.
     "}}}
-    let lines[0] = substitute(lines[0], '%s', escape(string(qfl), '\'), '')
+    let lines[0] = substitute(lines[0], '%s', escape(string(qfl), '&\'), '')
     call writefile(lines, fname)
     echo '[Csave] quickfix list saved in '..fname
 endfu
 
 fu qf#save_restore#restore(fname) abort "{{{2
-    let fname = s:expand(a:fname)
+    if a:fname is# ''
+        let fname = get(g:, 'LAST_QFL', '')
+    else
+        let fname = s:expand(a:fname)
+    endif
+
     if !filereadable(fname)
         echo '[Crestore] '..fname..' is not readable'
         return
@@ -196,7 +214,7 @@ fu s:expand(fname) abort "{{{2
     " It  would lead  to too  many spurious  matches when  we use  this kind  of
     " `:vimgrep` command:
     "
-    "     :vim /pat/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** $MYVIMRC
+    "     :vim /pat/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
     "}}}
     return s:QFL_DIR..'/'..a:fname..'.txt'
 endfu

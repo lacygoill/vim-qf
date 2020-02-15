@@ -201,7 +201,16 @@ endfu
 fu qf#align() abort "{{{2
     " align the columns (more readable)
     " *except* when the qfl is populated by `:WTF`
-    let is_wtf = !get(b:, 'qf_is_loclist', 0) && getqflist({'title':0}).title is# 'WTF'
+    " TODO: Once Nvim issue #11855 is fixed, you could simplify this:{{{
+    "
+    "     let is_wtf = !get(b:, 'qf_is_loclist', 0) && getqflist({'title':0}).title is# 'WTF'
+    "
+    " https://github.com/neovim/neovim/issues/11855
+    "}}}
+    let is_wtf = !get(b:, 'qf_is_loclist', 0)
+        \ && (has('nvim')
+        \     ? !empty(getqflist()) && getqflist({'title':0}).title is# 'WTF'
+        \     : getqflist({'title':0}).title is# 'WTF')
 
     if is_wtf || !executable('column') || !executable('sed')
         return

@@ -2,7 +2,7 @@
 " Csave / Crestore / Cremove {{{2
 
 com -bar -buffer -bang -complete=custom,qf#save_restore#complete -nargs=1 Csave call qf#save_restore#save(<q-args>, <bang>0)
-com -bar -buffer -complete=custom,qf#save_restore#complete -nargs=1 Crestore call qf#save_restore#restore(<q-args>)
+com -bar -buffer -complete=custom,qf#save_restore#complete -nargs=? Crestore call qf#save_restore#restore(<q-args>)
 com -bar -buffer -bang -complete=custom,qf#save_restore#complete -nargs=1 Cremove call qf#save_restore#remove(<q-args>, <bang>0)
 
 " Cconceal {{{2
