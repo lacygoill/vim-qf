@@ -247,7 +247,7 @@ fu qf#cc(nr, pfx) abort "{{{2
         endif
         sil exe a:pfx..(offset > 0 ? 'newer' : 'older')..abs(offset)
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -283,7 +283,7 @@ fu qf#cfilter(bang, pat, mod) abort "{{{2
             \       ?    pat
             \       :    'the pattern')
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -354,7 +354,7 @@ fu qf#create_matches() abort "{{{2
         endif
 
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -402,7 +402,7 @@ fu qf#cupdate(mod) abort "{{{2
         " restore position
         exe 'norm! '..pos..'G'
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -449,7 +449,7 @@ fu qf#conceal_or_delete(type, ...) abort "{{{2
         " restore position
         exe 'norm! '..pos..'G'
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -532,7 +532,7 @@ fu s:open(cmd) abort
     try
         exe how_to_open
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 
     if a:cmd is# 'helpgrep'
@@ -609,7 +609,7 @@ fu qf#open_manual(where) abort "{{{2
             call win_gotoid(new)
         endif
     catch
-        return lg#catch_error()
+        return lg#catch()
     finally
         if sb_was_on | set sb | endif
     endtry
@@ -628,7 +628,7 @@ fu qf#set_matches(origin, group, pat) abort "{{{2
         \                                                     )})
 
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -749,7 +749,7 @@ fu s:get_id() abort "{{{2
                          \ :    function('getqflist',        [{'id': 0}])
         return get(l:Getqflist_id(), 'id', 0)
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 

@@ -80,7 +80,7 @@ let g:autoloaded_qf#save_restore = 1
 
 " Init {{{1
 
-const s:QFL_DIR = $HOME..'/.vim/qfl'
+const s:QFL_DIR = $HOME..'/.vim/tmp/qfl'
 if !isdirectory(s:QFL_DIR)
     if mkdir(s:QFL_DIR, 'p', 0700)
         echom '[vim-qf] failed to create directory '..s:QFL_DIR
@@ -89,7 +89,7 @@ endif
 
 " Interface {{{1
 fu qf#save_restore#complete(_a, _l, _p) abort "{{{2
-    return join(map(glob($HOME..'/.vim/qfl/*.txt', 0, 1), {_,v -> fnamemodify(v, ':t:r')}), "\n")
+    return join(map(glob(s:QFL_DIR..'/*.txt', 0, 1), {_,v -> fnamemodify(v, ':t:r')}), "\n")
 endfu
 
 fu qf#save_restore#save(fname, bang) abort "{{{2
