@@ -684,6 +684,9 @@ fu qf#undo_ftplugin() abort "{{{2
     nunmap <buffer> DD
     xunmap <buffer> D
 
+    nunmap <buffer> p
+    nunmap <buffer> P
+
     nunmap <buffer> com
 
     nunmap <buffer> q
@@ -823,7 +826,11 @@ endfu
 
 fu s:maybe_resize_height() abort "{{{2
     if winwidth(0) == &columns
-        exe min([10, len(s:getqflist())])..'wincmd _'
+        " no more than 10 lines
+        let newheight = min([10, len(s:getqflist())])
+        " at least 2 lines (to avoid `E36` if we've reset `'ea'`)
+        let newheight = max([2, newheight])
+        exe newheight..'wincmd _'
     endif
 endfu
 

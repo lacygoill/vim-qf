@@ -67,5 +67,7 @@ augroup my_quickfix
     "  │                                            │
     "  │                                            └ name of the command which was run
     "  └ after a quickfix command is run
+
+    au FileType qf call qf#preview#mappings()
 augroup END
 

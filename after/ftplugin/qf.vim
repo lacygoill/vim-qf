@@ -37,12 +37,11 @@ com -bang -buffer -nargs=? -complete=custom,qf#cfilter_complete Cfilter
 "     :Cupdate
 
 com -bar -buffer Cupdate call qf#cupdate(<q-mods>)
-
 "}}}1
 " Mappings {{{1
 
 " disable some keys, to avoid annoying error messages
-call qf#disable_some_keys(['a', 'd', 'gj', 'gqq' , 'i', 'o', 'p', 'r', 'u', 'x'])
+call qf#disable_some_keys(['a', 'd', 'gj', 'gqq' , 'i', 'o', 'r', 'u', 'x'])
 
 nno <buffer><nowait><silent> <c-q> :<c-u>Csave default<cr>
 nno <buffer><nowait><silent> <c-r> :<c-u>Crestore default<cr>
@@ -66,6 +65,9 @@ nno <buffer><nowait><silent> DD :<c-u>set opfunc=qf#conceal_or_delete<bar>exe 'n
 xno <buffer><nowait><silent> D  :<c-u>call qf#conceal_or_delete('vis')<cr>
 
 nno <buffer><nowait><silent> com :<c-u>call qf#toggle_full_filepath()<cr>
+
+nno <buffer><nowait><silent> p :<c-u>call qf#preview#open()<cr>
+nno <buffer><nowait><silent> P :<c-u>call qf#preview#open('persistently')<cr>
 
 nno <buffer><nowait><silent> q :<c-u>call qf#quit()<cr>
 
