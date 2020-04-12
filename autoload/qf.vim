@@ -454,8 +454,8 @@ fu qf#conceal_or_delete(type, ...) abort "{{{2
 endfu
 
 fu qf#disable_some_keys(keys) abort "{{{2
-    for a_key in a:keys
-        sil exe 'nno <buffer><nowait><silent> '..a_key..' <nop>'
+    for key in a:keys
+        sil exe 'nno <buffer><nowait><silent> '..key..' <nop>'
     endfor
 endfu
 
