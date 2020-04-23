@@ -493,13 +493,15 @@ fu s:open(cmd) abort
     "                                 ┌ all the commands populating a ll seem to begin with the letter l
     "                                 │
     let [prefix, size] = a:cmd =~# '^l'
-                     \ ?     ['l', len(getloclist(0))]
-                     \ :     ['c', len(getqflist())]
+        \ ?     ['l', getloclist(0, {'size': 0}).size]
+        \ :     ['c', getqflist({'size': 0}).size]
 
     let mod = call('lg#window#get_modifier', a:cmd =~# '^l' ? [1] : [])
     "                                                          │
     "            flag meaning we're going to open a loc window ┘
 
+    " Wait.  `:copen` can't populate the qfl.  How could `cmd` be `copen`?{{{
+    "
     " In some of our  plugins, we may want to open the qf  window even though it
     " doesn't contain any valid entry (ex: `:Scriptnames`).
     " In that case, we execute sth like:
@@ -507,27 +509,31 @@ fu s:open(cmd) abort
     "     do <nomodeline> QuickFixCmdPost copen
     "     do <nomodeline> QuickFixCmdPost lopen
     "
-    " Here,  `:copen` and  `:lopen` are  not valid  commands because  they don't
-    " populate a qfl. We could probably  use any invented name. But `:copen` and
-    "  `:lopen`  make the  code more  readable. The command  name expresses  our
-    " intention: we want to open the qf window unconditionally
+    " In these  examples, `:copen` and  `:lopen` are not valid  commands because
+    " they don't  populate a  qfl.  We  could probably use  an ad-hoc  name, but
+    " `:copen`  and `:lopen`  make the  code more  readable.  The  command names
+    " express our intention: we want to open the qf window unconditionally
+    "}}}
     let cmd = expand('<amatch>') =~# '^[cl]open$' ? 'open' : 'window'
-    let how_to_open = mod =~# '^vert'
-        \ ?     mod..' '..prefix..cmd..' '..40
-        \ :     mod..' '..prefix..cmd..' '..max([min([10, size]), &wmh + 2])
-     "                                       │    │
-     "                                       │    └ at most 10 lines high
-     "                                       └ at least `&wmh + 2` lines high
-     " Why `&wmh + 2`?{{{
-     "
-     " First, the number passed to `:[cl]{open|window}`  must be at least 1, even
-     " if the qfl is empty. E.g., `:lwindow 0` would raise `E939`.
-     "
-     " Second, if `'ea'` is  reset, and the qf window is only 1  or 2 lines high,
-     " pressing Enter on the qf entry would raise `E36`.
-     " In general, the issue is triggered when  the qf window is `&wmh + 1` lines
-     " high or lower.
-     "}}}
+    if mod =~# 'vert'
+        let how_to_open = mod..' '..prefix..cmd..' '..s:get_width(a:cmd)
+    else
+        let how_to_open = mod..' '..prefix..cmd..' '..max([min([10, size]), &wmh + 2])
+        "                                              │    │
+        "                                              │    └ at most 10 lines high
+        "                                              └ at least `&wmh + 2` lines high
+        " Why `&wmh + 2`?{{{
+        "
+        " First, the number passed to `:[cl]{open|window}`  must be at least 1, even
+        " if the qfl is empty. E.g., `:lwindow 0` would raise `E939`.
+        "
+        " Second, if `'ea'` is  reset, and the qf window is only 1  or 2 lines high,
+        " pressing Enter on the qf entry would raise `E36`.
+        " In general, the issue is triggered when  the qf window is `&wmh + 1` lines
+        " high or lower.
+        "}}}
+    endif
+
     " it will fail if there's no loclist
     try
         exe how_to_open
@@ -818,6 +824,20 @@ fu s:get_title() abort "{{{2
     return get(b:, 'qf_is_loclist', 0)
        \ ?     get(getloclist(0, {'title': 0}), 'title', '')
        \ :     get(getqflist({'title': 0}), 'title', '')
+endfu
+
+fu s:get_width(cmd) abort "{{{2
+    let title = a:cmd =~# '^l' ? getloclist(0, {'title': 0}).title : getqflist({'title': 0}).title
+    if title is# 'TOC'
+        let lines_length = map(getloclist(0, {'items':0}).items, 'strchars(v:val.text, 1)')
+        call remove(lines_length, 0) " ignore first line (it may be very long, and is not that useful)
+        let longest_line = max(lines_length)
+        let right_padding = 1
+        let width = min([40, longest_line + right_padding + (&l:scl isnot# 'no' ? 2 : 0)])
+    else
+        let width = 40
+    endif
+    return width
 endfu
 
 fu s:getqflist() abort "{{{2

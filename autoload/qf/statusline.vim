@@ -9,7 +9,7 @@ fu qf#statusline#title(is_focused) abort
     elseif !a:is_focused
         return pfx
     else
-        let len = len(w:quickfix_title)
+        let len = strlen(w:quickfix_title)
         " Why not using `.80` in the outer `%{qf#...()}`?{{{
         "
         " When the title is too long, Vim would truncate its start.
