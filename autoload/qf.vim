@@ -454,8 +454,10 @@ fu qf#conceal_or_delete(type, ...) abort "{{{2
 endfu
 
 fu qf#disable_some_keys(keys) abort "{{{2
+    if !exists('b:undo_ftplugin') | let b:undo_ftplugin = 'exe' | endif
     for key in a:keys
         sil exe 'nno <buffer><nowait><silent> '..key..' <nop>'
+        let b:undo_ftplugin ..= '|exe "nunmap <buffer> '..key..'"'
     endfor
 endfu
 

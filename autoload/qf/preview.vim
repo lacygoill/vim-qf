@@ -8,24 +8,29 @@ let g:autoloaded_qf#preview = 1
 if !has('nvim')
     " this tells the popup filter which keys it must handle, and how
     const s:FILTER_KEYS = {
-        \ "\<m-j>": {id -> win_execute(id, 'exe "norm! \<c-e>"')},
-        \ "\<m-k>": {id -> win_execute(id, 'exe "norm! \<c-y>"')},
-        \ "\<m-d>": {id -> win_execute(id, 'exe "norm! \<c-d>"')},
-        \ "\<m-u>": {id -> win_execute(id, 'exe "norm! \<c-u>"')},
-        \ "\<m-g>": {id -> win_execute(id, 'norm! gg')},
-        \ "\<m-s-g>" : {id -> win_execute(id, 'norm! G')},
-        \ "\<m-m>": {-> s:set_height(-1)},
-        \ "\<m-p>": {-> s:set_height(1)},
+        \ lg#map#meta_notation('j'): {id -> win_execute(id, 'exe "norm! \<c-e>"')},
+        \ lg#map#meta_notation('k'): {id -> win_execute(id, 'exe "norm! \<c-y>"')},
+        \ lg#map#meta_notation('d'): {id -> win_execute(id, 'exe "norm! \<c-d>"')},
+        \ lg#map#meta_notation('u'): {id -> win_execute(id, 'exe "norm! \<c-u>"')},
+        \ lg#map#meta_notation('g'): {id -> win_execute(id, 'norm! gg')},
+        \ lg#map#meta_notation('G'): {id -> win_execute(id, 'norm! G')},
+        \ lg#map#meta_notation('m'): {-> s:set_height(-1)},
+        \ lg#map#meta_notation('p'): {-> s:set_height(1)},
         "\ toggle number column
-        \ "\<m-n>": {id -> setwinvar(id, '&number', !getwinvar(id, '&number'))},
+        \ lg#map#meta_notation('n'): {id -> setwinvar(id, '&number', !getwinvar(id, '&number'))},
         "\ reset topline to the line of the quickfix entry;
         "\ useful to get back to original position after scrolling
-        \ "\<m-r>": {id -> [
+        \ lg#map#meta_notation('r'): {id -> [
         \     popup_setoptions(id, #{firstline: w:_qfpreview.firstline}),
         \     popup_setoptions(id, #{firstline: 0}),
         \     s:set_signcolumn(),
         \ ]},
         \ }
+else
+    fu s:snr() abort
+        return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
+    endfu
+    let s:snr = get(s:, 'snr', s:snr())
 endif
 
 " Interface {{{1
@@ -85,24 +90,26 @@ fu qf#preview#mappings() abort
     " but it would disable *all* mappings while the popup is visible.
     "}}}
     if !has('nvim')
+        if !exists('b:undo_ftplugin') | let b:undo_ftplugin = 'exe' | endif
         for key in keys(s:FILTER_KEYS)
             exe 'nno <buffer><nowait> '..key..' '..key
+            let b:undo_ftplugin ..= '|exe "nunmap <buffer> '..key..'"'
         endfor
         return
     endif
 
-    nno <buffer><nowait><silent> <m-j> :<c-u>call <sid>scroll('c-e')<cr>
-    nno <buffer><nowait><silent> <m-k> :<c-u>call <sid>scroll('c-y')<cr>
-    nno <buffer><nowait><silent> <m-d> :<c-u>call <sid>scroll('c-d')<cr>
-    nno <buffer><nowait><silent> <m-u> :<c-u>call <sid>scroll('c-u')<cr>
-    nno <buffer><nowait><silent> <m-g> :<c-u>call <sid>scroll('gg')<cr>
-    nno <buffer><nowait><silent> <m-s-g> :<c-u>call <sid>scroll('G')<cr>
+    sil! call lg#map#meta('j', ':<c-u>call '..s:snr..'scroll("c-e")<cr>', 'n', 'bns')
+    sil! call lg#map#meta('k', ':<c-u>call '..s:snr..'scroll("c-y")<cr>', 'n', 'bns')
+    sil! call lg#map#meta('d', ':<c-u>call '..s:snr..'scroll("c-d")<cr>', 'n', 'bns')
+    sil! call lg#map#meta('u', ':<c-u>call '..s:snr..'scroll("c-u")<cr>', 'n', 'bns')
+    sil! call lg#map#meta('g', ':<c-u>call '..s:snr..'scroll("gg")<cr>', 'n', 'bns')
+    sil! call lg#map#meta('G', ':<c-u>call '..s:snr..'scroll("G")<cr>', 'n', 'bns')
 
-    nno <buffer><nowait><silent> <m-m> :<c-u>call <sid>set_height(-1)<cr>
-    nno <buffer><nowait><silent> <m-p> :<c-u>call <sid>set_height(+1)<cr>
+    sil! call lg#map#meta('m', ':<c-u>call '..s:snr..'set_height(-1)<cr>', 'n', 'bns')
+    sil! call lg#map#meta('p', ':<c-u>call '..s:snr..'set_height(+1)<cr>', 'n', 'bns')
 
-    nno <buffer><nowait><silent> <m-n> :<c-u>call <sid>toggle_numbercolumn()<cr>
-    nno <buffer><nowait><silent> <m-r> :<c-u>call <sid>jump_back_to_curentry()<cr>
+    sil! call lg#map#meta('n', ':<c-u>call '..s:snr..'toggle_numbercolumn()<cr>', 'n', 'bns')
+    sil! call lg#map#meta('r', ':<c-u>call '..s:snr..'jump_back_to_curentry()<cr>', 'n', 'bns')
 endfu
 "}}}1
 " Core {{{1
