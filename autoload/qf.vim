@@ -372,8 +372,8 @@ fu qf#cupdate(mod) abort "{{{2
         " But, if the buffer is unloaded, it will just return an empty list.
         " From `:h getbufline()`:
         "
-        " > This function  works only  for loaded  buffers.  For  unloaded and
-        " > non-existing buffers, an empty |List| is returned.
+        " >     This function  works only  for loaded  buffers.  For  unloaded and
+        " >     non-existing buffers, an empty |List| is returned.
         "
         " Therefore, if  an entry in  the qfl is present  in a buffer  which you
         " didn't visit in the past, it  won't be loaded, and `getbufline()` will
