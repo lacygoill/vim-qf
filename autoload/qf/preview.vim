@@ -125,7 +125,7 @@ fu s:popup_create() abort "{{{2
     if !curentry.valid | return | endif
 
     let opts = s:get_line_and_anchor(wininfo)
-    if type(opts) != type({}) | return | endif
+    if type(opts) != v:t_dict | return | endif
 
     let w:_qfpreview.firstline = curentry.lnum
     call extend(opts, {
