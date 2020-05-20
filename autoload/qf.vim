@@ -461,6 +461,18 @@ fu qf#disable_some_keys(keys) abort "{{{2
     endfor
 endfu
 
+fu qf#nv(errorfile) abort "{{{2
+    let file = readfile(a:errorfile)
+    if empty(file) | return | endif
+    let title = remove(file, 0)
+    " we use simple error formats suitable for a grep-like command
+    let qfl = getqflist({'lines': file, 'efm': '%f:%l:%c:%m,%f:%l:%m'})
+    let items = get(qfl, 'items', [])
+    call setqflist([], ' ', {'items': items, 'title': title})
+    cw
+    return ''
+endfu
+
 fu qf#open_auto(cmd) abort "{{{2
     "             ┌ `:lh`, like `:helpg`, opens a help window (with 1st match). {{{
     "             │ But, contrary to `:helpg`, the location list is local to a window.
@@ -835,7 +847,9 @@ fu s:get_width(cmd) abort "{{{2
         call remove(lines_length, 0) " ignore first line (it may be very long, and is not that useful)
         let longest_line = max(lines_length)
         let right_padding = 1
-        let width = min([40, longest_line + right_padding + (&l:scl isnot# 'no' ? 2 : 0)])
+        " this should evaluate to the total width of the fold/number/sign columns
+        let left_columns = wincol() - virtcol('.')
+        let width = min([40, longest_line + right_padding + left_columns])
     else
         let width = 40
     endif
