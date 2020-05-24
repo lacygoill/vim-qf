@@ -358,6 +358,13 @@ fu qf#create_matches() abort "{{{2
     endtry
 endfu
 
+fu qf#remove_invalid_entries() abort "{{{2
+    let qfl = getqflist()
+    call filter(qfl, 'v:val.valid')
+    let title = getqflist({'title': 0})
+    call setqflist([], 'r', {'items': qfl, 'title': title})
+endfu
+
 fu qf#cupdate(mod) abort "{{{2
     try
         " to restore later
@@ -710,6 +717,8 @@ fu qf#undo_ftplugin() abort "{{{2
     nunmap <buffer> com
 
     nunmap <buffer> q
+
+    delc CRemoveInvalid
 
     delc Csave
     delc Crestore

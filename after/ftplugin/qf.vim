@@ -1,4 +1,8 @@
 " Commands {{{1
+" CRemoveInvalid {{{2
+
+com -bar -buffer CRemoveInvalid call qf#remove_invalid_entries()
+
 " Csave / Crestore / Cremove {{{2
 
 com -bar -buffer -bang -complete=custom,qf#save_restore#complete -nargs=1 Csave call qf#save_restore#save(<q-args>, <bang>0)
