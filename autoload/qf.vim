@@ -413,33 +413,32 @@ fu qf#cupdate(mod) abort "{{{2
     endtry
 endfu
 
-fu qf#conceal_or_delete(type, ...) abort "{{{2
+fu qf#conceal_or_delete(...) abort "{{{2
+    if !a:0
+        let &opfunc = 'qf#conceal_or_delete'
+        return 'g@'
+    endif
+    let type = a:0 == 1 ? a:1 : 'Ex'
     " Purpose:
     "    - conceal visual block
     "    - delete anything else (and update the qfl)
     try
-        if index(['char', 'line', 'block'], a:type) >= 0
+        if index(['char', 'line'], type) >= 0
             let range = [line("'["), line("']")]
-        elseif a:type is# 'vis'
-            if visualmode() isnot# 'V'
-                " We could also use:
-                "
-                "     let pat = '\%V.*\%V'
-                "
-                " ... but the match would disappear when we change the focused window,
-                " probably because the visual marks would be set in another buffer.
-                let [vcol1, vcol2] = [virtcol("'<"), virtcol("'>")]
-                let pat = '\%'..vcol1..'v.*\%'..vcol2..'v.'
-                call matchadd('Conceal', pat, 0, -1, {'Conceal' : 'x'})
-                setl cocu=nc cole=3
-                return
-            else
-                let range = [line("'<"), line("'>")]
-            endif
-        elseif a:type is# 'Ex'
-            let range = [a:1, a:2]
-        else
+        elseif type is# 'block'
+            " We could also use:
+            "
+            "     let pat = '\%V.*\%V'
+            "
+            " ... but the match would disappear when we change the focused window,
+            " probably because the visual marks would be set in another buffer.
+            let [vcol1, vcol2] = [virtcol("'["), virtcol("']")]
+            let pat = '\%'..vcol1..'v.*\%'..vcol2..'v.'
+            call matchadd('Conceal', pat, 0, -1, {'Conceal' : 'x'})
+            setl cocu=nc cole=3
             return
+        elseif type is# 'Ex'
+            let range = [a:1, a:2]
         endif
         " for future restoration
         let pos = min(range)

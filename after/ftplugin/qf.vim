@@ -11,7 +11,7 @@ com -bar -buffer -bang -complete=custom,qf#save_restore#complete -nargs=1 Cremov
 
 " Cconceal {{{2
 
-com -bar -buffer -range Cconceal call qf#conceal_or_delete('Ex', <line1>, <line2>)
+com -bar -buffer -range Cconceal call qf#conceal_or_delete(<line1>, <line2>)
 
 " Cfilter {{{2
 " Documentation:{{{
@@ -64,9 +64,9 @@ nno <buffer><nowait><silent> <c-t>      :<c-u>call qf#open_manual('tabpage')<cr>
 nno <buffer><nowait><silent> <cr> :<c-u>call qf#open_manual('nosplit')<cr>
 nmap <buffer><nowait><silent> <c-w><cr> <c-s>
 
-nno <buffer><nowait><silent> D  :<c-u>set opfunc=qf#conceal_or_delete<cr>g@
-nno <buffer><nowait><silent> DD :<c-u>set opfunc=qf#conceal_or_delete<bar>exe 'norm! '..v:count1..'g@_'<cr>
-xno <buffer><nowait><silent> D  :<c-u>call qf#conceal_or_delete('vis')<cr>
+nno <buffer><expr><nowait> D  qf#conceal_or_delete()
+nno <buffer><expr><nowait> DD qf#conceal_or_delete()..'_'
+xno <buffer><expr><nowait> D  qf#conceal_or_delete()
 
 nno <buffer><nowait><silent> com :<c-u>call qf#toggle_full_filepath()<cr>
 
