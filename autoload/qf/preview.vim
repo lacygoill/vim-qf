@@ -5,6 +5,7 @@ let g:autoloaded_qf#preview = 1
 
 " Init {{{1
 
+" FIXME: `M-S-g` is broken in xterm when modifyOtherKeys is enabled, and in the GUI
 if !has('nvim')
     " this tells the popup filter which keys it must handle, and how
     const s:FILTER_KEYS = {

@@ -279,7 +279,7 @@ fu qf#cfilter(bang, pat, mod) abort "{{{2
             \       a:bang
             \       ?    'DID'
             \       :    'did NOT',
-            \       strchars(pat) <= 50
+            \       strchars(pat, 1) <= 50
             \       ?    pat
             \       :    'the pattern')
     catch
