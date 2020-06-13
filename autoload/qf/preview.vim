@@ -5,34 +5,26 @@ let g:autoloaded_qf#preview = 1
 
 " Init {{{1
 
-" FIXME: `M-S-g` is broken in xterm when modifyOtherKeys is enabled, and in the GUI
-if !has('nvim')
-    " this tells the popup filter which keys it must handle, and how
-    const s:FILTER_KEYS = {
-        \ lg#map#meta_notation('j'): {id -> win_execute(id, 'exe "norm! \<c-e>"')},
-        \ lg#map#meta_notation('k'): {id -> win_execute(id, 'exe "norm! \<c-y>"')},
-        \ lg#map#meta_notation('d'): {id -> win_execute(id, 'exe "norm! \<c-d>"')},
-        \ lg#map#meta_notation('u'): {id -> win_execute(id, 'exe "norm! \<c-u>"')},
-        \ lg#map#meta_notation('g'): {id -> win_execute(id, 'norm! gg')},
-        \ lg#map#meta_notation('G'): {id -> win_execute(id, 'norm! G')},
-        \ lg#map#meta_notation('m'): {-> s:set_height(-1)},
-        \ lg#map#meta_notation('p'): {-> s:set_height(1)},
-        "\ toggle number column
-        \ lg#map#meta_notation('n'): {id -> setwinvar(id, '&number', !getwinvar(id, '&number'))},
-        "\ reset topline to the line of the quickfix entry;
-        "\ useful to get back to original position after scrolling
-        \ lg#map#meta_notation('r'): {id -> [
-        \     popup_setoptions(id, #{firstline: w:_qfpreview.firstline}),
-        \     popup_setoptions(id, #{firstline: 0}),
-        \     s:set_signcolumn(),
-        \ ]},
-        \ }
-else
-    fu s:snr() abort
-        return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
-    endfu
-    let s:snr = get(s:, 'snr', s:snr())
-endif
+" this tells the popup filter which keys it must handle, and how
+const s:FILTER_KEYS = {
+    \ lg#map#meta_notation('j'): {id -> win_execute(id, 'exe "norm! \<c-e>"')},
+    \ lg#map#meta_notation('k'): {id -> win_execute(id, 'exe "norm! \<c-y>"')},
+    \ lg#map#meta_notation('d'): {id -> win_execute(id, 'exe "norm! \<c-d>"')},
+    \ lg#map#meta_notation('u'): {id -> win_execute(id, 'exe "norm! \<c-u>"')},
+    \ lg#map#meta_notation('g'): {id -> win_execute(id, 'norm! gg')},
+    \ lg#map#meta_notation('G'): {id -> win_execute(id, 'norm! G')},
+    \ lg#map#meta_notation('m'): {-> s:set_height(-1)},
+    \ lg#map#meta_notation('p'): {-> s:set_height(1)},
+    "\ toggle number column
+    \ lg#map#meta_notation('n'): {id -> setwinvar(id, '&number', !getwinvar(id, '&number'))},
+    "\ reset topline to the line of the quickfix entry;
+    "\ useful to get back to original position after scrolling
+    \ lg#map#meta_notation('r'): {id -> [
+    \     popup_setoptions(id, #{firstline: w:_qfpreview.firstline}),
+    \     popup_setoptions(id, #{firstline: 0}),
+    \     s:set_signcolumn(),
+    \ ]},
+    \ }
 
 " Interface {{{1
 fu qf#preview#open(...) abort "{{{2
@@ -90,27 +82,11 @@ fu qf#preview#mappings() abort
     " We could fix the issue  by passing `mapping: v:false` to `popup_create()`,
     " but it would disable *all* mappings while the popup is visible.
     "}}}
-    if !has('nvim')
-        if !exists('b:undo_ftplugin') | let b:undo_ftplugin = 'exe' | endif
-        for key in keys(s:FILTER_KEYS)
-            exe 'nno <buffer><nowait> '..key..' '..key
-            let b:undo_ftplugin ..= '|exe "nunmap <buffer> '..key..'"'
-        endfor
-        return
-    endif
-
-    sil! call lg#map#meta('j', ':<c-u>call '..s:snr..'scroll("c-e")<cr>', 'n', 'bns')
-    sil! call lg#map#meta('k', ':<c-u>call '..s:snr..'scroll("c-y")<cr>', 'n', 'bns')
-    sil! call lg#map#meta('d', ':<c-u>call '..s:snr..'scroll("c-d")<cr>', 'n', 'bns')
-    sil! call lg#map#meta('u', ':<c-u>call '..s:snr..'scroll("c-u")<cr>', 'n', 'bns')
-    sil! call lg#map#meta('g', ':<c-u>call '..s:snr..'scroll("gg")<cr>', 'n', 'bns')
-    sil! call lg#map#meta('G', ':<c-u>call '..s:snr..'scroll("G")<cr>', 'n', 'bns')
-
-    sil! call lg#map#meta('m', ':<c-u>call '..s:snr..'set_height(-1)<cr>', 'n', 'bns')
-    sil! call lg#map#meta('p', ':<c-u>call '..s:snr..'set_height(+1)<cr>', 'n', 'bns')
-
-    sil! call lg#map#meta('n', ':<c-u>call '..s:snr..'toggle_numbercolumn()<cr>', 'n', 'bns')
-    sil! call lg#map#meta('r', ':<c-u>call '..s:snr..'jump_back_to_curentry()<cr>', 'n', 'bns')
+    if !exists('b:undo_ftplugin') | let b:undo_ftplugin = 'exe' | endif
+    for key in keys(s:FILTER_KEYS)
+        exe 'nno <buffer><nowait> '..key..' '..key
+        let b:undo_ftplugin ..= '|exe "nunmap <buffer> '..key..'"'
+    endfor
 endfu
 "}}}1
 " Core {{{1
@@ -130,7 +106,7 @@ fu s:popup_create() abort "{{{2
 
     let w:_qfpreview.firstline = curentry.lnum
     call extend(opts, {
-        \ 'row': opts.row,
+        \ 'line': opts.line,
         \ 'col': wininfo.wincol,
         \ 'height': w:_qfpreview.height,
         \ 'width': wininfo.width,
@@ -174,19 +150,7 @@ fu s:popup_close() abort "{{{2
     " the qf window anymore, but in the window of the newly focused tab.
     "}}}
     if exists('w:_qfpreview')
-        if has('nvim')
-            " `nvim_win_is_valid()` is a necessary sanity check.{{{
-            "
-            " `lg#popup#create()` installs a `CursorMoved` autocmd to close the float
-            " when the cursor moves and emulate the `moved` key from `popup_create()`.
-            " Sometimes, it may close the window before this function is invoked.
-            "}}}
-            if nvim_win_is_valid(w:_qfpreview.winid)
-                call nvim_win_close(w:_qfpreview.winid, 1)
-            endif
-        else
-            call popup_close(w:_qfpreview.winid)
-        endif
+        call popup_close(w:_qfpreview.winid)
     endif
 endfu
 
@@ -215,7 +179,6 @@ fu s:set_signcolumn() abort "{{{2
     " IOW, we want to merge the two; i.e. draw the signs in the number column.
     "}}}
     call setwinvar(w:_qfpreview.winid, '&signcolumn', 'number')
-    " Note that it doesn't work in Nvim; missing Vim patch: 8.1.1564
 endfu
 
 fu s:set_sign(bufnr, lnum) abort "{{{2
@@ -374,7 +337,7 @@ fu s:get_line_and_anchor(wininfo) abort "{{{2
         let opts = {
             "\ `-1` to start *above* the topline of the qf window,
             "\ and another `-1` to not hide the statusline of the window above
-            \ 'row': a:wininfo.winrow - 2,
+            \ 'line': a:wininfo.winrow - 2,
             "\ for the popup to be aligned with the current window, we need to use the cell right above
             "\ the upper-left corner as the *bottom left* corner of the popup
             \ 'pos': 'botleft',
@@ -383,21 +346,21 @@ fu s:get_line_and_anchor(wininfo) abort "{{{2
     elseif lines_below >= w:_qfpreview.height
         let opts = {
             "\ `+1` to not hide the status line of the window below the qf window
-            \ 'row': a:wininfo.winrow + a:wininfo.height + 1,
+            \ 'line': a:wininfo.winrow + a:wininfo.height + 1,
             \ 'pos': 'topleft',
             \ }
     " still not enough room; if there's a little room above, reduce the height of the popup so that it fits
     elseif lines_above >= 5
         let w:_qfpreview.height = lines_above
         let opts = {
-            \ 'row': a:wininfo.winrow - 2,
+            \ 'line': a:wininfo.winrow - 2,
             \ 'pos': 'botleft',
             \ }
     " still not enough room; if there's a little room below, reduce the height of the popup so that it fits
     elseif lines_below >= 5
         let w:_qfpreview.height = lines_below
         let opts = {
-            \ 'row': a:wininfo.winrow + a:wininfo.height + 1,
+            \ 'line': a:wininfo.winrow + a:wininfo.height + 1,
             \ 'pos': 'topleft',
             \ }
     else
@@ -466,56 +429,11 @@ fu s:set_height(step) abort "{{{2
     endif
 
     let w:_qfpreview.height += a:step
-    if !has('nvim')
-        call popup_setoptions(w:_qfpreview.winid, #{
-            \ minheight: w:_qfpreview.height,
-            \ maxheight: w:_qfpreview.height,
-            \ })
-    else
-        " to preserve the topline
-        let topline = getwininfo(w:_qfpreview.winid)[0].topline
-        " Why don't you just use `:12res +-34`?{{{
-        "
-        " Doesn't work as expected (github issue #5443).
-        " If it did, you could write:
-        "
-        "     let winnr = win_id2win(w:_qfpreview.winid)
-        "     exe winnr..'res '..(a:step > 0 ? '+': '')..a:step
-        "}}}
-        let cmd = 'res '..(a:step > 0 ? '+' : '')..a:step
-        let cmd ..= printf(' | exe "%d" | norm! zt', topline)
-        call lg#win_execute(w:_qfpreview.winid, cmd)
-    endif
+    call popup_setoptions(w:_qfpreview.winid, #{
+        \ minheight: w:_qfpreview.height,
+        \ maxheight: w:_qfpreview.height,
+        \ })
     call s:set_signcolumn()
-endfu
-
-fu s:scroll(cmd) abort "{{{2
-    if !exists('w:_qfpreview') | return | endif
-    let cmd = {
-        \ 'c-e': "\<c-e>",
-        \ 'c-y': "\<c-y>",
-        \ 'c-u': "\<c-u>",
-        \ 'c-d': "\<c-d>",
-        \ 'gg': 'gg',
-        \ 'G': 'G',
-        \ }[a:cmd]
-    call lg#win_execute(w:_qfpreview.winid, 'norm! '..cmd)
-endfu
-
-fu s:toggle_numbercolumn() abort "{{{2
-    if !exists('w:_qfpreview') || !nvim_win_is_valid(w:_qfpreview.winid)
-        return
-    endif
-    let id = w:_qfpreview.winid
-    call setwinvar(id, '&number', !getwinvar(id, '&number'))
-endfu
-
-fu s:jump_back_to_curentry() abort "{{{2
-    if !exists('w:_qfpreview')
-       \ || !nvim_win_is_valid(w:_qfpreview.winid)
-        return
-    endif
-    call lg#win_execute(w:_qfpreview.winid, printf('exe "%d"|norm! zt', w:_qfpreview.firstline))
 endfu
 
 fu s:popup_is_where(where) abort "{{{2

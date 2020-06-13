@@ -31,11 +31,9 @@ let g:autoloaded_qf = 1
 "
 " We need to bind the information of a  match (HG name, regex) to a qfl (through
 " its 'context' key) or to its id.
-" Atm, I don't want to use the 'context' key because:
-"
-"    - it's not supported in Neovim
-"    - it could be used by another third-party plugin with a data type
-"      different than a dictionary (risk of incompatibility/interference)
+" Atm, I don't want to use the 'context' key because it could be used by another
+" third-party  plugin with  a data  type different  than a  dictionary (risk  of
+" incompatibility/interference)
 "
 " So, instead, we bind the info to the qfl id in the variable `s:matches_any_qfl`.
 "}}}
@@ -201,16 +199,7 @@ endfu
 fu qf#align() abort "{{{2
     " align the columns (more readable)
     " *except* when the qfl is populated by `:WTF`
-    " TODO: Once Nvim issue #11855 is fixed, you could simplify this:{{{
-    "
-    "     let is_wtf = !get(b:, 'qf_is_loclist', 0) && getqflist({'title':0}).title is# 'WTF'
-    "
-    " https://github.com/neovim/neovim/issues/11855
-    "}}}
-    let is_wtf = !get(b:, 'qf_is_loclist', 0)
-        \ && (has('nvim')
-        \     ? !empty(getqflist()) && getqflist({'title':0}).title is# 'WTF'
-        \     : getqflist({'title':0}).title is# 'WTF')
+    let is_wtf = !get(b:, 'qf_is_loclist', 0) && getqflist({'title':0}).title is# 'WTF'
 
     if is_wtf || !executable('column') || !executable('sed')
         return
@@ -230,24 +219,6 @@ fu qf#align() abort "{{{2
     finally
         call setbufvar(bufnr, '&ul', ul_save)
         setl nomodifiable nomodified
-    endtry
-endfu
-
-fu qf#cc(nr, pfx) abort "{{{2
-    if a:nr is# ''
-        exe a:pfx is# 'c' ? 'cc' : 'll'
-        return
-    endif
-
-    let pos = a:pfx is# 'c' ? get(getqflist({'nr': 0}), 'nr', 0) : get(getloclist(0, {'nr': 0}), 'nr', 0)
-    let offset = a:nr - pos
-    try
-        if offset == 0
-            return
-        endif
-        sil exe a:pfx..(offset > 0 ? 'newer' : 'older')..abs(offset)
-    catch
-        return lg#catch()
     endtry
 endfu
 
@@ -599,17 +570,8 @@ fu s:open(cmd) abort
         " And `BufEnter` may raise `E426` and `E433`:
         "
         "     $ vim -Nu NONE +'au QuickFixCmdPost * cw10|au bufenter * ++once helpc' +'helpg wont_find_this' +h
-        "
-        " Besides,  in Nvim,  `BufWinEnter` makes  the cursor  move on  the last
-        " entry in the qfl, while it should stay on the first.
-        "
-        " https://github.com/neovim/neovim/issues/11308
         "}}}
-        if !has('nvim')
-            au SafeState * ++once helpc
-        else
-            call timer_start(0, {-> execute('helpc')})
-        endif
+        au SafeState * ++once helpc
     endif
 endfu
 
@@ -691,7 +653,7 @@ fu qf#toggle_full_filepath() abort "{{{2
 endfu
 
 fu qf#undo_ftplugin() abort "{{{2
-    setl bl< cul< wrap<
+    setl bl< cul< stl< wrap<
     set efm<
     unlet! b:qf_is_loclist
     au! my_qf * <buffer>

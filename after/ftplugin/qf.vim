@@ -134,17 +134,7 @@ augroup END
 
 " the 4  spaces before `%l`  make sure that  the line address  is well-separated
 " from the title, even when the latter is long and the terminal window is narrow
-sil! call lg#set_stl(
-    \ '%{qf#statusline#title(1)}%=    %l/%L ',
-    \ '%{qf#statusline#title(0)}%=    %l/%L ')
-" Once Nvim supports `g:statusline_winid`, refactor this function call into this:{{{
-"
-"     let &l:stl = '%{qf#statusline#title()}%=    %l/%L '
-"
-" And inside `qf#statusline#title()`, replace `! a:is_focused` with:
-"
-"     g:statusline_winid != win_getid()
-"}}}
+let &l:stl = '%{qf#statusline#title()}%=    %l/%L '
 
 " efm {{{2
 " Why do we set 'efm'?{{{
@@ -235,8 +225,6 @@ call qf#align()
 " The  2nd time  we display  a  qf buffer  in  the same  window, there's  no
 " guarantee that we're going to conceal anything.
 "}}}
-" FIXME: This creates an issue when we press `gO` in an Nvim help buffer to get the TOC.
-" The conceal is disabled on the current line even in normal mode; it should not.
 setl cocu< cole<
 call clearmatches()
 call qf#create_matches()

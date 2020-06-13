@@ -1,4 +1,4 @@
-fu qf#statusline#title(is_focused) abort
+fu qf#statusline#title() abort
     " Remember that all the code in this function is evaluated in the context of
     " the window for which the status line is built.
     " So even if the  function is called for a *non-focused*  qf window, you can
@@ -6,7 +6,7 @@ fu qf#statusline#title(is_focused) abort
     let pfx = get(b:, 'qf_is_loclist', 0) ? '[LL] ': '[QF] '
     if !exists('w:quickfix_title') || w:quickfix_title =~# '\<TOC$'
         return ''
-    elseif !a:is_focused
+    elseif g:actual_curwin != win_getid()
         return pfx
     else
         let len = strlen(w:quickfix_title)
