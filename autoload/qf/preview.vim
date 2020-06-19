@@ -40,8 +40,15 @@ fu qf#preview#open(...) abort "{{{2
     if !exists('w:_qfpreview')
         let w:_qfpreview = {
             \ 'persistent': v:false,
-            \ 'height': min([winheight(0), winheight(winnr('#'))/2]),
+            \ 'height': s:get_winheight(),
             \ }
+        " increase the height of the window when we zoom the tmux pane where Vim is displayed
+        augroup qfpreview_reset_height
+            au! * <buffer>
+            au VimResized <buffer> let w:_qfpreview.height = s:get_winheight()
+                \ | call s:popup_close()
+                \ | call qf#preview#open()
+        augroup END
     endif
 
     if a:0
@@ -155,7 +162,9 @@ fu s:popup_close() abort "{{{2
 endfu
 
 fu s:popup_filter(winid, key) abort "{{{2
-    if !has_key(s:FILTER_KEYS, a:key) | return v:false | endif
+    if !has_key(s:FILTER_KEYS, a:key)
+        return v:false
+    endif
     call get(s:FILTER_KEYS, a:key)(a:winid)
     return v:true
 endfu
@@ -321,6 +330,10 @@ endfu
 
 "}}}1
 " Util {{{1
+fu s:get_winheight() abort "{{{2
+    return min([winheight(0), winheight(winnr('#'))/2])
+endfu
+
 fu s:get_line_and_anchor(wininfo) abort "{{{2
     " compute how many screen lines are available above and below the qf window
     let lines_above = s:get_lines_above()
