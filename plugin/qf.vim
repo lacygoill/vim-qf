@@ -14,6 +14,11 @@ let g:loaded_qf = 1
 " highlighted in another way.
 " See here for inspiration: https://github.com/fcpg/vim-kickfix
 
+" TODO: Use `'quickfixtextfunc'` to align the fields in the qf window.
+" Also, make sure that to leave invalid entries unchanged.
+" Currently, we use `sed(1)` which tries to align invalid entries; the result is
+" ugly.
+
 " Options {{{1
 
 " don't let the default qf filetype plugin set `'stl'`, we'll do it ourselves
