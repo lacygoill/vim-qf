@@ -68,8 +68,6 @@ nno <buffer><expr><nowait> D  qf#conceal_or_delete()
 nno <buffer><expr><nowait> DD qf#conceal_or_delete()..'_'
 xno <buffer><expr><nowait> D  qf#conceal_or_delete()
 
-nno <buffer><nowait><silent> com :<c-u>call qf#toggle_full_filepath()<cr>
-
 nno <buffer><nowait><silent> p :<c-u>call qf#preview#open()<cr>
 nno <buffer><nowait><silent> P :<c-u>call qf#preview#open('persistently')<cr>
 
@@ -200,23 +198,6 @@ let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 
 " Are we viewing a location list or a quickfix list?
 const b:qf_is_loclist = getwininfo(win_getid())[0].loclist
-
-" Alignment {{{1
-
-" We could also install this autocmd in our vimrc:{{{
-"
-"     au BufReadPost quickfix call s:qf_align()
-"
-" ... where `s:qf_align()` would contain commands to align the columns.
-"
-" It would work most of the time, including after `:helpg foo`.
-" But it wouldn't work after `:lh foo`.
-"
-" Because `BufReadPost quickfix` wouldn't be fired, and the function wouldn't be
-" called. However, `FileType  qf` is emitted, so  the `qf` filetype plugin  is a
-" better place to format the contents of a quickfix buffer.
-"}}}
-call qf#align()
 
 " Matches {{{1
 

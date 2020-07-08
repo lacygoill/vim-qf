@@ -196,31 +196,44 @@ fu qf#quit() abort "{{{2
     q
 endfu
 
-fu qf#align() abort "{{{2
-    " align the columns (more readable)
-    " *except* when the qfl is populated by `:WTF`
-    let is_wtf = !get(b:, 'qf_is_loclist', 0) && getqflist({'title':0}).title is# 'WTF'
-
-    if is_wtf || !executable('column') || !executable('sed')
-        return
+def qf#align(info: dict<number>): list<string> "{{{2
+    let qfl: list<any>
+    if info.quickfix
+        qfl = getqflist(#{id: info.id, items: 0}).items
+    else
+        qfl = getloclist(info.winid, #{id: info.id, items: 0}).items
     endif
-
-    " We won't try to undo the edition, so don't save anything in the undotree.
-    " Useful to lower memory consumption if qfl is big.
-    " For more info, see `:h clear-undo`.
-    let [ul_save, bufnr] = [&l:ul, bufnr('%')]
-    setl modifiable ul=-1
-
-    try
-        " prepend the first two occurrences of a bar with a literal C-a
-        sil %!sed 's/|/\x01|/1; s/|/\x01|/2'
-        " sort the text using the C-a's as delimiters
-        sil %!column -s $'\x01' -t
-    finally
-        call setbufvar(bufnr, '&ul', ul_save)
-        setl nomodifiable nomodified
-    endtry
-endfu
+    let l: list<string> = []
+    let lnum_width = range(info.start_idx - 1, info.end_idx - 1)
+        ->map({_,v -> qfl[v].lnum})
+        ->max()
+        ->len()
+    let col_width = range(info.start_idx - 1, info.end_idx - 1)
+        ->map({_,v -> qfl[v].col})
+        ->max()
+        ->len()
+    let fname_width = range(info.start_idx - 1, info.end_idx - 1)
+        ->map({_,v -> qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(1)})
+        ->max()
+    for idx in range(info.start_idx - 1, info.end_idx - 1)
+        let e = qfl[idx]
+        if !e.valid
+            add(l, '|| ' .. e.text)
+        else
+            " case where the entry does not  refer to a particular location in a
+            " file, but just to a file as a whole (e.g. `:Find`, `:PluginsToCommit`, ...)
+            if e.lnum == 0 && e.col == 0
+                add(l, bufname(e.bufnr))
+            else
+                let fname = printf('%-*s', fname_width, bufname(e.bufnr)->fnamemodify(':t'))
+                let lnum = printf('%*d', lnum_width, e.lnum)
+                let col = printf('%*d', col_width, e.col)
+                add(l, fname .. '|' .. lnum .. ' col ' .. col .. '| ' .. e.text)
+            endif
+        endif
+    endfor
+    return l
+enddef
 
 fu qf#cfilter(bang, pat, mod) abort "{{{2
     try
@@ -639,19 +652,6 @@ fu qf#setup_toc() abort "{{{2
     let &syntax = getbufvar(bufnr, '&syntax')
 endfu
 
-fu qf#toggle_full_filepath() abort "{{{2
-    let pos = getcurpos()
-
-    let qfl = s:getqflist()
-    let l:Transformation = empty(get(get(qfl, 0, []), 'module', ''))
-        \ ? {_,v -> extend(v, {'module': fnamemodify(bufname(v.bufnr), ':t')})}
-        \ : {_,v -> extend(v, {'module': ''})}
-    let what = {'items': map(qfl, l:Transformation)}
-    call s:setqflist([], 'r', what)
-
-    call setpos('.', pos)
-endfu
-
 fu qf#undo_ftplugin() abort "{{{2
     setl bl< cul< stl< wrap<
     set efm<
@@ -674,8 +674,6 @@ fu qf#undo_ftplugin() abort "{{{2
 
     nunmap <buffer> p
     nunmap <buffer> P
-
-    nunmap <buffer> com
 
     nunmap <buffer> q
 

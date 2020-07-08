@@ -3,26 +3,30 @@ if exists('g:loaded_qf')
 endif
 let g:loaded_qf = 1
 
-" TODO: Maybe implement a popup window to preview the context of some entry in the qfl.
-" https://github.com/bfrg/vim-qf-preview
-
 " TODO: Implement a mapping/command which would fold all entries belonging to the same file.
 " See here for inspiration: https://github.com/fcpg/vim-kickfix
+
+" TODO: Fold invalid entries and/or highlight them in some way.
+" Should  we prevent  `qf#align()`  from trying  to aligning  the  fields of  an
+" invalid entry (there's nothing to align anyway...)?
 
 " TODO: Add  custom  syntax highlighting  so  that  entries  from one  file  are
 " highlighted  in one  way, while  the next  extries from  a different  file are
 " highlighted in another way.
 " See here for inspiration: https://github.com/fcpg/vim-kickfix
 
-" TODO: Use `'quickfixtextfunc'` to align the fields in the qf window.
-" Also, make sure that to leave invalid entries unchanged.
-" Currently, we use `sed(1)` which tries to align invalid entries; the result is
-" ugly.
+" TODO: Add a command to sort qf entries in some way?
+" Inspiration: https://github.com/vim/vim/issues/6412 (look for `qf#sort#qflist()`)
+
+" TODO: Configure `ctags(1)` so that it  generates tags for `:def` functions and
+" `:const` constants.  See `man ctags-optlib(7)`.
 
 " Options {{{1
 
 " don't let the default qf filetype plugin set `'stl'`, we'll do it ourselves
 let g:qf_disable_statusline = 1
+
+set qftf=qf#align
 
 " Commands {{{1
 
