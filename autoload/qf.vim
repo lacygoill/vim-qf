@@ -205,15 +205,15 @@ def qf#align(info: dict<number>): list<string> "{{{2
     endif
     let l: list<string> = []
     let lnum_width = range(info.start_idx - 1, info.end_idx - 1)
-        ->map({_,v -> qfl[v].lnum})
+        ->map({_, v -> qfl[v].lnum})
         ->max()
         ->len()
     let col_width = range(info.start_idx - 1, info.end_idx - 1)
-        ->map({_,v -> qfl[v].col})
+        ->map({_, v -> qfl[v].col})
         ->max()
         ->len()
     let fname_width = range(info.start_idx - 1, info.end_idx - 1)
-        ->map({_,v -> qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(1)})
+        ->map({_, v -> qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(1)})
         ->max()
     for idx in range(info.start_idx - 1, info.end_idx - 1)
         let e = qfl[idx]
@@ -646,7 +646,7 @@ fu qf#setup_toc() abort "{{{2
     let bufnr = llist[0].bufnr
     " we only want the texts, not their location
     setl modifiable
-    sil %d_
+    sil keepj %d_
     call setline(1, map(llist, {_,v -> v.text}))
     setl nomodifiable nomodified
     let &syntax = getbufvar(bufnr, '&syntax')

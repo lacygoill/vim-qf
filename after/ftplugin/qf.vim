@@ -139,7 +139,7 @@ let &l:stl = '%{qf#statusline#title()}%=    %l/%L '
 "
 " Type:
 "       :vim /fu/gj %
-"       :setl ma | $d_ | setl noma
+"       :setl ma | keepj $d_ | setl noma
 "       :cgetb
 "
 " The new qfl is not interactive.
