@@ -197,6 +197,9 @@ fu qf#quit() abort "{{{2
 endfu
 
 def qf#align(info: dict<number>): list<string> "{{{2
+    if w:quickfix_title =~# 'Cookbook\|Scriptnames'
+        return []
+    endif
     let qfl: list<any>
     if info.quickfix
         qfl = getqflist(#{id: info.id, items: 0}).items
