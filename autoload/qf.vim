@@ -197,9 +197,6 @@ fu qf#quit() abort "{{{2
 endfu
 
 def qf#align(info: dict<number>): list<string> "{{{2
-    if w:quickfix_title =~# 'Cookbook\|Scriptnames'
-        return []
-    endif
     let qfl: list<any>
     if info.quickfix
         qfl = getqflist(#{id: info.id, items: 0}).items
@@ -223,8 +220,8 @@ def qf#align(info: dict<number>): list<string> "{{{2
         if !e.valid
             add(l, '|| ' .. e.text)
         else
-            " case where the entry does not  refer to a particular location in a
-            " file, but just to a file as a whole (e.g. `:Find`, `:PluginsToCommit`, ...)
+            # case where the entry does not  refer to a particular location in a
+            # file, but just to a file as a whole (e.g. `:Find`, `:PluginsToCommit`, ...)
             if e.lnum == 0 && e.col == 0
                 add(l, bufname(e.bufnr))
             else
