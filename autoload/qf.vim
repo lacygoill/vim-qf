@@ -196,7 +196,7 @@ fu qf#quit() abort "{{{2
     q
 endfu
 
-def qf#align(info: dict<number>): list<string> "{{{2
+def qf#align(info: dict<number>): list<string> # {{{2
     let qfl: list<any>
     if info.quickfix
         qfl = getqflist(#{id: info.id, items: 0}).items
