@@ -19,7 +19,7 @@ com -bar -buffer -range Cconceal call qf#conceal_or_delete(<line1>, <line2>)
 "     :Cfilter[!] /{pat}/
 "     :Cfilter[!]  {pat}
 "
-"             Filter the quickfix looking  for pattern, `{pat}`. The pattern can
+"             Filter the quickfix looking  for pattern, `{pat}`.  The pattern can
 "             match the filename  or text.  Providing `!` will  invert the match
 "             (just like `grep -v`).
 "}}}
@@ -28,7 +28,7 @@ com -bar -buffer -range Cconceal call qf#conceal_or_delete(<line1>, <line2>)
 " It would break a pattern containing a bar (for example, for an alternation).
 
 com -bang -buffer -nargs=? -complete=custom,qf#cfilter_complete Cfilter
-\                           call qf#cfilter(<bang>0, <q-args>, <q-mods>)
+    \ call qf#cfilter(<bang>0, <q-args>, <q-mods>)
 
 " Cupdate {{{2
 
@@ -50,9 +50,9 @@ call qf#disable_some_keys(['a', 'd', 'gj', 'gqq' , 'i', 'o', 'r', 'u', 'x'])
 nno <buffer><nowait><silent> <c-q> :<c-u>Csave default<cr>
 nno <buffer><nowait><silent> <c-r> :<c-u>Crestore default<cr>
 
-nno <buffer><nowait><silent> <c-s>      :<c-u>call qf#open_manual('split')<cr>
+nno <buffer><nowait><silent> <c-s> :<c-u>call qf#open_manual('split')<cr>
 nno <buffer><nowait><silent> <c-v><c-v> :<c-u>call qf#open_manual('vert split')<cr>
-nno <buffer><nowait><silent> <c-t>      :<c-u>call qf#open_manual('tabpage')<cr>
+nno <buffer><nowait><silent> <c-t> :<c-u>call qf#open_manual('tabpage')<cr>
 " FYI:{{{
 "
 " By default:
@@ -65,7 +65,7 @@ nno <buffer><nowait><silent> <cr> :<c-u>call qf#open_manual('nosplit')<cr>
 nmap <buffer><nowait><silent> <c-w><cr> <c-s>
 
 nno <buffer><expr><nowait> D  qf#conceal_or_delete()
-nno <buffer><expr><nowait> DD qf#conceal_or_delete()..'_'
+nno <buffer><expr><nowait> DD qf#conceal_or_delete() .. '_'
 xno <buffer><expr><nowait> D  qf#conceal_or_delete()
 
 nno <buffer><nowait><silent> p :<c-u>call qf#preview#open()<cr>
@@ -87,7 +87,7 @@ augroup my_qf
     "
     "     call qf#setup_toc()
     "
-    " The function isn't called. No syntax highlighting. Why?
+    " The function isn't called.  No syntax highlighting.  Why?
     " If I install this autocmd:
     "
     "     au FileType qf call qf#setup_toc()
@@ -97,7 +97,7 @@ augroup my_qf
     "
     "     au Syntax qf call qf#setup_toc()
     "
-    " It works. Why?
+    " It works.  Why?
     "
     " Update:
     " It's because of the guard:
@@ -123,9 +123,9 @@ augroup my_qf
     "
     "     au Syntax <buffer> call qf#setup_toc()
     "
-    " It works. What does `<buffer>` mean here? What's the difference with `qf`?
-    " I think it's expanded into a buffer number. So it limits the scope of
-    " the autocmd to the current buffer, when its syntax option is set.
+    " It works.  What does `<buffer>` mean here? What's the difference with `qf`?
+    " I think it's expanded into a buffer number.  So it limits the scope of the
+    " autocmd to the current buffer, when its syntax option is set.
     "}}}
     au Syntax <buffer> call qf#setup_toc()
 augroup END
@@ -152,7 +152,7 @@ let &l:stl = '%{qf#statusline#title()}%=    %l/%L '
 "
 " But it seems  it doesn't contain any  value describing the contents  of a qfl.
 " IOW, it's designed to interpret the output of some shell commands and populate
-" the qfl. It's not designed to parse the qfl itself.
+" the qfl.  It's not designed to parse the qfl itself.
 "}}}
 " Could we use a simpler value?{{{
 "
@@ -197,7 +197,7 @@ let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 " Variables {{{1
 
 " Are we viewing a location list or a quickfix list?
-const b:qf_is_loclist = getwininfo(win_getid())[0].loclist
+const b:qf_is_loclist = win_getid()->getwininfo()[0].loclist
 
 " Matches {{{1
 
@@ -213,5 +213,5 @@ call qf#create_matches()
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ ..'| call qf#undo_ftplugin()'
+    \ .. '| call qf#undo_ftplugin()'
 

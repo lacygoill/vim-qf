@@ -7,20 +7,24 @@ let g:autoloaded_qf#save_restore = 1
 "
 "     augroup save_and_restore_last_qfl | au!
 "         au VimLeavePre * call s:save_last_qfl()
-"         au VimEnter    * call s:restore_last_qfl()
+"         au VimEnter * call s:restore_last_qfl()
 "     augroup END
 "
 "     fu s:save_last_qfl() abort
 "         let curqfnr = getqflist({'nr': 0}).nr
-"         let qfls = filter(map(range(1, getqflist({'nr': '$'}).nr),
-"             \ {_,v -> getqflist({'nr': v, 'size': 0, 'title': 0})}),
-"             \ {_,v -> v.size != 0
-"             \      && v.size < 9999
-"             \      && v.title !~# '^\s*:hub\s\+push\s*$'
-"             \      && v.nr >= curqfnr})
+"         let qfls = range(1, getqflist({'nr': '$'}).nr)
+"             \ ->map({_, v -> getqflist({'nr': v, 'size': 0, 'title': 0})})
+"             \ ->filter({_, v -> v.size != 0
+"             \                && v.size < 9999
+"             \                && v.title !~# '^\s*:hub\s\+push\s*$'
+"             \                && v.nr >= curqfnr})
 "         if empty(qfls) | unlet! g:MY_LAST_QFL | return | endif
 "         let items = getqflist({'nr': qfls[0].nr, 'items': 0}).items
-"         call map(items, {_,v -> extend(v, {'filename': fnamemodify(bufname(remove(v, 'bufnr')), ':p')})})
+"         call map(items, {_, v -> extend(v, {'filename':
+"             \     remove(v, 'bufnr')
+"             \     ->bufname()
+"             \     ->fnamemodify(':p')
+"             \ })})
 "         let g:MY_LAST_QFL = {'items': items, 'title': getqflist({'title': 0}).title}
 "     endfu
 "
@@ -58,8 +62,8 @@ let g:autoloaded_qf#save_restore = 1
 "         " running a simple `$ vim`.
 "        "}}}
 "         if getqflist({'size':0}).size
-"         \ || empty(get(get(g:, 'MY_LAST_QFL', {}), 'items', []))
-"         \ || v:servername is# ''
+"         \ || get(g:, 'MY_LAST_QFL', {})->get('items', [])->empty()
+"         \ || v:servername == ''
 "             return
 "         endif
 "         call setqflist([], ' ', {'items': g:MY_LAST_QFL.items, 'title': g:MY_LAST_QFL.title})
@@ -79,16 +83,18 @@ let g:autoloaded_qf#save_restore = 1
 
 " Init {{{1
 
-const s:QFL_DIR = $HOME..'/.vim/tmp/qfl'
+const s:QFL_DIR = $HOME .. '/.vim/tmp/qfl'
 if !isdirectory(s:QFL_DIR)
     if mkdir(s:QFL_DIR, 'p', 0700)
-        echom '[vim-qf] failed to create directory '..s:QFL_DIR
+        echom '[vim-qf] failed to create directory ' .. s:QFL_DIR
     endif
 endif
 
 " Interface {{{1
 fu qf#save_restore#complete(_a, _l, _p) abort "{{{2
-    return join(map(glob(s:QFL_DIR..'/*.txt', 0, 1), {_,v -> fnamemodify(v, ':t:r')}), "\n")
+    return glob(s:QFL_DIR .. '/*.txt', 0, 1)
+        \ ->map({_, v -> fnamemodify(v, ':t:r')})
+        \ ->join("\n")
 endfu
 
 fu qf#save_restore#save(fname, bang) abort "{{{2
@@ -97,7 +103,7 @@ fu qf#save_restore#save(fname, bang) abort "{{{2
     endif
     let fname = s:expand(a:fname)
     if filereadable(fname) && !a:bang
-        return s:error('[Csave] '..fname..' is an existing file; add ! to overwrite')
+        return s:error('[Csave] ' .. fname .. ' is an existing file; add ! to overwrite')
     endif
     let g:LAST_QFL = fname
     let items = getqflist({'items': 0}).items
@@ -113,7 +119,8 @@ fu qf#save_restore#save(fname, bang) abort "{{{2
     " `fnamemodify(...)` makes sure that the  name is absolute, and not relative
     " to the current working directory.
     "}}}
-    call map(items, {_,v -> extend(v, {'filename': fnamemodify(bufname(remove(v, 'bufnr')), ':p')})})
+    call map(items, {_, v -> extend(v, {'filename':
+        \ remove(v, 'bufnr')->bufname()->fnamemodify(':p')})})
     let qfl = {'items': items, 'title': getqflist({'title': 0}).title}
     let lines =<< trim END
         let s:qfl = %s
@@ -159,25 +166,25 @@ fu qf#save_restore#save(fname, bang) abort "{{{2
     "
     " Similar issue with `&` which has a special meaning.
     "}}}
-    let lines[0] = substitute(lines[0], '%s', escape(string(qfl), '&\'), '')
+    let lines[0] = substitute(lines[0], '%s', string(qfl)->escape('&\'), '')
     call writefile(lines, fname)
-    echo '[Csave] quickfix list saved in '..fname
+    echo '[Csave] quickfix list saved in ' .. fname
 endfu
 
 fu qf#save_restore#restore(fname) abort "{{{2
-    if a:fname is# ''
+    if a:fname == ''
         let fname = get(g:, 'LAST_QFL', '')
     else
         let fname = s:expand(a:fname)
     endif
 
     if !filereadable(fname)
-        echo '[Crestore] '..fname..' is not readable'
+        echo '[Crestore] ' .. fname .. ' is not readable'
         return
     endif
-    exe 'so '..fnameescape(fname)
+    exe 'so ' .. fnameescape(fname)
     cw
-    echo '[Crestore] quickfix list restored from '..fname
+    echo '[Crestore] quickfix list restored from ' .. fname
 endfu
 
 fu qf#save_restore#remove(fname, bang) abort "{{{2
@@ -191,12 +198,12 @@ fu qf#save_restore#remove(fname, bang) abort "{{{2
     if !a:bang | return s:error('[Cremove] add a bang') | endif
     let fname = s:expand(a:fname)
     if !filereadable(fname)
-        echo '[Cremove] cannot remove '..fname..' ; file not readable' | return
+        echo '[Cremove] cannot remove ' .. fname .. ' ; file not readable' | return
     endif
     if delete(fname)
-        echo '[Cremove] failed to remove '..fname
+        echo '[Cremove] failed to remove ' .. fname
     else
-        echo '[Cremove] removed '..fname
+        echo '[Cremove] removed ' .. fname
     endif
 endfu
 "}}}1
@@ -215,6 +222,6 @@ fu s:expand(fname) abort "{{{2
     "
     "     :vim /pat/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
     "}}}
-    return s:QFL_DIR..'/'..a:fname..'.txt'
+    return s:QFL_DIR .. '/' .. a:fname .. '.txt'
 endfu
 

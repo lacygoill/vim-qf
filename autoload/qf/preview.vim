@@ -5,26 +5,36 @@ let g:autoloaded_qf#preview = 1
 
 " Init {{{1
 
+import MapMetaChord from 'lg/map.vim'
+
+" FIXME: This is currently broken because of: https://github.com/vim/vim/issues/6636
+" Once the issue is fixed, check whether the popup filter mappings work as expected.
+
 " this tells the popup filter which keys it must handle, and how
-const s:FILTER_KEYS = {
-    \ lg#map#meta_notation('j'): {id -> win_execute(id, 'exe "norm! \<c-e>"')},
-    \ lg#map#meta_notation('k'): {id -> win_execute(id, 'exe "norm! \<c-y>"')},
-    \ lg#map#meta_notation('d'): {id -> win_execute(id, 'exe "norm! \<c-d>"')},
-    \ lg#map#meta_notation('u'): {id -> win_execute(id, 'exe "norm! \<c-u>"')},
-    \ lg#map#meta_notation('g'): {id -> win_execute(id, 'norm! gg')},
-    \ lg#map#meta_notation('G'): {id -> win_execute(id, 'norm! G')},
-    \ lg#map#meta_notation('m'): {-> s:set_height(-1)},
-    \ lg#map#meta_notation('p'): {-> s:set_height(1)},
+const s:FILTER_CMD = {
+    \ s:MapMetaChord('j'): {id -> win_execute(id, 'exe "norm! \<c-e>"')},
+    \ s:MapMetaChord('k'): {id -> win_execute(id, 'exe "norm! \<c-y>"')},
+    \ s:MapMetaChord('d'): {id -> win_execute(id, 'exe "norm! \<c-d>"')},
+    \ s:MapMetaChord('u'): {id -> win_execute(id, 'exe "norm! \<c-u>"')},
+    \ s:MapMetaChord('g'): {id -> win_execute(id, 'norm! gg')},
+    \ s:MapMetaChord('G'): {id -> win_execute(id, 'norm! G')},
+    \ s:MapMetaChord('m'): {-> s:set_height(-1)},
+    \ s:MapMetaChord('p'): {-> s:set_height(1)},
     "\ toggle number column
-    \ lg#map#meta_notation('n'): {id -> setwinvar(id, '&number', !getwinvar(id, '&number'))},
+    \ s:MapMetaChord('n'): {id -> (!getwinvar(id, '&number'))->setwinvar(id, '&number')},
     "\ reset topline to the line of the quickfix entry;
     "\ useful to get back to original position after scrolling
-    \ lg#map#meta_notation('r'): {id -> [
+    \ s:MapMetaChord('r'): {id -> [
     \     popup_setoptions(id, #{firstline: w:_qfpreview.firstline}),
     \     popup_setoptions(id, #{firstline: 0}),
     \     s:set_signcolumn(),
     \ ]},
     \ }
+
+const s:FILTER_LHS = map(['j', 'k', 'd', 'u', 'g', 'G', 'm', 'p', 'n', 'r'],
+    \ {_, v -> s:MapMetaChord(v, v:true)})
+    "                            ^----^
+    "                            don't translate the chords; we need symbolic notations
 
 " Interface {{{1
 fu qf#preview#open(...) abort "{{{2
@@ -78,7 +88,7 @@ fu qf#preview#open(...) abort "{{{2
 endfu
 
 fu qf#preview#mappings() abort
-    " Why?{{{
+    " Purpose of this function:{{{
     "
     " We currently use  `M-j` to scroll in  the popup via a filter,  but we also
     " use it to scroll in the preview window via a global mapping.
@@ -90,22 +100,26 @@ fu qf#preview#mappings() abort
     " but it would disable *all* mappings while the popup is visible.
     "}}}
     if !exists('b:undo_ftplugin') | let b:undo_ftplugin = 'exe' | endif
-    for key in keys(s:FILTER_KEYS)
-        exe 'nno <buffer><nowait> '..key..' '..key
-        let b:undo_ftplugin ..= '|exe "nunmap <buffer> '..key..'"'
+    for key in s:FILTER_LHS
+        exe 'nno <buffer><nowait> ' .. key .. ' ' .. key
+        let unmap_cmd = '|exe "nunmap <buffer> ' .. key .. '"'
+        " sanity check; unmapping the same key twice could raise an error
+        if stridx(b:undo_ftplugin, unmap_cmd) == -1
+            let b:undo_ftplugin ..= unmap_cmd
+        endif
     endfor
 endfu
 "}}}1
 " Core {{{1
 fu s:popup_create() abort "{{{2
     " need some info about the window (its geometry and whether it's a location window or qf window)
-    let wininfo = getwininfo(win_getid())[0]
+    let wininfo = win_getid()->getwininfo()[0]
 
     let items = wininfo.loclist ? getloclist(0, {'items':0}).items : getqflist({'items':0}).items
     if empty(items) | return | endif
 
     " need some info about the current entry in the qfl (whether it's valid, and its line number)
-    let curentry = items[line('.')-1]
+    let curentry = items[line('.') - 1]
     if !curentry.valid | return | endif
 
     let opts = s:get_line_and_anchor(wininfo)
@@ -137,7 +151,7 @@ fu s:popup_create() abort "{{{2
 
     call s:close_when_quit()
     if s:should_persist()
-        let w:_qfpreview.validitems = map(items, {_,v -> v.valid})
+        let w:_qfpreview.validitems = map(items, {_, v -> v.valid})
         call s:persist()
     endif
 endfu
@@ -162,10 +176,10 @@ fu s:popup_close() abort "{{{2
 endfu
 
 fu s:popup_filter(winid, key) abort "{{{2
-    if !has_key(s:FILTER_KEYS, a:key)
+    if !has_key(s:FILTER_CMD, a:key)
         return v:false
     endif
-    call get(s:FILTER_KEYS, a:key)(a:winid)
+    call get(s:FILTER_CMD, a:key)(a:winid)
     return v:true
 endfu
 
@@ -331,7 +345,7 @@ endfu
 "}}}1
 " Util {{{1
 fu s:get_winheight() abort "{{{2
-    return min([winheight(0), winheight(winnr('#'))/2])
+    return min([winheight(0), winnr('#')->winheight() / 2])
 endfu
 
 fu s:get_line_and_anchor(wininfo) abort "{{{2
@@ -387,10 +401,10 @@ fu s:get_line_and_anchor(wininfo) abort "{{{2
 endfu
 
 fu s:get_lines_above() abort "{{{2
-    return win_screenpos(winnr())[0] - 2 - s:tabline_is_visible()
-    "                                  │
-    "                                  └ we don't want to use the first line of the qf window,
-    "                                    and we don't want to use the status line of the window above
+    return winnr()->win_screenpos()[0] - 2 - s:tabline_is_visible()
+    "                                    │
+    "                                    └ we don't want to use the first line of the qf window,
+    "                                      and we don't want to use the status line of the window above
 endfu
 
 fu s:get_lines_below() abort "{{{2
@@ -418,7 +432,7 @@ endfu
 fu s:set_height(step) abort "{{{2
     " Why this check?{{{
     "
-    " Suppose you include the key `+` in `s:FILTER_KEYS`:
+    " Suppose you include the key `+` in `s:FILTER_CMD`:
     "
     "     \ '+': {-> s:set_height(1)},
     "
@@ -450,7 +464,7 @@ fu s:set_height(step) abort "{{{2
 endfu
 
 fu s:popup_is_where(where) abort "{{{2
-    let qf_firstline = win_screenpos(winnr())[0]
+    let qf_firstline = winnr()->win_screenpos()[0]
     let popup_firstline = win_screenpos(w:_qfpreview.winid)[0]
     return a:where is# 'above'
         \ ? popup_firstline < qf_firstline

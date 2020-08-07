@@ -22,7 +22,7 @@ fu qf#statusline#title() abort
         " When the title is too long, Vim would truncate the line address.
         " I want to always see where I am in the list.
         "}}}
-        return pfx..(len > 80 ? w:quickfix_title[:79]..'»' : w:quickfix_title)
+        return pfx .. (len > 80 ? w:quickfix_title[:79] .. '»' : w:quickfix_title)
     endif
 endfu
 

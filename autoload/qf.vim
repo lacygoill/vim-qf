@@ -4,18 +4,20 @@ endif
 let g:autoloaded_qf = 1
 
 " TODO:
-" We shouldn't  create matches. We  shouldn't use the  complex ad  hoc mechanism
-" around `s:matches_any_qfl`. Instead we should create ad hoc syntax file.
+" We shouldn't  create matches.  We shouldn't  use the complex ad  hoc mechanism
+" around  `s:matches_any_qfl`.  Instead  we should  create ad  hoc syntax  file.
 " Look at how Neovim has solved the issue in `ftplugin/qf.vim` for TOC menus.
 
 " TODO: Split the code: one functionality per file.
+
+import Catch from 'lg.vim'
 
 " Variables {{{1
 " What's the purpose of `s:matches_any_qfl`?{{{
 "
 " Suppose we  have a  plugin which  populates a  qfl, opens  the qf  window, and
-" applies a  match. The latter  is local  to the window. And  if we  close, then
-" re-open the qf window, its id changes. So, we lose the match.
+" applies a match.   The latter is local  to the window.  And if  we close, then
+" re-open the qf window, its id changes.  So, we lose the match.
 "
 " To fix this, we need to achieve 2 things:
 "
@@ -39,19 +41,20 @@ let g:autoloaded_qf = 1
 "}}}
 " How is it structured?{{{
 "
-" It stores a dictionary whose keys are qfl ids. The value of a key is a sub-dictionary
-" describing matches.
+" It stores  a dictionary  whose keys  are qfl  ids.  The  value of  a key  is a
+" sub-dictionary describing matches.
 "
-" Each key in this sub-dictionary describes an “origin”. By convention, we build the
-" text of an origin like this:
-"         {plugin_name}:{function_name}
+" Each  key in  this sub-dictionary  describes an  “origin”.  By  convention, we
+" build the text of an origin like this:
 "
-" This kind of info could be useful when debugging. It tells us from which function
-" in which plugin does the match come from.
+"     {plugin_name}:{function_name}
+"
+" This kind  of info  could be useful  when debugging.  It  tells us  from which
+" function in which plugin does the match come from.
 "
 " Finally, the value associated to an “origin” key is a list of sub-sub-dictionaries.
-" Why a list? Because a SINGLE function from a plugin could need to install SEVERAL
-" matches. These final sub-sub-dictionaries contain 2 keys/values:
+" Why a  list? Because a *single* function  from a plugin could  need to install
+" *several* matches.  These final sub-sub-dictionaries contain 2 keys/values:
 "
 "    - 'group' → HG name
 "    - 'pat'   → regex
@@ -61,10 +64,10 @@ let g:autoloaded_qf = 1
 "        ┌ qf id
 "        │     ┌ origin
 "        │     │
-"     { '1': {'myfuncs:search_todo':
-"     \                             [{'group': 'Conceal', 'pat': '^.\{-}|\s*\d\+\%(\s\+col\s\+\d\+\s*\)\=\s*|\s\='},
-"     \                              {'group': 'Todo',    'pat': '\cfixme\|todo'}]
-"     \      }}
+"     { '1': {'myfuncs:search_todo': [
+"     \     {'group': 'Conceal', 'pat': '^.\{-}|\s*\d\+\%(\s\+col\s\+\d\+\s*\)\=\s*|\s\='},
+"     \     {'group': 'Todo', 'pat': '\cfixme\|todo'}
+"     \ ]}}
 "}}}
 " How is it used?{{{
 "
@@ -79,7 +82,7 @@ let g:autoloaded_qf = 1
 " that the matches are re-applied whenever we close/re-open the qf window.
 "
 " `qf#create_matches()`  checks  whether  the  id  of  the  current  qfl  is  in
-" `s:matches_any_qfl`. If it is, it installs all  the matches which are bound to
+" `s:matches_any_qfl`.  If it is, it installs all the matches which are bound to
 " `it.
 "}}}
 " Why call `qf#create_matches()` in every third-party plugin?{{{
@@ -117,13 +120,13 @@ let g:autoloaded_qf = 1
 "
 "       It couldn't even rely on the expression populating `b:qf_is_loclist`:
 "
-"         get(get(getwininfo(win_getid()), 0, {}), 'loclist', 0)
+"         win_getid()->getwininfo()->get(0, {})->get('loclist', 0)
 "
 "       ... because, again, there would be no qf window yet.
 "
 " Second:
-" Suppose the qf window is already opened, and one of our plugin creates a new qfl,
-" with a new custom match. It won't be applied.
+" Suppose the qf window  is already opened, and one of our  plugin creates a new
+" qfl, with a new custom match.  It won't be applied.
 "
 " Why?
 " Because, when `setloclist()` or `setqflist()` is invoked, if the qf window is already
@@ -142,19 +145,19 @@ let g:autoloaded_qf = 1
 " To avoid sourcing the qf filetype plugin when populating the qfl, we could use
 " `:noa`:
 "
-"     noa call setqflist(…)
+"     noa call setqflist(...)
 "
 " Conclusion:
 " Even with all  that, the qf filetype  plugin would be sourced twice  if the qf
-" window is not already opened. Indeed:
+" window is not already opened.  Indeed:
 "
-"         vim-window:
-"             autocmd QuickFixCmdPost cwindow
+"     vim-window:
+"         autocmd QuickFixCmdPost cwindow
 "
-"         a plugin:
-"             do <nomodeline> QuickFixCmdPost cwindow
+"     a plugin:
+"         do <nomodeline> QuickFixCmdPost cwindow
 "
-" … will fire `FileType qf` iff the window is not opened.
+" ... will fire `FileType qf` iff the window is not opened.
 " I don't like a filetype plugin being sourced several times.
 "}}}
 let s:matches_any_qfl = {}
@@ -162,7 +165,7 @@ let s:matches_any_qfl = {}
 " What's the use of `KNOWN_PATTERNS`?{{{
 "
 " If you  often use the same  regex to describe some  text on which you  want to
-" apply a match, add it to this dictionary, with a telling name. Then, instead
+" apply a match, add it to this  dictionary, with a telling name.  Then, instead
 " of writing this:
 "
 "     call qf#set_matches({origin}, {HG}, {complex_regex})
@@ -171,32 +174,32 @@ let s:matches_any_qfl = {}
 "
 "     call qf#set_matches({origin}, {HG}, {telling_name})
 "}}}
-const s:KNOWN_PATTERNS  = {
-    \ 'location'  : '^.\{-}|\s*\%(\d\+\)\=\s*\%(col\s\+\d\+\)\=\s*|\s\=',
+const s:KNOWN_PATTERNS = {
+    \ 'location': '^.\{-}|\s*\%(\d\+\)\=\s*\%(col\s\+\d\+\)\=\s*|\s\=',
     \ 'double_bar': '^|\s*|\s*\|\s*|\s*|\s*$',
     \ }
 
 " `$MYVIMRC` is empty when we start with `-Nu /tmp/vimrc`.
-if $MYVIMRC is# ''
+if $MYVIMRC == ''
     let s:OTHER_PLUGINS = ['autoload/plug.vim']
 else
     let s:VIMRC_FILE = $MYVIMRC
     let s:OTHER_PLUGINS = readfile(s:VIMRC_FILE) | unlet! s:VIMRC_FILE
-    call filter(s:OTHER_PLUGINS, {_,v -> v =~# '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)'})
-    call map(s:OTHER_PLUGINS, {_,v -> 'plugged/'..matchstr(v, '.\{-}/\zs[^,'']*')})
+    call filter(s:OTHER_PLUGINS, {_, v -> v =~# '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)'})
+    call map(s:OTHER_PLUGINS, {_, v -> 'plugged/' .. matchstr(v, '.\{-}/\zs[^,'']*')})
     let s:OTHER_PLUGINS += ['autoload/plug.vim']
     lockvar! s:OTHER_PLUGINS
 endif
 
 " Interface {{{1
 fu qf#quit() abort "{{{2
-    if reg_recording() isnot# ''
+    if reg_recording() != ''
         return feedkeys('q', 'in')[-1]
     endif
     q
 endfu
 
-def qf#align(info: dict<number>): list<string> # {{{2
+def qf#align(info: dict<number>): list<string> #{{{2
     let qfl: list<any>
     if info.quickfix
         qfl = getqflist(#{id: info.id, items: 0}).items
@@ -238,12 +241,12 @@ enddef
 fu qf#cfilter(bang, pat, mod) abort "{{{2
     try
         " get a qfl with(out) the entries we want to filter
-        let list          = s:getqflist()
-        let pat           = s:get_pat(a:pat)
+        let list = s:getqflist()
+        let pat = s:get_pat(a:pat)
         let [comp, logic] = s:get_comp_and_logic(a:bang)
-        let old_size      = len(list)
+        let old_size = len(list)
         call filter(list,
-            \     printf('fnamemodify(bufname(v:val.bufnr), ":p") %s pat %s v:val.text %s pat',
+            \     printf('bufname(v:val.bufnr)->fnamemodify(":p") %s pat %s v:val.text %s pat',
             \     comp, logic, comp))
 
         if len(list) == old_size
@@ -267,7 +270,7 @@ fu qf#cfilter(bang, pat, mod) abort "{{{2
             \       ?    pat
             \       :    'the pattern')
     catch
-        return lg#catch()
+        return s:Catch()
     endtry
 endfu
 
@@ -292,11 +295,11 @@ endfu
 fu qf#cgrep_buffer(lnum1, lnum2, pat, loclist) abort "{{{2
     let pfx1 = a:loclist ? 'l' : 'c'
     let pfx2 = a:loclist ? 'l' : ''
-    let range = a:lnum1..','..a:lnum2
+    let range = a:lnum1 .. ',' .. a:lnum2
 
     " ┌ we don't want the title of the qfl separating `:` from `cexpr`
     " │
-    exe pfx1..'expr []'
+    exe pfx1 .. 'expr []'
     "                    ┌ if the pattern is absent from a buffer,
     "                    │ it will raise an error
     "                    │
@@ -307,12 +310,12 @@ fu qf#cgrep_buffer(lnum1, lnum2, pat, loclist) abort "{{{2
     let cmd = printf('sil! noa %sbufdo %svimgrepadd /%s/gj %%', range, pfx2, a:pat)
     exe cmd
 
-    exe pfx1..'window'
+    exe pfx1 .. 'window'
 
     if a:loclist
-        call setloclist(0, [], 'a', {'title': ':'..cmd})
+        call setloclist(0, [], 'a', {'title': ':' .. cmd})
     else
-        call setqflist([], 'a', {'title': ':'..cmd})
+        call setqflist([], 'a', {'title': ':' .. cmd})
     endif
 endfu
 
@@ -328,17 +331,17 @@ fu qf#create_matches() abort "{{{2
                     if group is? 'conceal'
                         setl cocu=nc cole=3
                     endif
-                    let match_id = call('matchadd',   [group, pat, 0, -1]
-                    \                               + (group is? 'conceal'
-                    \                                  ?    [{ 'conceal': 'x' }]
-                    \                                  :    []
-                    \                                 ))
+                    let match_id = call('matchadd', [group, pat, 0, -1]
+                        \ + (group is? 'conceal'
+                        \    ?    [{ 'conceal': 'x' }]
+                        \    :    []
+                        \   ))
                 endfor
             endfor
         endif
 
     catch
-        return lg#catch()
+        return s:Catch()
     endtry
 endfu
 
@@ -372,17 +375,17 @@ fu qf#cupdate(mod) abort "{{{2
         "
         " In this case, we want the text field to stay the same (hence `v.text`).
         "}}}
-        "                                         │
-        call map(list, {_,v -> extend(v, {'text': get(getbufline(v.bufnr, v.lnum), 0, v.text)})})
-        "                      │
-        "                      └ There will be a conflict between the old value
-        "                        associated to the key `text`, and the new one.
+        "                                                                       │
+        call map(list, {_, v -> extend(v, {'text': getbufline(v.bufnr, v.lnum)->get(0, v.text)})})
+        "                       │
+        "                       └ There will be a conflict between the old value
+        "                         associated to the key `text`, and the new one.
         "
-        "                        And   in  case   of   conflict,  by   default
-        "                        `extend()` overwrites the  old value with the
-        "                        new  one.
-        "                        So,  in effect,  `extend()` will  replace the
-        "                        old text with the new one.
+        "                         And   in  case   of   conflict,  by   default
+        "                         `extend()` overwrites the  old value with the
+        "                         new  one.
+        "                         So,  in effect,  `extend()` will  replace the
+        "                         old text with the new one.
 
         " set this new qfl
         let action = s:get_action(a:mod)
@@ -391,9 +394,9 @@ fu qf#cupdate(mod) abort "{{{2
         call s:maybe_resize_height()
 
         " restore position
-        exe 'norm! '..pos..'G'
+        exe 'norm! ' .. pos .. 'G'
     catch
-        return lg#catch()
+        return s:Catch()
     endtry
 endfu
 
@@ -417,7 +420,7 @@ fu qf#conceal_or_delete(...) abort "{{{2
             " ... but the match would disappear when we change the focused window,
             " probably because the visual marks would be set in another buffer.
             let [vcol1, vcol2] = [virtcol("'["), virtcol("']")]
-            let pat = '\%'..vcol1..'v.*\%'..vcol2..'v.'
+            let pat = '\%' .. vcol1 .. 'v.*\%' .. vcol2 .. 'v.'
             call matchadd('Conceal', pat, 0, -1, {'Conceal' : 'x'})
             setl cocu=nc cole=3
             return
@@ -437,17 +440,17 @@ fu qf#conceal_or_delete(...) abort "{{{2
         call s:maybe_resize_height()
 
         " restore position
-        exe 'norm! '..pos..'G'
+        exe 'norm! ' .. pos .. 'G'
     catch
-        return lg#catch()
+        return s:Catch()
     endtry
 endfu
 
 fu qf#disable_some_keys(keys) abort "{{{2
     if !exists('b:undo_ftplugin') | let b:undo_ftplugin = 'exe' | endif
     for key in a:keys
-        sil exe 'nno <buffer><nowait><silent> '..key..' <nop>'
-        let b:undo_ftplugin ..= '|exe "nunmap <buffer> '..key..'"'
+        sil exe 'nno <buffer><nowait><silent> ' .. key .. ' <nop>'
+        let b:undo_ftplugin ..= '|exe "nunmap <buffer> ' .. key .. '"'
     endfor
 endfu
 
@@ -520,16 +523,16 @@ fu s:open(cmd) abort
     "}}}
     let cmd = expand('<amatch>') =~# '^[cl]open$' ? 'open' : 'window'
     if mod =~# 'vert'
-        let how_to_open = mod..' '..prefix..cmd..' '..s:get_width(a:cmd)
+        let how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. s:get_width(a:cmd)
     else
-        let how_to_open = mod..' '..prefix..cmd..' '..max([min([10, size]), &wmh + 2])
-        "                                              │    │
-        "                                              │    └ at most 10 lines high
-        "                                              └ at least `&wmh + 2` lines high
+        let how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. max([min([10, size]), &wmh + 2])
+        "                                                        │    │
+        "                                                        │    └ at most 10 lines high
+        "                                                        └ at least `&wmh + 2` lines high
         " Why `&wmh + 2`?{{{
         "
         " First, the number passed to `:[cl]{open|window}`  must be at least 1, even
-        " if the qfl is empty. E.g., `:lwindow 0` would raise `E939`.
+        " if the qfl is empty.  E.g., `:lwindow 0` would raise `E939`.
         "
         " Second, if `'ea'` is  reset, and the qf window is only 1  or 2 lines high,
         " pressing Enter on the qf entry would raise `E36`.
@@ -542,7 +545,7 @@ fu s:open(cmd) abort
     try
         exe how_to_open
     catch
-        return lg#catch()
+        return s:Catch()
     endtry
 
     if a:cmd is# 'helpgrep'
@@ -590,7 +593,7 @@ endfu
 
 fu qf#open_manual(where) abort "{{{2
     let size = b:qf_is_loclist ? getloclist(0, {'size': 0}).size : getqflist({'size': 0}).size
-    if empty(size) | echo (b:qf_is_loclist ? 'location' : 'quickfix')..' list is empty' | return | endif
+    if empty(size) | echo (b:qf_is_loclist ? 'location' : 'quickfix') .. ' list is empty' | return | endif
 
     let sb_was_on = &sb | set nosb
     try
@@ -610,7 +613,7 @@ fu qf#open_manual(where) abort "{{{2
             call win_gotoid(new)
         endif
     catch
-        return lg#catch()
+        return s:Catch()
     finally
         if sb_was_on | set sb | endif
     endtry
@@ -624,12 +627,12 @@ fu qf#set_matches(origin, group, pat) abort "{{{2
         endif
         let matches_this_qfl_this_origin = get(s:matches_any_qfl[id], a:origin, [])
         let pat = get(s:KNOWN_PATTERNS, a:pat, a:pat)
-        call extend(s:matches_any_qfl[id], { a:origin : extend( matches_this_qfl_this_origin,
-        \                                                       [{ 'group': a:group, 'pat': pat }]
-        \                                                     )})
+        call extend(s:matches_any_qfl[id], {
+            \ a:origin : extend( matches_this_qfl_this_origin, [{ 'group': a:group, 'pat': pat }])
+            \ })
 
     catch
-        return lg#catch()
+        return s:Catch()
     endtry
 endfu
 
@@ -647,7 +650,7 @@ fu qf#setup_toc() abort "{{{2
     " we only want the texts, not their location
     setl modifiable
     sil keepj %d_
-    call setline(1, map(llist, {_,v -> v.text}))
+    call map(llist, {_, v -> v.text})->setline(1)
     setl nomodifiable nomodified
     let &syntax = getbufvar(bufnr, '&syntax')
 endfu
@@ -695,8 +698,8 @@ fu s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
 
     " What is this “filter indicator”?{{{
     "
-    " If the  qfl has already  been filtered, we  don't want to  add another
-    " `[:filter pat]`  in the title. Too  verbose. Instead we want to  add a
+    " If  the qfl  has  already been  filtered,  we don't  want  to add  another
+    " `[:filter pat]`  in the  title.  Too  verbose.  Instead we  want to  add a
     " “branch” or a “concat”:
     "
     "         [:filter! pat1] [:filter! pat2]    ✘
@@ -705,11 +708,11 @@ fu s:add_filter_indicator_to_title(title, pat, bang) abort "{{{2
     "         [:filter pat1] [:filter pat2]      ✘
     "         [:filter pat1 & pat2]              ✔
     "}}}
-    let filter_indicator = '\s*\[:filter'..(a:bang ? '!' : '!\@!')
+    let filter_indicator = '\s*\[:filter' .. (a:bang ? '!' : '!\@!')
     let has_already_been_filtered = match(a:title, filter_indicator) >= 0
     return has_already_been_filtered
-            \ ?     substitute(a:title, '\ze\]$', (a:bang ? ' | ' : ' \& ')..pat, '')
-            \ :     a:title..' [:filter'..bang..' '..pat..']'
+        \ ?     substitute(a:title, '\ze\]$', (a:bang ? ' | ' : ' \& ') .. pat, '')
+        \ :     a:title .. ' [:filter' .. bang .. ' ' .. pat .. ']'
 endfu
 
 fu s:get_action(mod) abort "{{{2
@@ -736,11 +739,11 @@ endfu
 fu s:get_id() abort "{{{2
     try
         let l:Getqflist_id = get(b:, 'qf_is_loclist', 0)
-                         \ ?    function('getloclist', [0] + [{'id': 0}])
-                         \ :    function('getqflist',        [{'id': 0}])
+            \ ?    function('getloclist', [0] + [{'id': 0}])
+            \ :    function('getqflist', [{'id': 0}])
         return get(l:Getqflist_id(), 'id', 0)
     catch
-        return lg#catch()
+        return s:Catch()
     endtry
 endfu
 
@@ -759,10 +762,10 @@ fu s:get_pat(pat) abort "{{{2
     " But the second one is a python one.
     " The  entries in  the python  buffer would  be filtered  using the  comment
     " leader of Vim, which is totally wrong.
-    let cml = getbufvar(get(get(getqflist(), 0, {}), 'bufnr', 0), '&cms')
-    let cml = escape(matchstr(split(cml, '%s'), '\S\+'), '\')
-    if cml isnot# ''
-        let cml = '\V'..cml..'\m'
+    let cml = getqflist()->get(0, {})->get('bufnr', 0)->getbufvar('&cms')
+    let cml = split(cml, '%s')->matchstr('\S\+')->escape('\')
+    if cml != ''
+        let cml = '\V' .. cml .. '\m'
     else
         " An empty comment leader would make a pattern which matches all the time.
         " As a result, all the qfl would be emptied.
@@ -779,39 +782,39 @@ fu s:get_pat(pat) abort "{{{2
     " should *not* be filtered, but they are).
     "}}}
     let arg2pat = {
-        \ '-commented':     '^\s*'..cml,
-        \ '-other_plugins': '^\S*/\%('..join(s:OTHER_PLUGINS, '\|')..'\)',
-        \ '-tmp':           '^\S*/\%(qfl\|session\|tmp\)/\S*\.vim',
+        \ '-commented': '^\s*' .. cml,
+        \ '-other_plugins': '^\S*/\%(' .. join(s:OTHER_PLUGINS, '\|') .. '\)',
+        \ '-tmp': '^\S*/\%(qfl\|session\|tmp\)/\S*\.vim',
         \ }
 
     " If `:Cfilter` was passed a special argument, interpret it.
-    if pat =~# join(keys(arg2pat), '\|')
+    if pat =~# keys(arg2pat)->join('\|')
         let pat = split(pat, '\s\+')
-        call map(pat, {_,v -> arg2pat[v]})
+        call map(pat, {_, v -> arg2pat[v]})
         let pat = join(pat, '\|')
         return pat
     else
         " If no pattern was provided, use the search register as a fallback.
         " Remove a possible couple of slashes before and after the pattern.
         " Otherwise, do nothing.
-        return pat is# ''
-           \ ?     @/
-           \ : pat =~ '^/.*/$'
-           \ ?     pat[1:-2]
-           \ :     pat
+        return pat == ''
+            \ ?     @/
+            \ : pat =~ '^/.*/$'
+            \ ?     pat[1:-2]
+            \ :     pat
     endif
 endfu
 
 fu s:get_title() abort "{{{2
     return get(b:, 'qf_is_loclist', 0)
-       \ ?     get(getloclist(0, {'title': 0}), 'title', '')
-       \ :     get(getqflist({'title': 0}), 'title', '')
+        \ ?     getloclist(0, {'title': 0})->get('title', '')
+        \ :     getqflist({'title': 0})->get('title', '')
 endfu
 
 fu s:get_width(cmd) abort "{{{2
     let title = a:cmd =~# '^l' ? getloclist(0, {'title': 0}).title : getqflist({'title': 0}).title
     if title is# 'TOC'
-        let lines_length = map(getloclist(0, {'items':0}).items, 'strchars(v:val.text, 1)')
+        let lines_length = getloclist(0, {'items':0}).items->map('strchars(v:val.text, 1)')
         call remove(lines_length, 0) " ignore first line (it may be very long, and is not that useful)
         let longest_line = max(lines_length)
         let right_padding = 1
@@ -831,10 +834,10 @@ endfu
 fu s:maybe_resize_height() abort "{{{2
     if winwidth(0) == &columns
         " no more than 10 lines
-        let newheight = min([10, len(s:getqflist())])
+        let newheight = min([10, s:getqflist()->len()])
         " at least 2 lines (to avoid `E36` if we've reset `'ea'`)
         let newheight = max([2, newheight])
-        exe newheight..'wincmd _'
+        exe newheight .. 'wincmd _'
     endif
 endfu
 

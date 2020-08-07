@@ -46,9 +46,9 @@ augroup my_quickfix | au!
     " Other plugins may need to be informed when the qf window is opened.
     " See: https://github.com/romainl/vim-qf/pull/70
     "}}}
-    au QuickFixCmdPost * ++nested call qf#open_auto(expand('<amatch>'))
-    "  │                                            │
-    "  │                                            └ name of the command which was run
+    au QuickFixCmdPost * ++nested call expand('<amatch>')->qf#open_auto()
+    "  │                                        │
+    "  │                                        └ name of the command which was run
     "  └ after a quickfix command is run
 
     au FileType qf call qf#preview#mappings()
