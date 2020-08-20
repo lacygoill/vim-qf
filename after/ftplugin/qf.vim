@@ -5,9 +5,9 @@ com -bar -buffer CRemoveInvalid call qf#remove_invalid_entries()
 
 " Csave / Crestore / Cremove {{{2
 
-com -bar -buffer -bang -complete=custom,qf#save_restore#complete -nargs=1 Csave call qf#save_restore#save(<q-args>, <bang>0)
-com -bar -buffer -complete=custom,qf#save_restore#complete -nargs=? Crestore call qf#save_restore#restore(<q-args>)
-com -bar -buffer -bang -complete=custom,qf#save_restore#complete -nargs=1 Cremove call qf#save_restore#remove(<q-args>, <bang>0)
+com -bar -buffer -bang -nargs=1 -complete=custom,qf#save_restore#complete Csave call qf#save_restore#save(<q-args>, <bang>0)
+com -bar -buffer -nargs=? -complete=custom,qf#save_restore#complete Crestore call qf#save_restore#restore(<q-args>)
+com -bar -buffer -bang -nargs=1 -complete=custom,qf#save_restore#complete Cremove call qf#save_restore#remove(<q-args>, <bang>0)
 
 " Cconceal {{{2
 
@@ -206,7 +206,7 @@ const b:qf_is_loclist = win_getid()->getwininfo()[0].loclist
 " The  2nd time  we display  a  qf buffer  in  the same  window, there's  no
 " guarantee that we're going to conceal anything.
 "}}}
-setl cocu< cole<
+set cocu< cole<
 call clearmatches()
 call qf#create_matches()
 

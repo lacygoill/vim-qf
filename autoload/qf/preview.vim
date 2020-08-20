@@ -6,6 +6,7 @@ let g:autoloaded_qf#preview = 1
 " Init {{{1
 
 import MapMetaChord from 'lg/map.vim'
+import Popup_create from 'lg/popup.vim'
 
 " FIXME: This is currently broken because of: https://github.com/vim/vim/issues/6636
 " Once the issue is fixed, check whether the popup filter mappings work as expected.
@@ -143,7 +144,7 @@ fu s:popup_create() abort "{{{2
 
     " `sil!` to suppress `E325` in case the file is already open in another Vim instance
     " See: https://github.com/vim/vim/issues/5822
-    sil! let [_, w:_qfpreview.winid] = lg#popup#create(curentry.bufnr, opts)
+    sil! let [_, w:_qfpreview.winid] = s:Popup_create(curentry.bufnr, opts)
     call s:set_signcolumn()
     call s:set_sign(curentry.bufnr, curentry.lnum)
     " hide ad-hoc characters used for syntax highlighting (like bars and stars in help files)

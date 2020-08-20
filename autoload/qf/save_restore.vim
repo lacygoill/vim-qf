@@ -138,9 +138,9 @@ fu qf#save_restore#save(fname, bang) abort "{{{2
     "
     " From `:h :s%`
     "
-    " >    The special meaning is also used inside the third argument {sub} of
-    " >    the |substitute()| function with the following exceptions:
-    " >    ...
+    "    > The special meaning is also used inside the third argument {sub} of
+    "    > the |substitute()| function with the following exceptions:
+    "    > ...
     "
     " MWE:
     "

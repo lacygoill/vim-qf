@@ -11,6 +11,7 @@ let g:autoloaded_qf = 1
 " TODO: Split the code: one functionality per file.
 
 import Catch from 'lg.vim'
+import GetWinMod from 'lg/window.vim'
 
 " Variables {{{1
 " What's the purpose of `s:matches_any_qfl`?{{{
@@ -366,8 +367,8 @@ fu qf#cupdate(mod) abort "{{{2
         " But, if the buffer is unloaded, it will just return an empty list.
         " From `:h getbufline()`:
         "
-        " >     This function  works only  for loaded  buffers.  For  unloaded and
-        " >     non-existing buffers, an empty |List| is returned.
+        "    > This function  works only  for loaded  buffers.  For  unloaded and
+        "    > non-existing buffers, an empty |List| is returned.
         "
         " Therefore, if  an entry in  the qfl is present  in a buffer  which you
         " didn't visit in the past, it  won't be loaded, and `getbufline()` will
@@ -503,9 +504,9 @@ fu s:open(cmd) abort
         \ ?     ['l', getloclist(0, {'size': 0}).size]
         \ :     ['c', getqflist({'size': 0}).size]
 
-    let mod = call('lg#window#get_modifier', a:cmd =~# '^l' ? [1] : [])
-    "                                                          │
-    "            flag meaning we're going to open a loc window ┘
+    let mod = call('s:GetWinMod', a:cmd =~# '^l' ? [v:true] : [])
+    "                                                 │
+    "   flag meaning we're going to open a loc window ┘
 
     " Wait.  `:copen` can't populate the qfl.  How could `cmd` be `copen`?{{{
     "
@@ -656,8 +657,7 @@ fu qf#setup_toc() abort "{{{2
 endfu
 
 fu qf#undo_ftplugin() abort "{{{2
-    setl bl< cul< stl< wrap<
-    set efm<
+    set bl< cul< efm< stl< wrap<
     unlet! b:qf_is_loclist
     au! my_qf * <buffer>
 
