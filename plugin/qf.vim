@@ -18,9 +18,6 @@ let g:loaded_qf = 1
 " TODO: Add a command to sort qf entries in some way?
 " Inspiration: https://github.com/vim/vim/issues/6412 (look for `qf#sort#qflist()`)
 
-" TODO: Configure `ctags(1)` so that it  generates tags for `:def` functions and
-" `:const` constants.  See `man ctags-optlib(7)`.
-
 " Options {{{1
 
 " don't let the default qf filetype plugin set `'stl'`, we'll do it ourselves

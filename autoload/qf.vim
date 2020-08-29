@@ -14,6 +14,9 @@ import Catch from 'lg.vim'
 import GetWinMod from 'lg/window.vim'
 
 " Variables {{{1
+
+const s:EFM_TYPE = #{e: 'error', w: 'warning', i: 'info', n: 'note'}
+
 " What's the purpose of `s:matches_any_qfl`?{{{
 "
 " Suppose we  have a  plugin which  populates a  qfl, opens  the qf  window, and
@@ -219,6 +222,13 @@ def qf#align(info: dict<number>): list<string> #{{{2
     let fname_width = range(info.start_idx - 1, info.end_idx - 1)
         ->map({_, v -> qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(1)})
         ->max()
+    let type_width = range(info.start_idx - 1, info.end_idx - 1)
+        ->map({_, v -> get(s:EFM_TYPE, qfl[v].type, '')->strlen()})
+        ->max()
+    let errnum_width = range(info.start_idx - 1, info.end_idx - 1)
+        ->map({_, v -> qfl[v].nr})
+        ->max()
+        ->len()
     for idx in range(info.start_idx - 1, info.end_idx - 1)
         let e = qfl[idx]
         if !e.valid
@@ -229,10 +239,15 @@ def qf#align(info: dict<number>): list<string> #{{{2
             if e.lnum == 0 && e.col == 0
                 add(l, bufname(e.bufnr))
             else
-                let fname = printf('%-*s', fname_width, bufname(e.bufnr)->fnamemodify(':t'))
+                let fname = printf('%-*S', fname_width, bufname(e.bufnr)->fnamemodify(':t'))
                 let lnum = printf('%*d', lnum_width, e.lnum)
                 let col = printf('%*d', col_width, e.col)
-                add(l, fname .. '|' .. lnum .. ' col ' .. col .. '| ' .. e.text)
+                let type = printf('%-*S', type_width, get(s:EFM_TYPE, e.type, ''))
+                let errnum = ''
+                if e.nr > 0
+                    errnum = printf('%*d', errnum_width + 1, e.nr)
+                endif
+                add(l, printf('%s|%s col %s %s%s| %s', fname, lnum, col, type, errnum, e.text))
             endif
         endif
     endfor
