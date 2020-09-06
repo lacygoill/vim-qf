@@ -270,7 +270,7 @@ fu qf#cfilter(bang, pat, mod) abort "{{{2
             return
         endif
 
-        let title = s:add_filter_indicator_to_title(s:get_title(), a:pat, a:bang)
+        let title = s:get_title()->s:add_filter_indicator_to_title(a:pat, a:bang)
         let action = s:get_action(a:mod)
         call s:setqflist([], action, {'items': list, 'title': title})
 
@@ -349,7 +349,7 @@ fu qf#create_matches() abort "{{{2
                     endif
                     let match_id = call('matchadd', [group, pat, 0, -1]
                         \ + (group is? 'conceal'
-                        \    ?    [{ 'conceal': 'x' }]
+                        \    ?    [#{conceal: 'x'}]
                         \    :    []
                         \   ))
                 endfor
@@ -437,7 +437,7 @@ fu qf#conceal_or_delete(...) abort "{{{2
             " probably because the visual marks would be set in another buffer.
             let [vcol1, vcol2] = [virtcol("'["), virtcol("']")]
             let pat = '\%' .. vcol1 .. 'v.*\%' .. vcol2 .. 'v.'
-            call matchadd('Conceal', pat, 0, -1, {'Conceal' : 'x'})
+            call matchadd('Conceal', pat, 0, -1, #{conceal : 'x'})
             setl cocu=nc cole=3
             return
         elseif type is# 'Ex'
@@ -756,7 +756,7 @@ fu s:get_id() abort "{{{2
         let l:Getqflist_id = get(b:, 'qf_is_loclist', 0)
             \ ?    function('getloclist', [0] + [{'id': 0}])
             \ :    function('getqflist', [{'id': 0}])
-        return get(l:Getqflist_id(), 'id', 0)
+        return l:Getqflist_id()->get('id', 0)
     catch
         return s:Catch()
     endtry

@@ -135,28 +135,27 @@ augroup END
 let &l:stl = '%{qf#statusline#title()}%=    %l/%L '
 
 " efm {{{2
-" Why do we set 'efm'?{{{
+" Why do you set `'efm'`?{{{
 "
-" Type:
-"       :vim /fu/gj %
-"       :setl ma | keepj $d_ | setl noma
-"       :cgetb
+"     :vim /fu/gj %
+"     :setl ma | keepj $d_ | setl noma
+"     :cgetb
 "
 " The new qfl is not interactive.
-" This is because  `:cgetb` interprets the contents of the  qfl thanks to 'efm',
-" (contrary to `:grep` which uses 'gfm').
+" This is because `:cgetb` interprets the contents of the qfl thanks to `'efm'`,
+" (contrary to `:grep` which uses `'gfm'`).
 "
 " The default global value is very long:
 "
-"        put =&g:efm | s/\\\@1<!,/\r/g
+"     put =&g:efm | s/\\\@1<!,/\r/g
 "
 " But it seems  it doesn't contain any  value describing the contents  of a qfl.
 " IOW, it's designed to interpret the output of some shell commands and populate
 " the qfl.  It's not designed to parse the qfl itself.
 "}}}
-" Could we use a simpler value?{{{
+" Could I use a simpler value?{{{
 "
-" Yes, if we didn't align the text in the qfl:
+" Yes, if you didn't align the text in the qfl:
 "
 "     let &l:efm = '%f\|%l col %c\|%m'
 "
@@ -170,7 +169,7 @@ let &l:stl = '%{qf#statusline#title()}%=    %l/%L '
 "                              │
 let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 "│              ├──┘
-"│              └ scanf() notation for `%\s%\+`(see :h efm-ignore, “pattern matching“)
+"│              └ scanf() notation for `%\s%\+`(see `:h efm-ignore /pattern matching`)
 "└ using `:let` instead of `setl` makes the value more readable
 "  otherwise, we would need to escape any:
 "
@@ -184,7 +183,7 @@ let &l:efm = '%f%*\s\|%l col %c%*\s\|%m'
 "    - comma
 "
 "      We need to escape a comma even  with `:let`, because a comma has a
-"      special meaning for 'efm': separation between 2 formats.
+"      special meaning for `'efm'`: separation between 2 formats.
 "
 "      But with `:set` we would need a double backslash, because a comma has
 "      also a special meaning for `:set`: separation between 2 option values.
