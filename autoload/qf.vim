@@ -210,7 +210,7 @@ def qf#align(info: dict<number>): list<string> #{{{2
     else
         qfl = getloclist(info.winid, #{id: info.id, items: 0}).items
     endif
-    let l: list<string> = []
+    let l = []
     let lnum_width = range(info.start_idx - 1, info.end_idx - 1)
         ->map({_, v -> qfl[v].lnum})
         ->max()
@@ -756,7 +756,7 @@ fu s:get_id() abort "{{{2
         let l:Getqflist_id = get(b:, 'qf_is_loclist', 0)
             \ ?    function('getloclist', [0] + [{'id': 0}])
             \ :    function('getqflist', [{'id': 0}])
-        return l:Getqflist_id()->get('id', 0)
+        return Getqflist_id()->get('id', 0)
     catch
         return s:Catch()
     endtry
