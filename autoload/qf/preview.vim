@@ -8,17 +8,8 @@ let g:autoloaded_qf#preview = 1
 import MapMetaChord from 'lg/map.vim'
 import Popup_create from 'lg/popup.vim'
 
-" FIXME: This is currently broken because of: https://github.com/vim/vim/issues/6636
-" Once the issue is fixed, check whether the popup filter mappings work as expected.
-
 " this tells the popup filter which keys it must handle, and how
 const s:FILTER_CMD = {
-    \ s:MapMetaChord('j'): {id -> win_execute(id, 'exe "norm! \<c-e>"')},
-    \ s:MapMetaChord('k'): {id -> win_execute(id, 'exe "norm! \<c-y>"')},
-    \ s:MapMetaChord('d'): {id -> win_execute(id, 'exe "norm! \<c-d>"')},
-    \ s:MapMetaChord('u'): {id -> win_execute(id, 'exe "norm! \<c-u>"')},
-    \ s:MapMetaChord('g'): {id -> win_execute(id, 'norm! gg')},
-    \ s:MapMetaChord('G'): {id -> win_execute(id, 'norm! G')},
     \ s:MapMetaChord('m'): {-> s:set_height(-1)},
     \ s:MapMetaChord('p'): {-> s:set_height(1)},
     "\ toggle number column
@@ -32,7 +23,7 @@ const s:FILTER_CMD = {
     \ ]},
     \ }
 
-const s:FILTER_LHS = map(['j', 'k', 'd', 'u', 'g', 'G', 'm', 'p', 'n', 'r'],
+const s:FILTER_LHS = map(['m', 'p', 'n', 'r'],
     \ {_, v -> s:MapMetaChord(v, v:true)})
     "                            ^----^
     "                            don't translate the chords; we need symbolic notations
@@ -91,11 +82,9 @@ endfu
 fu qf#preview#mappings() abort
     " Purpose of this function:{{{
     "
-    " We currently use  `M-j` to scroll in  the popup via a filter,  but we also
-    " use it to scroll in the preview window via a global mapping.
-    "
-    " Because of this mapping, we can't use `M-j` to scroll in the popup.
-    " Indeed, the mapping is applied before the filter.
+    " We currently  use `M-m` as a  prefix for various commands  which highlight
+    " lines.   Because of  this,  we can't  use `M-m`  to  decrease the  popup's
+    " height.  Indeed, mappings are applied before popup filters.
     "
     " We could fix the issue  by passing `mapping: v:false` to `popup_create()`,
     " but it would disable *all* mappings while the popup is visible.

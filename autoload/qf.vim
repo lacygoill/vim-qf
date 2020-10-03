@@ -178,9 +178,9 @@ let s:matches_any_qfl = {}
 "
 "     call qf#set_matches({origin}, {HG}, {telling_name})
 "}}}
-const s:KNOWN_PATTERNS = {
-    \ 'location': '^.\{-}|\s*\%(\d\+\)\=\s*\%(col\s\+\d\+\)\=\s*|\s\=',
-    \ 'double_bar': '^|\s*|\s*\|\s*|\s*|\s*$',
+const s:KNOWN_PATTERNS = #{
+    \ location: '^.\{-}|\s*\%(\d\+\)\=\s*\%(col\s\+\d\+\)\=\s*|\s\=',
+    \ double_bar: '^|\s*|\s*\|\s*|\s*|\s*$',
     \ }
 
 " `$MYVIMRC` is empty when we start with `-Nu /tmp/vimrc`.
@@ -204,50 +204,58 @@ fu qf#quit() abort "{{{2
 endfu
 
 def qf#align(info: dict<number>): list<string> #{{{2
-    let qfl: list<any>
+    var qfl: list<any>
     if info.quickfix
         qfl = getqflist(#{id: info.id, items: 0}).items
     else
         qfl = getloclist(info.winid, #{id: info.id, items: 0}).items
     endif
-    let l = []
-    let lnum_width = range(info.start_idx - 1, info.end_idx - 1)
+    var l: list<string>
+    var lnum_width = range(info.start_idx - 1, info.end_idx - 1)
         ->map({_, v -> qfl[v].lnum})
         ->max()
         ->len()
-    let col_width = range(info.start_idx - 1, info.end_idx - 1)
+    var col_width = range(info.start_idx - 1, info.end_idx - 1)
         ->map({_, v -> qfl[v].col})
         ->max()
         ->len()
-    let fname_width = range(info.start_idx - 1, info.end_idx - 1)
+    var pat_width = range(info.start_idx - 1, info.end_idx - 1)
+        ->map({_, v -> strchars(qfl[v].pattern, 1)})
+        ->max()
+    var fname_width = range(info.start_idx - 1, info.end_idx - 1)
         ->map({_, v -> qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(1)})
         ->max()
-    let type_width = range(info.start_idx - 1, info.end_idx - 1)
+    var type_width = range(info.start_idx - 1, info.end_idx - 1)
         ->map({_, v -> get(s:EFM_TYPE, qfl[v].type, '')->strlen()})
         ->max()
-    let errnum_width = range(info.start_idx - 1, info.end_idx - 1)
+    var errnum_width = range(info.start_idx - 1, info.end_idx - 1)
         ->map({_, v -> qfl[v].nr})
         ->max()
         ->len()
     for idx in range(info.start_idx - 1, info.end_idx - 1)
-        let e = qfl[idx]
+        var e = qfl[idx]
         if !e.valid
             add(l, '|| ' .. e.text)
         else
             # case where the entry does not  refer to a particular location in a
             # file, but just to a file as a whole (e.g. `:Find`, `:PluginsToCommit`, ...)
-            if e.lnum == 0 && e.col == 0
+            if e.lnum == 0 && e.col == 0 && e.pattern == ''
                 add(l, bufname(e.bufnr))
             else
-                let fname = printf('%-*S', fname_width, bufname(e.bufnr)->fnamemodify(':t'))
-                let lnum = printf('%*d', lnum_width, e.lnum)
-                let col = printf('%*d', col_width, e.col)
-                let type = printf('%-*S', type_width, get(s:EFM_TYPE, e.type, ''))
-                let errnum = ''
+                var fname = printf('%-*S', fname_width, bufname(e.bufnr)->fnamemodify(':t'))
+                var lnum = printf('%*d', lnum_width, e.lnum)
+                var col = printf('%*d', col_width, e.col)
+                var pat = printf('%-*S', pat_width, e.pattern)
+                var type = printf('%-*S', type_width, get(s:EFM_TYPE, e.type, ''))
+                var errnum = ''
                 if e.nr > 0
                     errnum = printf('%*d', errnum_width + 1, e.nr)
                 endif
-                add(l, printf('%s|%s col %s %s%s| %s', fname, lnum, col, type, errnum, e.text))
+                if e.pattern == ''
+                    add(l, printf('%s|%s col %s %s%s| %s', fname, lnum, col, type, errnum, e.text))
+                else
+                    add(l, printf('%s|%s %s%s| %s', fname, pat, type, errnum, e.text))
+                endif
             endif
         endif
     endfor
@@ -332,6 +340,18 @@ fu qf#cgrep_buffer(lnum1, lnum2, pat, loclist) abort "{{{2
         call setloclist(0, [], 'a', {'title': ':' .. cmd})
     else
         call setqflist([], 'a', {'title': ':' .. cmd})
+    endif
+endfu
+
+fu qf#conceal() abort "{{{2
+    " we don't  want to see the  middle column displaying a  pattern in location
+    " window opened by an `:ltag` command
+    if get(w:, 'quickfix_title', '')[:4] is# 'ltag '
+        " TODO: Is there a risk of piling up matches?
+        " Should we run `clearmatches()`?
+        " Should we save the id of the match, and use it in a guard?
+        call matchadd('Conceal', '|.\{-}|')
+        setl cocu=nvc cole=3
     endif
 endfu
 
@@ -652,29 +672,9 @@ fu qf#set_matches(origin, group, pat) abort "{{{2
     endtry
 endfu
 
-fu qf#setup_toc() abort "{{{2
-    if get(w:, 'quickfix_title') !~# '\<TOC$' || &syntax isnot# 'qf'
-        return
-    endif
-
-    let llist = getloclist(0)
-    if empty(llist)
-        return
-    endif
-
-    let bufnr = llist[0].bufnr
-    " we only want the texts, not their location
-    setl modifiable
-    sil keepj %d_
-    call map(llist, {_, v -> v.text})->setline(1)
-    setl nomodifiable nomodified
-    let &syntax = getbufvar(bufnr, '&syntax')
-endfu
-
 fu qf#undo_ftplugin() abort "{{{2
     set bl< cul< efm< stl< wrap<
     unlet! b:qf_is_loclist
-    au! my_qf * <buffer>
 
     nunmap <buffer> <c-q>
     nunmap <buffer> <c-r>
@@ -829,7 +829,7 @@ endfu
 fu s:get_width(cmd) abort "{{{2
     let title = a:cmd =~# '^l' ? getloclist(0, {'title': 0}).title : getqflist({'title': 0}).title
     if title is# 'TOC'
-        let lines_length = getloclist(0, {'items':0}).items->map('strchars(v:val.text, 1)')
+        let lines_length = getloclist(0, {'items': 0}).items->map('strchars(v:val.text, 1)')
         call remove(lines_length, 0) " ignore first line (it may be very long, and is not that useful)
         let longest_line = max(lines_length)
         let right_padding = 1

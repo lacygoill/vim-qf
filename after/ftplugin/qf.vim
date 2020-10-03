@@ -79,57 +79,6 @@ setl nobuflisted
 
 setl cursorline nowrap
 
-augroup my_qf
-    au! * <buffer>
-    " FIXME:{{{
-    "
-    " If I press `-c` to open the TOC menu, and if I write in this file:
-    "
-    "     call qf#setup_toc()
-    "
-    " The function isn't called.  No syntax highlighting.  Why?
-    " If I install this autocmd:
-    "
-    "     au FileType qf call qf#setup_toc()
-    "
-    " Same result.
-    " If I install this autocmd
-    "
-    "     au Syntax qf call qf#setup_toc()
-    "
-    " It works.  Why?
-    "
-    " Update:
-    " It's because of the guard:
-    "
-    "         if … &syntax isnot# 'qf'
-    "             return
-    "         endif
-    "
-    " We need it to prevent the autocmd to nest too deep:
-    "
-    "     Vim(let):E218: autocommand nesting too deep
-    "
-    " This error comes from the command (in `qf#setup_toc()`):
-    "
-    "     let &syntax = getbufvar(bufnr, '&syntax')
-    "
-    " We could prefix it with `:noa`, but then the new syntax file
-    " (help, markdown, man, …) would NOT be sourced.
-    "
-    " ---
-    "
-    " If I install this autocmd
-    "
-    "     au Syntax <buffer> call qf#setup_toc()
-    "
-    " It works.  What does `<buffer>` mean here? What's the difference with `qf`?
-    " I think it's expanded into a buffer number.  So it limits the scope of the
-    " autocmd to the current buffer, when its syntax option is set.
-    "}}}
-    au Syntax <buffer> call qf#setup_toc()
-augroup END
-
 " the 4  spaces before `%l`  make sure that  the line address  is well-separated
 " from the title, even when the latter is long and the terminal window is narrow
 let &l:stl = '%{qf#statusline#title()}%=    %l/%L '
@@ -206,8 +155,7 @@ const b:qf_is_loclist = win_getid()->getwininfo()[0].loclist
 " guarantee that we're going to conceal anything.
 "}}}
 set cocu< cole<
-call clearmatches()
-call qf#create_matches()
+au Syntax qf ++once call qf#conceal()
 
 " Teardown {{{1
 
