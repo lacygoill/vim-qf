@@ -15,7 +15,15 @@ import GetWinMod from 'lg/window.vim'
 
 " Variables {{{1
 
-const s:EFM_TYPE = #{e: 'error', w: 'warning', i: 'info', n: 'note'}
+const s:EFM_TYPE = #{
+    \ e: 'error',
+    \ w: 'warning',
+    \ i: 'info',
+    \ n: 'note',
+    "\ we use this ad-hoc flag in `vim-stacktrace` to distinguish Vim9 errors
+    "\ which are raised at compile time, from those raised at runtime
+    \ c: 'compiling',
+    \ }
 
 " What's the purpose of `s:matches_any_qfl`?{{{
 "
@@ -470,8 +478,11 @@ fu qf#conceal_or_delete(...) abort "{{{2
         let list = s:getqflist()
         call remove(list, range[0]-1, range[1]-1)
 
+        " we need to preserve conceal options, because our qf filetype plugin resets them
+        let [cole_save, cocu_save] = [&l:cole, &l:cocu]
         " set this new qfl
-        call s:setqflist([], 'r', {'items':list})
+        call s:setqflist([], 'r', #{items: list})
+        let [&l:cole, &l:cocu] = [cole_save, cocu_save]
 
         call s:maybe_resize_height()
 
