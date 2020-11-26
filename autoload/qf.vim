@@ -214,9 +214,9 @@ endfu
 def qf#align(info: dict<number>): list<string> #{{{2
     var qfl: list<any>
     if info.quickfix
-        qfl = getqflist(#{id: info.id, items: 0}).items
+        qfl = getqflist({id: info.id, items: 0}).items
     else
-        qfl = getloclist(info.winid, #{id: info.id, items: 0}).items
+        qfl = getloclist(info.winid, {id: info.id, items: 0}).items
     endif
     var l: list<string>
     var lnum_width = range(info.start_idx - 1, info.end_idx - 1)
@@ -496,7 +496,7 @@ endfu
 fu qf#disable_some_keys(keys) abort "{{{2
     if !exists('b:undo_ftplugin') | let b:undo_ftplugin = 'exe' | endif
     for key in a:keys
-        sil exe 'nno <buffer><nowait><silent> ' .. key .. ' <nop>'
+        sil exe 'nno <buffer><nowait> ' .. key .. ' <nop>'
         let b:undo_ftplugin ..= '|exe "nunmap <buffer> ' .. key .. '"'
     endfor
 endfu

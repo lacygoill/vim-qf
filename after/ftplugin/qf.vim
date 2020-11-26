@@ -47,12 +47,12 @@ com -bar -buffer Cupdate call qf#cupdate(<q-mods>)
 " disable some keys, to avoid annoying error messages
 call qf#disable_some_keys(['a', 'd', 'gj', 'gqq' , 'i', 'o', 'r', 'u', 'x'])
 
-nno <buffer><nowait><silent> <c-q> :<c-u>Csave default<cr>
-nno <buffer><nowait><silent> <c-r> :<c-u>Crestore default<cr>
+nno <buffer><nowait> <c-q> <cmd>Csave default<cr>
+nno <buffer><nowait> <c-r> <cmd>Crestore default<cr>
 
-nno <buffer><nowait><silent> <c-s> :<c-u>call qf#open_manual('split')<cr>
-nno <buffer><nowait><silent> <c-v><c-v> :<c-u>call qf#open_manual('vert split')<cr>
-nno <buffer><nowait><silent> <c-t> :<c-u>call qf#open_manual('tabpage')<cr>
+nno <buffer><nowait> <c-s> <cmd>call qf#open_manual('split')<cr>
+nno <buffer><nowait> <c-v><c-v> <cmd>call qf#open_manual('vert split')<cr>
+nno <buffer><nowait> <c-t> <cmd>call qf#open_manual('tabpage')<cr>
 " FYI:{{{
 "
 " By default:
@@ -61,17 +61,17 @@ nno <buffer><nowait><silent> <c-t> :<c-u>call qf#open_manual('tabpage')<cr>
 "     C-w t  moves the focus to the top window in the current tab page
 "}}}
 
-nno <buffer><nowait><silent> <cr> :<c-u>call qf#open_manual('nosplit')<cr>
-nmap <buffer><nowait><silent> <c-w><cr> <c-s>
+nno <buffer><nowait> <cr> <cmd>call qf#open_manual('nosplit')<cr>
+nmap <buffer><nowait> <c-w><cr> <c-s>
 
 nno <buffer><expr><nowait> D  qf#conceal_or_delete()
 nno <buffer><expr><nowait> DD qf#conceal_or_delete() .. '_'
 xno <buffer><expr><nowait> D  qf#conceal_or_delete()
 
-nno <buffer><nowait><silent> p :<c-u>call qf#preview#open()<cr>
-nno <buffer><nowait><silent> P :<c-u>call qf#preview#open('persistently')<cr>
+nno <buffer><nowait> p <cmd>call qf#preview#open()<cr>
+nno <buffer><nowait> P <cmd>call qf#preview#open('persistently')<cr>
 
-nno <buffer><nowait><silent> q :<c-u>call qf#quit()<cr>
+nno <buffer><nowait> q <cmd>call qf#quit()<cr>
 
 " Options {{{1
 
