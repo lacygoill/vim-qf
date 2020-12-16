@@ -36,7 +36,7 @@ com -nargs=1 -range=% -addr=buffers LGrepBuffer call qf#cgrep_buffer(<line1>, <l
 " Autocmds {{{1
 
 " Automatically open the qf/ll window after a quickfix command.
-augroup my_quickfix | au!
+augroup MyQuickfix | au!
 
     " Do *not* remove the `++nested` flag.{{{
     "

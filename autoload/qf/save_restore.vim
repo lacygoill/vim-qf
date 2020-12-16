@@ -5,7 +5,7 @@ let g:autoloaded_qf#save_restore = 1
 
 " How to save the current qfl automatically when quitting Vim, and how to restore it automatically on startup?{{{
 "
-"     augroup save_and_restore_last_qfl | au!
+"     augroup SaveAndRestoreLastQfl | au!
 "         au VimLeavePre * call s:save_last_qfl()
 "         au VimEnter * call s:restore_last_qfl()
 "     augroup END

@@ -45,7 +45,7 @@ fu qf#preview#open(...) abort "{{{2
             \ 'height': s:get_winheight(),
             \ }
         " increase the height of the window when we zoom the tmux pane where Vim is displayed
-        augroup qfpreview_reset_height
+        augroup QfpreviewResetHeight
             au! * <buffer>
             au VimResized <buffer> let w:_qfpreview.height = s:get_winheight()
                 \ | call s:popup_close()
@@ -220,7 +220,7 @@ endfu
 fu s:close_when_quit() abort "{{{2
     " Need an augroup  to prevent the duplication of the  autocmds when we press
     " `p` several times in the same qf window.
-    augroup qfpreview_close
+    augroup QfpreviewClose
         au! * <buffer>
         " close the popup when the qf window is closed or left
         " Why not `QuitPre` or `BufWinLeave`?{{{
@@ -258,7 +258,7 @@ fu s:persist() abort "{{{2
     let w:_qfpreview.lastline = line('.')
     " Need an  augroup to prevent the  duplication of the autocmds  each time we
     " move the cursor.
-    augroup qfpreview_persistent
+    augroup QfpreviewPersistent
         " Is it ok to clear the augroup?  What if the buffer is displayed in several windows?{{{
         "
         " It's ok because:
@@ -281,7 +281,7 @@ fu s:update() abort "{{{2
     let curlnum = line('.')
     " Why these checks?{{{
     "
-    " This function is called from  the `qfpreview_persistent` autocmd; when the
+    " This function is called from  the `QfpreviewPersistent` autocmd; when the
     " latter is *installed*, you know that:
     "
     "    - `w:_qfpreview` exists
@@ -310,12 +310,12 @@ endfu
 
 fu s:fire_cursormoved() abort "{{{2
     " sanity check
-    if !exists('w:_qfpreview') || !exists('#qfpreview_persistent#CursorMoved')
+    if !exists('w:_qfpreview') || !exists('#QfpreviewPersistent#CursorMoved')
         return
     endif
     " necessary to disable a guard in `s:update()`
     let w:_qfpreview.lastline = 0
-    do <nomodeline> qfpreview_persistent CursorMoved
+    do <nomodeline> QfpreviewPersistent CursorMoved
 endfu
 
 fu s:clear_autocmds() abort "{{{2
@@ -328,8 +328,8 @@ fu s:clear_autocmds() abort "{{{2
     "}}}
     " We can't clear  the augroups because there could still  be autocmds inside
     " (but for other buffers).
-    au! qfpreview_persistent * <buffer>
-    au! qfpreview_close * <buffer>
+    au! QfpreviewPersistent * <buffer>
+    au! QfpreviewClose * <buffer>
 endfu
 
 "}}}1
