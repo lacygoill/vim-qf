@@ -76,7 +76,7 @@ const s:EFM_TYPE = #{
 "        ┌ qf id
 "        │     ┌ origin
 "        │     │
-"     { '1': {'myfuncs:search_todo': [
+"     { '1': {'myfuncs:searchTodo': [
 "     \     {'group': 'Conceal', 'pat': '^.\{-}|\s*\d\+\%(\s\+col\s\+\d\+\s*\)\=\s*|\s\='},
 "     \     {'group': 'Todo', 'pat': '\cfixme\|todo'}
 "     \ ]}}
@@ -220,24 +220,24 @@ def qf#align(info: dict<number>): list<string> #{{{2
     endif
     var l: list<string>
     var lnum_width = range(info.start_idx - 1, info.end_idx - 1)
-        ->map({_, v -> qfl[v].lnum})
+        ->map((_, v) => qfl[v].lnum)
         ->max()
         ->len()
     var col_width = range(info.start_idx - 1, info.end_idx - 1)
-        ->map({_, v -> qfl[v].col})
+        ->map((_, v) => qfl[v].col)
         ->max()
         ->len()
     var pat_width = range(info.start_idx - 1, info.end_idx - 1)
-        ->map({_, v -> strchars(qfl[v].pattern, 1)})
+        ->map((_, v) => strchars(qfl[v].pattern, 1))
         ->max()
     var fname_width = range(info.start_idx - 1, info.end_idx - 1)
-        ->map({_, v -> qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(1)})
+        ->map((_, v) => qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(1))
         ->max()
     var type_width = range(info.start_idx - 1, info.end_idx - 1)
-        ->map({_, v -> get(s:EFM_TYPE, qfl[v].type, '')->strlen()})
+        ->map((_, v) => get(s:EFM_TYPE, qfl[v].type, '')->strlen())
         ->max()
     var errnum_width = range(info.start_idx - 1, info.end_idx - 1)
-        ->map({_, v -> qfl[v].nr})
+        ->map((_, v) => qfl[v].nr)
         ->max()
         ->len()
     for idx in range(info.start_idx - 1, info.end_idx - 1)
@@ -354,7 +354,7 @@ endfu
 fu qf#conceal() abort "{{{2
     " we don't  want to see the  middle column displaying a  pattern in location
     " window opened by an `:ltag` command
-    if get(w:, 'quickfix_title', '')[:4] is# 'ltag '
+    if get(w:, 'quickfix_title', '')[: 4] is# 'ltag '
         " TODO: Is there a risk of piling up matches?
         " Should we run `clearmatches()`?
         " Should we save the id of the match, and use it in a guard?
@@ -826,7 +826,7 @@ fu s:get_pat(pat) abort "{{{2
         return pat == ''
             \ ?     @/
             \ : pat =~ '^/.*/$'
-            \ ?     pat[1:-2]
+            \ ?     pat[1 : -2]
             \ :     pat
     endif
 endfu
