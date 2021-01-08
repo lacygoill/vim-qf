@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 if exists('loaded') | finish | endif
 var loaded = true
@@ -134,8 +134,7 @@ def PopupCreate() #{{{2
 
     # `:nos` to suppress `E325` in case the file is already open in another Vim instance
     # See: https://github.com/vim/vim/issues/5822
-    var _: any
-    nos [_, w:_qfpreview.winid] = Popup_create(curentry.bufnr, opts)
+    nos w:_qfpreview.winid = Popup_create(curentry.bufnr, opts)[1]
     SetSigncolumn()
     SetSign(curentry.bufnr, curentry.lnum)
     # hide ad-hoc characters used for syntax highlighting (like bars and stars in help files)
@@ -427,7 +426,7 @@ def SetHeight(step: number) #{{{2
     #
     # Suppose you include the key `+` in `FILTER_CMD`:
     #
-    #     \ '+': {-> SetHeight(1)},
+    #     \ '+': () => SetHeight(1),
     #
     # and then you run:
     #

@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 if exists('loaded') | finish | endif
 var loaded = true
@@ -253,7 +253,8 @@ def qf#align(info: dict<number>): list<string> #{{{2
             if e.lnum == 0 && e.col == 0 && e.pattern == ''
                 add(l, bufname(e.bufnr))
             else
-                var fname = printf('%-*S', fname_width, bufname(e.bufnr)->fnamemodify(':t'))
+                var fname = printf('%-*S', fname_width, bufname(e.bufnr)
+                    ->fnamemodify(full_filepath ? ':p' : ':t'))
                 var lnum = printf('%*d', lnum_width, e.lnum)
                 var col = printf('%*d', col_width, e.col)
                 var pat = printf('%-*S', pat_width, e.pattern)
@@ -278,7 +279,7 @@ def qf#cfilter(bang: bool, apat: string, mod: string) #{{{2
     var list = Getqflist()
     var pat = GetPat(apat)
     var old_size = len(list)
-    var Filter: func(any, dict<any>): bool
+    var Filter: func(number, dict<any>): bool
     if bang
         # Why the question mark in the comparison operators?{{{
         #
@@ -345,10 +346,10 @@ def qf#cgrepBuffer(lnum1: number, lnum2: number, pat: string, loclist = false) #
     #                    ┌ if the pattern is absent from a buffer,
     #                    │ it will raise an error
     #                    │
-    #                    │   ┌ to prevent a possible autocmd from opening the qf window
-    #                    │   │  every time the qfl is expanded; it could make Vim open
-    #                    │   │  a new split for every buffer
-    #                    │   │
+    #                    │ ┌ to prevent a possible autocmd from opening the qf window
+    #                    │ │  every time the qfl is expanded; it could make Vim open
+    #                    │ │  a new split for every buffer
+    #                    │ │
     var cmd = printf('sil! noa %sbufdo %svimgrepadd /%s/gj %%', range, pfx2, pat)
     exe cmd
 
@@ -570,7 +571,7 @@ def Open(acmd: string)
     endif
 
     # `true`: flag meaning we're going to open a loc window
-    var mod = call('GetWinMod', acmd =~ '^l' ? [true] : [])
+    var mod = call(GetWinMod, acmd =~ '^l' ? [true] : [])
 
     # Wait.  `:copen` can't populate the qfl.  How could `cmd` be `copen`?{{{
     #
@@ -705,6 +706,15 @@ def qf#setMatches(origin: string, group: string, apat: string) #{{{2
         })
 enddef
 
+def qf#toggleFullFilePath() #{{{2
+    var pos = getcurpos()
+    full_filepath = !full_filepath
+    var list = Getqflist()
+    Setqflist([], 'r', {items: list})
+    setpos('.', pos)
+enddef
+var full_filepath: bool
+
 def qf#undoFtplugin() #{{{2
     set bl< cul< efm< stl< wrap<
     unlet! b:qf_is_loclist
@@ -723,6 +733,7 @@ def qf#undoFtplugin() #{{{2
     nunmap <buffer> DD
     xunmap <buffer> D
 
+    nunmap <buffer> cof
     nunmap <buffer> p
     nunmap <buffer> P
 

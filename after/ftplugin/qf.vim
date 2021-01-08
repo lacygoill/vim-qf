@@ -1,4 +1,4 @@
-vim9script
+vim9
 
 # Commands {{{1
 # CRemoveInvalid {{{2
@@ -69,6 +69,8 @@ nmap <buffer><nowait> <c-w><cr> <c-s>
 nno <buffer><expr><nowait> D  qf#concealOrDelete()
 nno <buffer><expr><nowait> DD qf#concealOrDelete() .. '_'
 xno <buffer><expr><nowait> D  qf#concealOrDelete()
+
+nno <buffer><nowait>cof <cmd>call qf#toggleFullFilePath()<cr>
 
 nno <buffer><nowait> p <cmd>call qf#preview#open()<cr>
 nno <buffer><nowait> P <cmd>call qf#preview#open(v:true)<cr>
