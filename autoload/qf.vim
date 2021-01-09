@@ -279,7 +279,7 @@ def qf#cfilter(bang: bool, apat: string, mod: string) #{{{2
     var list = Getqflist()
     var pat = GetPat(apat)
     var old_size = len(list)
-    var Filter: func(number, dict<any>): bool
+    var Filter: func
     if bang
         # Why the question mark in the comparison operators?{{{
         #
@@ -287,10 +287,10 @@ def qf#cfilter(bang: bool, apat: string, mod: string) #{{{2
         # That's not what we want.  If that bothers you, you can always override
         # it by including `\C` in the pattern you provide to `:Cfilter`.
         #}}}
-        Filter = (_, v) =>
+        Filter = (_, v: dict<any>): bool =>
             bufname(v.bufnr)->fnamemodify(':p') !~? pat && v.text !~? pat
     else
-        Filter = (_, v) =>
+        Filter = (_, v: dict<any>): bool =>
             bufname(v.bufnr)->fnamemodify(':p') =~? pat || v.text =~? pat
     endif
     filter(list, Filter)

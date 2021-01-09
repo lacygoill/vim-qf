@@ -9,7 +9,7 @@ def qf#statusline#title(): string
     # So even if the  function is called for a *non-focused*  qf window, you can
     # reliably query a buffer/window variable local to the latter.
     var pfx = get(b:, 'qf_is_loclist', 0) ? '[LL] ' : '[QF] '
-    if !exists('w:quickfix_title') || w:quickfix_title =~# '\<TOC$'
+    if !exists('w:quickfix_title') || w:quickfix_title =~ '\<TOC$'
         return ''
     elseif g:actual_curwin->str2nr() != win_getid()
         return pfx
