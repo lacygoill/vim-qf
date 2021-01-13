@@ -849,7 +849,8 @@ enddef
 def GetWidth(cmd: string): number #{{{2
     var title = cmd =~ '^l' ? getloclist(0, {title: 0}).title : getqflist({title: 0}).title
     if title == 'TOC'
-        var lines_length = getloclist(0, {items: 0}).items->map((_, v) => strchars(v.text, true))
+        var lines_length = getloclist(0, {items: 0}).items
+            ->mapnew((_, v) => strchars(v.text, true))
         remove(lines_length, 0) # ignore first line (it may be very long, and is not that useful)
         var longest_line = max(lines_length)
         var right_padding = 1

@@ -142,7 +142,7 @@ def PopupCreate() #{{{2
 
     CloseWhenQuit()
     if ShouldPersist()
-        w:_qfpreview.validitems = map(items, (_, v) => v.valid)
+        w:_qfpreview.validitems = mapnew(items, (_, v) => v.valid)
         Persist()
     endif
 enddef
