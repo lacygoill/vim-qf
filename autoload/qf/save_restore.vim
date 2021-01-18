@@ -11,9 +11,9 @@ var loaded = true
 #     augroup END
 #
 #     def SaveLastQfl()
-#         var curqfnr = getqflist({nr: 0}).nr
-#         var qfls = range(1, getqflist({nr: '$'}).nr)
-#             ->map((_, v) => getqflist({nr: v, size: 0, title: 0}))
+#         var curqfnr: number = getqflist({nr: 0}).nr
+#         var qfls: list<dict<any>> = range(1, getqflist({nr: '$'}).nr)
+#             ->mapnew((_, v) => getqflist({nr: v, size: 0, title: 0}))
 #             ->filter((_, v) => v.size != 0
 #                            && v.size < 9999
 #                            && v.title !~ '^\s*:hub\s\+push\s*$'
@@ -22,7 +22,7 @@ var loaded = true
 #             unlet! g:MY_LAST_QFL
 #             return
 #         endif
-#         var items = getqflist({nr: qfls[0].nr, items: 0}).items
+#         var items: list<dict<any>> = getqflist({nr: qfls[0].nr, items: 0}).items
 #         map(items, (_, v) => extend(v, {
 #             filename:
 #                 remove(v, 'bufnr')
@@ -87,9 +87,9 @@ var loaded = true
 
 # Init {{{1
 
-const QFL_DIR = $HOME .. '/.vim/tmp/qfl'
+const QFL_DIR: string = $HOME .. '/.vim/tmp/qfl'
 if !isdirectory(QFL_DIR)
-    if mkdir(QFL_DIR, 'p', 0700)
+    if mkdir(QFL_DIR, 'p', 0o700)
         echom '[vim-qf] failed to create directory ' .. QFL_DIR
     endif
 endif
@@ -106,13 +106,13 @@ def qf#save_restore#save(afname: string, bang: bool) #{{{2
         Error('[Csave] sorry, only a quickfix list can be saved, not a location list')
         return
     endif
-    var fname = Expand(afname)
+    var fname: string = Expand(afname)
     if filereadable(fname) && !bang
         Error('[Csave] ' .. fname .. ' is an existing file; add ! to overwrite')
         return
     endif
     g:LAST_QFL = fname
-    var items = getqflist({items: 0}).items
+    var items: list<dict<any>> = getqflist({items: 0}).items
     if empty(items)
         echo '[Csave] no quickfix list to save'
         return
@@ -130,12 +130,12 @@ def qf#save_restore#save(afname: string, bang: bool) #{{{2
     #}}}
     map(items, (_, v) => extend(v, {filename:
         remove(v, 'bufnr')->bufname()->fnamemodify(':p')}))
-    var qfl = {items: items, title: getqflist({title: 0}).title}
-    var lines =<< trim END
+    var qfl: dict<any> = {items: items, title: getqflist({title: 0}).title}
+    var lines: list<string> =<< trim END
         vim9script
-        var qfl = %s
-        var items = qfl.items
-        var title = qfl.title
+        var qfl: dict<any> = %s
+        var items: list<dict<any>> = qfl.items
+        var title: string = qfl.title
         setqflist([], ' ', {items: items, title: title})
     END
     # Why `escape()`?{{{
@@ -209,7 +209,7 @@ def qf#save_restore#remove(afname: string, bang: bool) #{{{2
         Error('[Cremove] add a bang')
         return
     endif
-    var fname = Expand(afname)
+    var fname: string = Expand(afname)
     if !filereadable(fname)
         echo printf('[Cremove] cannot remove %s ; file not readable', fname)
         return

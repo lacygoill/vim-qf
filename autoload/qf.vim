@@ -15,7 +15,7 @@ import GetWinMod from 'lg/window.vim'
 
 # Variables {{{1
 
-const EFM_TYPE = {
+const EFM_TYPE: dict<string> = {
     e: 'error',
     w: 'warning',
     i: 'info',
@@ -172,7 +172,7 @@ const EFM_TYPE = {
 # ... will fire `FileType qf` iff the window is not opened.
 # I don't like a filetype plugin being sourced several times.
 #}}}
-var matches_any_qfl: dict<dict<job>> = {}
+var matches_any_qfl: dict<dict<list<dict<string>>>> = {}
 
 # What's the use of `KNOWN_PATTERNS`?{{{
 #
@@ -186,7 +186,7 @@ var matches_any_qfl: dict<dict<job>> = {}
 #
 #     call qf#setMatches({origin}, {HG}, {telling_name})
 #}}}
-const KNOWN_PATTERNS = {
+const KNOWN_PATTERNS: dict<string> = {
     location: '^.\{-}|\s*\%(\d\+\)\=\s*\%(col\s\+\d\+\)\=\s*|\s\=',
     double_bar: '^|\s*|\s*\|\s*|\s*|\s*$',
     }
@@ -222,29 +222,29 @@ def qf#align(info: dict<number>): list<string> #{{{2
         qfl = getloclist(info.winid, {id: info.id, items: 0}).items
     endif
     var l: list<string>
-    var lnum_width = range(info.start_idx - 1, info.end_idx - 1)
+    var lnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v) => qfl[v].lnum)
         ->max()
         ->len()
-    var col_width = range(info.start_idx - 1, info.end_idx - 1)
+    var col_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v) => qfl[v].col)
         ->max()
         ->len()
-    var pat_width = range(info.start_idx - 1, info.end_idx - 1)
+    var pat_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v) => strchars(qfl[v].pattern, true))
         ->max()
-    var fname_width = range(info.start_idx - 1, info.end_idx - 1)
+    var fname_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v) => qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(true))
         ->max()
-    var type_width = range(info.start_idx - 1, info.end_idx - 1)
+    var type_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v) => get(EFM_TYPE, qfl[v].type, '')->strlen())
         ->max()
-    var errnum_width = range(info.start_idx - 1, info.end_idx - 1)
+    var errnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v) => qfl[v].nr)
         ->max()
         ->len()
     for idx in range(info.start_idx - 1, info.end_idx - 1)
-        var e = qfl[idx]
+        var e: dict<any> = qfl[idx]
         if !e.valid
             add(l, '|| ' .. e.text)
         else
@@ -253,13 +253,13 @@ def qf#align(info: dict<number>): list<string> #{{{2
             if e.lnum == 0 && e.col == 0 && e.pattern == ''
                 add(l, bufname(e.bufnr))
             else
-                var fname = printf('%-*S', fname_width, bufname(e.bufnr)
+                var fname: string = printf('%-*S', fname_width, bufname(e.bufnr)
                     ->fnamemodify(full_filepath ? ':p' : ':t'))
-                var lnum = printf('%*d', lnum_width, e.lnum)
-                var col = printf('%*d', col_width, e.col)
-                var pat = printf('%-*S', pat_width, e.pattern)
-                var type = printf('%-*S', type_width, get(EFM_TYPE, e.type, ''))
-                var errnum = ''
+                var lnum: string = printf('%*d', lnum_width, e.lnum)
+                var col: string = printf('%*d', col_width, e.col)
+                var pat: string = printf('%-*S', pat_width, e.pattern)
+                var type: string = printf('%-*S', type_width, get(EFM_TYPE, e.type, ''))
+                var errnum: string = ''
                 if e.nr > 0
                     errnum = printf('%*d', errnum_width + 1, e.nr)
                 endif
@@ -276,9 +276,9 @@ enddef
 
 def qf#cfilter(bang: bool, apat: string, mod: string) #{{{2
     # get a qfl with(out) the entries we want to filter
-    var list = Getqflist()
-    var pat = GetPat(apat)
-    var old_size = len(list)
+    var list: list<dict<any>> = Getqflist()
+    var pat: string = GetPat(apat)
+    var old_size: number = len(list)
     var Filter: func
     if bang
         # Why the question mark in the comparison operators?{{{
@@ -300,8 +300,8 @@ def qf#cfilter(bang: bool, apat: string, mod: string) #{{{2
         return
     endif
 
-    var title = GetTitle()->AddFilterIndicatorToTitle(apat, bang)
-    var action = GetAction(mod)
+    var title: string = GetTitle()->AddFilterIndicatorToTitle(apat, bang)
+    var action: string = GetAction(mod)
     Setqflist([], action, {items: list, title: title})
 
     MaybeResizeHeight()
@@ -336,21 +336,21 @@ def qf#cfreeStack(loclist = false) #{{{2
 enddef
 
 def qf#cgrepBuffer(lnum1: number, lnum2: number, pat: string, loclist = false) #{{{2
-    var pfx1 = loclist ? 'l' : 'c'
-    var pfx2 = loclist ? 'l' : ''
-    var range = ':' .. lnum1 .. ',' .. lnum2
+    var pfx1: string = loclist ? 'l' : 'c'
+    var pfx2: string = loclist ? 'l' : ''
+    var range: string = ':' .. lnum1 .. ',' .. lnum2
 
     # ┌ we don't want the title of the qfl separating `:` from `cexpr`
     # │
     exe pfx1 .. 'expr []'
-    #                    ┌ if the pattern is absent from a buffer,
-    #                    │ it will raise an error
-    #                    │
-    #                    │ ┌ to prevent a possible autocmd from opening the qf window
-    #                    │ │  every time the qfl is expanded; it could make Vim open
-    #                    │ │  a new split for every buffer
-    #                    │ │
-    var cmd = printf('sil! noa %sbufdo %svimgrepadd /%s/gj %%', range, pfx2, pat)
+    #                            ┌ if the pattern is absent from a buffer,
+    #                            │ it will raise an error
+    #                            │
+    #                            │ ┌ to prevent a possible autocmd from opening the qf window
+    #                            │ │  every time the qfl is expanded; it could make Vim open
+    #                            │ │  a new split for every buffer
+    #                            │ │
+    var cmd: string = printf('sil! noa %sbufdo %svimgrepadd /%s/gj %%', range, pfx2, pat)
     exe cmd
 
     exe pfx1 .. 'window'
@@ -376,9 +376,9 @@ def qf#concealLtagPatternColumn() #{{{2
 enddef
 
 def qf#createMatches() #{{{2
-    var id = GetId()
+    var id: number = GetId()
 
-    var matches_this_qfl = get(matches_any_qfl, id, {})
+    var matches_this_qfl: dict<list<dict<string>>> = get(matches_any_qfl, id, {})
     if !empty(matches_this_qfl)
         for matches_from_all_origins in values(matches_this_qfl)
             for a_match in matches_from_all_origins
@@ -398,18 +398,18 @@ def qf#createMatches() #{{{2
 enddef
 
 def qf#removeInvalidEntries() #{{{2
-    var qfl = getqflist()
+    var qfl: list<dict<any>> = getqflist()
     filter(qfl, (_, v) => v.valid)
-    var title = getqflist({title: 0})
+    var title: string = getqflist({title: 0})
     setqflist([], 'r', {items: qfl, title: title})
 enddef
 
 def qf#cupdate(mod: string) #{{{2
     # to restore later
-    var pos = line('.')
+    var pos: number = line('.')
 
     # get a qfl where the text is updated
-    var list = Getqflist()
+    var list: list<dict<any>> = Getqflist()
     # Why using `get()`?{{{
     #
     # `getbufline()`  should return  a list  with  a single  item, the  line
@@ -439,7 +439,7 @@ def qf#cupdate(mod: string) #{{{2
     #                     old text with the new one.
 
     # set this new qfl
-    var action = GetAction(mod)
+    var action: string = GetAction(mod)
     Setqflist([], action, {items: list})
 
     MaybeResizeHeight()
@@ -458,21 +458,21 @@ def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
         return 'g@'
     endif
 
-    var type = lnum2 == 0 ? type_or_lnum : 'Ex'
+    var type: string = lnum2 == 0 ? type_or_lnum : 'Ex'
     var range: list<number>
     if index(['char', 'line'], type) >= 0
         range = [line("'["), line("']")]
     elseif type == 'block'
-        var vcol1 = virtcol("'[")
-        var vcol2 = virtcol("']")
+        var vcol1: number = virtcol("'[")
+        var vcol2: number = virtcol("']")
         # We could also use:{{{
         #
-        #     var pat = '\%V.*\%V'
+        #     var pat: string = '\%V.*\%V'
         #
         # ... but the match would disappear when we change the focused window,
         # probably because the visual marks would be set in another buffer.
         #}}}
-        var pat = '\%' .. vcol1 .. 'v.*\%' .. vcol2 .. 'v.'
+        var pat: string = '\%' .. vcol1 .. 'v.*\%' .. vcol2 .. 'v.'
         matchadd('Conceal', pat, 0, -1, {conceal: 'x'})
         setl cocu=nc cole=3
         return ''
@@ -480,15 +480,15 @@ def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
         range = [type_or_lnum, lnum2]
     endif
     # for future restoration
-    var pos = min(range)
+    var pos: number = min(range)
 
     # get a qfl without the entries we want to delete
-    var qfl = Getqflist()
+    var qfl: list<dict<any>> = Getqflist()
     remove(qfl, range[0] - 1, range[1] - 1)
 
     # we need to preserve conceal options, because our qf filetype plugin resets them
-    var cole_save = &l:cole
-    var cocu_save = &l:cocu
+    var cole_save: number = &l:cole
+    var cocu_save: string = &l:cocu
     # set this new qfl
     Setqflist([], 'r', {items: qfl})
     [&l:cole, &l:cocu] = [cole_save, cocu_save]
@@ -512,14 +512,14 @@ enddef
 
 
 def qf#nv(errorfile: string): string #{{{2
-    var file = readfile(errorfile)
+    var file: list<string> = readfile(errorfile)
     if empty(file)
         return ''
     endif
-    var title = remove(file, 0)
+    var title: string = remove(file, 0)
     # we use simple error formats suitable for a grep-like command
-    var qfl = getqflist({lines: file, efm: '%f:%l:%c:%m,%f:%l:%m'})
-    var items = get(qfl, 'items', [])
+    var qfl: list<dict<any>> = getqflist({lines: file, efm: '%f:%l:%c:%m,%f:%l:%m'})
+    var items: list<dict<any>> = get(qfl, 'items', [])
     setqflist([], ' ', {items: items, title: title})
     cw
     return ''
@@ -571,7 +571,7 @@ def Open(acmd: string)
     endif
 
     # `true`: flag meaning we're going to open a loc window
-    var mod = call(GetWinMod, acmd =~ '^l' ? [true] : [])
+    var mod: string = call(GetWinMod, acmd =~ '^l' ? [true] : [])
 
     # Wait.  `:copen` can't populate the qfl.  How could `cmd` be `copen`?{{{
     #
@@ -587,7 +587,7 @@ def Open(acmd: string)
     # `:copen`  and `:lopen`  make the  code more  readable.  The  command names
     # express our intention: we want to open the qf window unconditionally
     #}}}
-    var cmd = expand('<amatch>') =~ '^[cl]open$' ? 'open' : 'window'
+    var cmd: string = expand('<amatch>') =~ '^[cl]open$' ? 'open' : 'window'
     var how_to_open: string
     if mod =~ 'vert'
         how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. GetWidth(acmd)
@@ -660,15 +660,15 @@ def Open(acmd: string)
 enddef
 
 def qf#openManual(where: string) #{{{2
-    var size = b:qf_is_loclist
-        ? getloclist(0, {size: 0}).size
-        : getqflist({size: 0}).size
+    var size: number = b:qf_is_loclist
+        ?     getloclist(0, {size: 0}).size
+        :     getqflist({size: 0}).size
     if empty(size)
         echo (b:qf_is_loclist ? 'location' : 'quickfix') .. ' list is empty'
         return
     endif
 
-    var sb_was_on = &sb | set nosb
+    var sb_was_on: bool = &sb | set nosb
     try
         if where == 'nosplit'
             exe "norm! \<cr>zv" | return
@@ -678,15 +678,16 @@ def qf#openManual(where: string) #{{{2
         if where == 'vert split'
             wincmd L
         elseif where == 'tabpage'
-            var orig = win_getid()
+            var orig: number = win_getid()
             tab sp
-            var new = win_getid()
+            var new: number = win_getid()
             win_gotoid(orig)
             q
             win_gotoid(new)
         endif
     catch
         Catch()
+        return
     finally
         if sb_was_on
             set sb
@@ -695,21 +696,21 @@ def qf#openManual(where: string) #{{{2
 enddef
 
 def qf#setMatches(origin: string, group: string, apat: string) #{{{2
-    var id = GetId()
+    var id: number = GetId()
     if !has_key(matches_any_qfl, id)
         matches_any_qfl[id] = {}
     endif
-    var matches_this_qfl_this_origin = get(matches_any_qfl[id], origin, [])
-    var pat = get(KNOWN_PATTERNS, apat, apat)
+    var matches_this_qfl_this_origin: list<dict<string>> = get(matches_any_qfl[id], origin, [])
+    var pat: string = get(KNOWN_PATTERNS, apat, apat)
     extend(matches_any_qfl[id], {
         origin: extend(matches_this_qfl_this_origin, [{group: group, pat: pat}])
         })
 enddef
 
 def qf#toggleFullFilePath() #{{{2
-    var pos = getcurpos()
+    var pos: list<number> = getcurpos()
     full_filepath = !full_filepath
-    var list = Getqflist()
+    var list: list<dict<any>> = Getqflist()
     Setqflist([], 'r', {items: list})
     setpos('.', pos)
 enddef
@@ -764,8 +765,8 @@ def AddFilterIndicatorToTitle(title: string, pat: string, bang: bool): string #{
     #         [:filter pat1] [:filter pat2]      ✘
     #         [:filter pat1 & pat2]              ✔
     #}}}
-    var filter_indicator = '\s*\[:filter' .. (bang ? '!' : '!\@!')
-    var has_already_been_filtered = match(title, filter_indicator) >= 0
+    var filter_indicator: string = '\s*\[:filter' .. (bang ? '!' : '!\@!')
+    var has_already_been_filtered: bool = match(title, filter_indicator) >= 0
     return has_already_been_filtered
         ?     substitute(title, '\ze\]$', (bang ? ' | ' : ' \& ') .. pat, '')
         :     title .. ' [:filter' .. (bang ? '!' : '') .. ' ' .. pat .. ']'
@@ -779,7 +780,7 @@ def GetAction(mod: string): string #{{{2
 enddef
 
 def GetId(): number #{{{2
-    var Getqflist_id = get(b:, 'qf_is_loclist', false)
+    var Getqflist_id: func = get(b:, 'qf_is_loclist', false)
         ?    function('getloclist', [0] + [{id: 0}])
         :    function('getqflist', [{id: 0}])
     return Getqflist_id()->get('id', 0)
@@ -798,7 +799,10 @@ def GetPat(apat: string): string #{{{2
     # But the second one is a python one.
     # The  entries in  the python  buffer would  be filtered  using the  comment
     # leader of Vim, which is totally wrong.
-    var cml = getqflist()->get(0, {})->get('bufnr', 0)->getbufvar('&cms')
+    var cml: string = getqflist()
+        ->get(0, {})
+        ->get('bufnr', 0)
+        ->getbufvar('&cms')
     cml = split(cml, '%s')->matchstr('\S\+')->escape('\')
     if cml != ''
         cml = '\V' .. cml .. '\m'
@@ -817,7 +821,7 @@ def GetPat(apat: string): string #{{{2
     # while they should),  rather than some false positives  (i.e. entries which
     # should *not* be filtered, but they are).
     #}}}
-    var arg2pat = {
+    var arg2pat: dict<string> = {
         -commented: '^\s*' .. cml,
         -other_plugins: '^\S*/\%(' .. join(OTHER_PLUGINS, '\|') .. '\)',
         -tmp: '^\S*/\%(qfl\|session\|tmp\)/\S*\.vim',
@@ -825,7 +829,7 @@ def GetPat(apat: string): string #{{{2
 
     # If `:Cfilter` was passed a special argument, interpret it.
     if apat =~ keys(arg2pat)->join('\|')
-        var pat = split(apat, '\s\+')
+        var pat: list<string> = split(apat, '\s\+')
         map(pat, (_, v) => arg2pat[v])
         return join(pat, '\|')
     else
@@ -847,15 +851,17 @@ def GetTitle(): string #{{{2
 enddef
 
 def GetWidth(cmd: string): number #{{{2
-    var title = cmd =~ '^l' ? getloclist(0, {title: 0}).title : getqflist({title: 0}).title
+    var title: string = cmd =~ '^l'
+        ?     getloclist(0, {title: 0}).title
+        :     getqflist({title: 0}).title
     if title == 'TOC'
-        var lines_length = getloclist(0, {items: 0}).items
+        var lines_length: list<number> = getloclist(0, {items: 0}).items
             ->mapnew((_, v) => strchars(v.text, true))
         remove(lines_length, 0) # ignore first line (it may be very long, and is not that useful)
-        var longest_line = max(lines_length)
-        var right_padding = 1
+        var longest_line: number = max(lines_length)
+        var right_padding: number = 1
         # this should evaluate to the total width of the fold/number/sign columns
-        var left_columns = wincol() - virtcol('.')
+        var left_columns: number = wincol() - virtcol('.')
         return min([40, longest_line + right_padding + left_columns])
     else
         return 40
@@ -869,7 +875,7 @@ enddef
 def MaybeResizeHeight() #{{{2
     if winwidth(0) == &columns
         # no more than 10 lines
-        var newheight = min([10, Getqflist()->len()])
+        var newheight: number = min([10, Getqflist()->len()])
         # at least 2 lines (to avoid `E36` if we've reset `'ea'`)
         newheight = max([2, newheight])
         exe ':' .. newheight .. 'wincmd _'

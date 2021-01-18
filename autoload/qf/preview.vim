@@ -9,7 +9,7 @@ import MapMetaChord from 'lg/map.vim'
 import Popup_create from 'lg/popup.vim'
 
 # this tells the popup filter which keys it must handle, and how
-const FILTER_CMD = {
+const FILTER_CMD: dict<func> = {
     [MapMetaChord('m')]: () => SetHeight(-1),
     [MapMetaChord('p')]: () => SetHeight(1),
     # toggle number column
@@ -22,7 +22,7 @@ const FILTER_CMD = {
         SetSigncolumn(),
     ]}
 
-const FILTER_LHS = map(['m', 'p', 'n', 'r'],
+const FILTER_LHS: list<string> = map(['m', 'p', 'n', 'r'],
     (_, v) => MapMetaChord(v, true))
     #                         ^--^
     #                         don't translate the chords; we need symbolic notations
@@ -88,10 +88,12 @@ def qf#preview#mappings()
     # We could fix the issue by passing `mapping: false` to `PopupCreate()`, but
     # it would disable *all* mappings while the popup is visible.
     #}}}
-    if !exists('b:undo_ftplugin') | b:undo_ftplugin = 'exe' | endif
+    if !exists('b:undo_ftplugin')
+        b:undo_ftplugin = 'exe'
+    endif
     for key in FILTER_LHS
         exe 'nno <buffer><nowait> ' .. key .. ' ' .. key
-        var unmap_cmd = '|exe "nunmap <buffer> ' .. key .. '"'
+        var unmap_cmd: string = '|exe "nunmap <buffer> ' .. key .. '"'
         # sanity check; unmapping the same key twice could raise an error
         if stridx(b:undo_ftplugin, unmap_cmd) == -1
             b:undo_ftplugin ..= unmap_cmd
@@ -102,19 +104,25 @@ enddef
 # Core {{{1
 def PopupCreate() #{{{2
     # need some info about the window (its geometry and whether it's a location window or qf window)
-    var wininfo = win_getid()->getwininfo()[0]
+    var wininfo: dict<any> = win_getid()->getwininfo()[0]
 
-    var items = wininfo.loclist
-        ? getloclist(0, {items: 0}).items
-        : getqflist({items: 0}).items
-    if empty(items) | return | endif
+    var items: list<dict<any>> = wininfo.loclist
+        ?     getloclist(0, {items: 0}).items
+        :     getqflist({items: 0}).items
+    if empty(items)
+        return
+    endif
 
     # need some info about the current entry in the qfl (whether it's valid, and its line number)
-    var curentry = items[line('.') - 1]
-    if !curentry.valid | return | endif
+    var curentry: dict<any> = items[line('.') - 1]
+    if !curentry.valid
+        return
+    endif
 
-    var opts = GetLineAndAnchor(wininfo)
-    if type(opts) != v:t_dict | return | endif
+    var opts: dict<any> = GetLineAndAnchor(wininfo)
+    if type(opts) != v:t_dict
+        return
+    endif
 
     w:_qfpreview.firstline = curentry.lnum
     extend(opts, {
@@ -185,7 +193,9 @@ def SetSigncolumn() #{{{2
     # visible anymore.
     #}}}
     # sanity check
-    if !exists('w:_qfpreview') | return | endif
+    if !exists('w:_qfpreview')
+        return
+    endif
     # Why `number`?  Why not `auto` or `yes`?{{{
     #
     # If we enable the number column, we don't want 2 columns (one for the signs
@@ -279,7 +289,7 @@ def Persist() #{{{2
 enddef
 
 def Update() #{{{2
-    var curlnum = line('.')
+    var curlnum: number = line('.')
     # Why these checks?{{{
     #
     # This function is called from  the `QfpreviewPersistent` autocmd; when the
@@ -304,8 +314,10 @@ def Update() #{{{2
     endif
     PopupClose()
     w:_qfpreview.lastline = curlnum
-    var curentry_is_valid = w:_qfpreview.validitems[curlnum - 1]
-    if !curentry_is_valid | return | endif
+    var curentry_is_valid: bool = w:_qfpreview.validitems[curlnum - 1]
+    if !curentry_is_valid
+        return
+    endif
     PopupCreate()
 enddef
 
@@ -341,8 +353,8 @@ enddef
 
 def GetLineAndAnchor(wininfo: dict<any>): dict<any> #{{{2
     # compute how many screen lines are available above and below the qf window
-    var lines_above = GetLinesAbove()
-    var lines_below = GetLinesBelow()
+    var lines_above: number = GetLinesAbove()
+    var lines_below: number = GetLinesBelow()
 
     var opts: dict<any>
     # position the popup above the current window if there's enough room
@@ -400,10 +412,10 @@ def GetLinesAbove(): number #{{{2
 enddef
 
 def GetLinesBelow(): number #{{{2
-    var n = &lines - (GetLinesAbove() + winheight(0))
-    #                 │                 │ {{{
-    #                 │                 └ the lines inside are also irrelevant
-    #                 └ the lines above the qf window are irrelevant
+    var n: number = &lines - (GetLinesAbove() + winheight(0))
+    #                         │                 │ {{{
+    #                         │                 └ the lines inside are also irrelevant
+    #                         └ the lines above the qf window are irrelevant
     #}}}
     n -= &cmdheight + 2 + (TablineIsVisible() ? 1 : 0)
     #    │            │    │{{{
@@ -441,7 +453,9 @@ def SetHeight(step: number) #{{{2
     # invokes this function, while the current window is not the qf window where
     # `w:_qfpreview` is set.
     #}}}
-    if !exists('w:_qfpreview') | return | endif
+    if !exists('w:_qfpreview')
+        return
+    endif
 
     if PopupIsTooSmall() && step == -1
     || PopupIsTooBig() && step == 1
@@ -465,8 +479,8 @@ def SetHeight(step: number) #{{{2
 enddef
 
 def PopupIsWhere(where: string): bool #{{{2
-    var qf_firstline = winnr()->win_screenpos()[0]
-    var popup_firstline = win_screenpos(w:_qfpreview.winid)[0]
+    var qf_firstline: number = winnr()->win_screenpos()[0]
+    var popup_firstline: number = win_screenpos(w:_qfpreview.winid)[0]
     return where == 'above'
         ? popup_firstline < qf_firstline
         : popup_firstline > qf_firstline
@@ -477,8 +491,8 @@ def PopupIsTooSmall(): bool #{{{2
 enddef
 
 def PopupIsTooBig(): bool #{{{2
-    var lines_above = GetLinesAbove()
-    var lines_below = GetLinesBelow()
+    var lines_above: number = GetLinesAbove()
+    var lines_below: number = GetLinesBelow()
     return PopupIsWhere('below') && w:_qfpreview.height == lines_below
         || PopupIsWhere('above') && w:_qfpreview.height == lines_above
 enddef
