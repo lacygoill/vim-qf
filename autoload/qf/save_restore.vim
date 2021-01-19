@@ -224,7 +224,7 @@ enddef
 # Util {{{1
 def Error(msg: string) #{{{2
     echohl ErrorMsg
-    echo msg
+    echom msg
     echohl NONE
 enddef
 
