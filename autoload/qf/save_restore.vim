@@ -214,7 +214,7 @@ def qf#save_restore#remove(afname: string, bang: bool) #{{{2
         echo printf('[Cremove] cannot remove %s ; file not readable', fname)
         return
     endif
-    if delete(fname) == -1
+    if delete(fname)
         echo '[Cremove] failed to remove ' .. fname
     else
         echo '[Cremove] removed ' .. fname
