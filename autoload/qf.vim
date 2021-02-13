@@ -371,7 +371,7 @@ def qf#concealLtagPatternColumn() #{{{2
     if get(w:, 'ltag_conceal_match', 0) >= 1
         matchdelete(w:ltag_conceal_match)
     endif
-    w:ltag_conceal_match = matchadd('Conceal', '|.\{-}|')
+    w:ltag_conceal_match = matchadd('Conceal', '|.\{-}\\\$\s*|' .. '\|' .. '|.\{-}|')
     setl cocu=nvc cole=3
 enddef
 

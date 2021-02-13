@@ -120,7 +120,7 @@ def PopupCreate() #{{{2
     endif
 
     var opts: dict<any> = GetLineAndAnchor(wininfo)
-    if type(opts) != v:t_dict
+    if typename(opts) !~ '^dict'
         return
     endif
 
