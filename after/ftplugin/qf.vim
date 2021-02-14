@@ -1,4 +1,4 @@
-vim9
+vim9script
 
 # Commands {{{1
 # CRemoveInvalid {{{2
