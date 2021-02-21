@@ -13,8 +13,8 @@ var loaded = true
 #     def SaveLastQfl()
 #         var curqfnr: number = getqflist({nr: 0}).nr
 #         var qfls: list<dict<any>> = range(1, getqflist({nr: '$'}).nr)
-#             ->mapnew((_, v) => getqflist({nr: v, size: 0, title: 0}))
-#             ->filter((_, v) => v.size != 0
+#             ->mapnew((_, v: number): dict<any> => getqflist({nr: v, size: 0, title: 0}))
+#             ->filter((_, v: dict<any>): bool => v.size != 0
 #                            && v.size < 9999
 #                            && v.title !~ '^\s*:hub\s\+push\s*$'
 #                            && v.nr >= curqfnr)
@@ -23,12 +23,12 @@ var loaded = true
 #             return
 #         endif
 #         var items: list<dict<any>> = getqflist({nr: qfls[0].nr, items: 0}).items
-#         map(items, (_, v) => extend(v, {
-#             filename:
-#                 remove(v, 'bufnr')
-#                 ->bufname()
-#                 ->fnamemodify(':p')
-#             }))
+#             ->map((_, v: dict<any>): dict<any> => extend(v, {
+#                 filename:
+#                     remove(v, 'bufnr')
+#                     ->bufname()
+#                     ->fnamemodify(':p')
+#                 }))
 #         g:MY_LAST_QFL = {items: items, title: getqflist({title: 0}).title}
 #     enddef
 #
@@ -97,7 +97,7 @@ endif
 # Interface {{{1
 def qf#save_restore#complete(...l: any): string #{{{2
     return glob(QFL_DIR .. '/*.txt', false, true)
-        ->map((_, v) => fnamemodify(v, ':t:r'))
+        ->map((_, v: string): string => fnamemodify(v, ':t:r'))
         ->join("\n")
 enddef
 
@@ -128,8 +128,12 @@ def qf#save_restore#save(afname: string, bang: bool) #{{{2
     # `fnamemodify(...)` makes sure that the  name is absolute, and not relative
     # to the current working directory.
     #}}}
-    map(items, (_, v) => extend(v, {filename:
-        remove(v, 'bufnr')->bufname()->fnamemodify(':p')}))
+    map(items, (_, v: dict<any>): dict<any> =>
+        extend(v, {
+            filename: remove(v, 'bufnr')
+                        ->bufname()
+                        ->fnamemodify(':p')
+        }))
     var qfl: dict<any> = {items: items, title: getqflist({title: 0}).title}
     var lines: list<string> =<< trim END
         vim9script

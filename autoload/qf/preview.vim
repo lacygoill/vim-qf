@@ -3,30 +3,6 @@ vim9script noclear
 if exists('loaded') | finish | endif
 var loaded = true
 
-# Init {{{1
-
-import MapMetaChord from 'lg/map.vim'
-import Popup_create from 'lg/popup.vim'
-
-# this tells the popup filter which keys it must handle, and how
-const FILTER_CMD: dict<func> = {
-    [MapMetaChord('m')]: () => SetHeight(-1),
-    [MapMetaChord('p')]: () => SetHeight(1),
-    # toggle number column
-    [MapMetaChord('n')]: (id) => (!getwinvar(id, '&number'))->setwinvar(id, '&number'),
-    # reset topline to the line of the quickfix entry;
-    # useful to get back to original position after scrolling
-    [MapMetaChord('r')]: (id) => [
-        popup_setoptions(id, {firstline: w:_qfpreview.firstline}),
-        popup_setoptions(id, {firstline: 0}),
-        SetSigncolumn(),
-    ]}
-
-const FILTER_LHS: list<string> = map(['m', 'p', 'n', 'r'],
-    (_, v) => MapMetaChord(v, true))
-    #                         ^--^
-    #                         don't translate the chords; we need symbolic notations
-
 # Interface {{{1
 def qf#preview#open(persistent = false) #{{{2
     # Why the `w:` scope?  Why not `b:`?{{{
@@ -150,7 +126,7 @@ def PopupCreate() #{{{2
 
     CloseWhenQuit()
     if ShouldPersist()
-        w:_qfpreview.validitems = mapnew(items, (_, v) => v.valid)
+        w:_qfpreview.validitems = mapnew(items, (_, v: dict<any>): bool => v.valid)
         Persist()
     endif
 enddef
@@ -500,4 +476,28 @@ enddef
 def TablineIsVisible(): bool #{{{2
     return &stal == 2 || &stal == 1 && tabpagenr('$') >= 2
 enddef
+
+# Init {{{1
+
+import MapMetaChord from 'lg/map.vim'
+import Popup_create from 'lg/popup.vim'
+
+# this tells the popup filter which keys it must handle, and how
+const FILTER_CMD: dict<func> = {
+    [MapMetaChord('m')]: () => SetHeight(-1),
+    [MapMetaChord('p')]: () => SetHeight(1),
+    # toggle number column
+    [MapMetaChord('n')]: (id: number) => (!getwinvar(id, '&number'))->setwinvar(id, '&number'),
+    # reset topline to the line of the quickfix entry;
+    # useful to get back to original position after scrolling
+    [MapMetaChord('r')]: (id: number) => [
+        popup_setoptions(id, {firstline: w:_qfpreview.firstline}),
+        popup_setoptions(id, {firstline: 0}),
+        SetSigncolumn(),
+    ]}
+
+const FILTER_LHS: list<string> = map(['m', 'p', 'n', 'r'],
+    (_, v: string): string => MapMetaChord(v, true))
+    #                                         ^--^
+    #                                         don't translate the chords; we need symbolic notations
 

@@ -199,8 +199,8 @@ if $MYVIMRC == ''
 else
     VIMRC_FILE = $MYVIMRC
     OTHER_PLUGINS = readfile(VIMRC_FILE)
-    filter(OTHER_PLUGINS, (_, v) => v =~ '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)')
-    map(OTHER_PLUGINS, (_, v) => 'plugged/' .. matchstr(v, '.\{-}/\zs[^,'']*'))
+        ->filter((_, v: string): bool => v =~ '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)')
+        ->map((_, v: string): string => 'plugged/' .. matchstr(v, '.\{-}/\zs[^,'']*'))
     OTHER_PLUGINS += ['autoload/plug.vim']
     lockvar! OTHER_PLUGINS
 endif
@@ -223,24 +223,24 @@ def qf#align(info: dict<number>): list<string> #{{{2
     endif
     var l: list<string>
     var lnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v) => qfl[v].lnum)
+        ->map((_, v: number): number => qfl[v].lnum)
         ->max()
         ->len()
     var col_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v) => qfl[v].col)
+        ->map((_, v: number): number => qfl[v].col)
         ->max()
         ->len()
     var pat_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v) => strchars(qfl[v].pattern, true))
+        ->map((_, v: number): number => strchars(qfl[v].pattern, true))
         ->max()
     var fname_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v) => qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(true))
+        ->map((_, v: number): number => qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(true))
         ->max()
     var type_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v) => get(EFM_TYPE, qfl[v].type, '')->strlen())
+        ->map((_, v: number): number => get(EFM_TYPE, qfl[v].type, '')->strlen())
         ->max()
     var errnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v) => qfl[v].nr)
+        ->map((_, v: number): number => qfl[v].nr)
         ->max()
         ->len()
     for idx in range(info.start_idx - 1, info.end_idx - 1)
@@ -399,7 +399,7 @@ enddef
 
 def qf#removeInvalidEntries() #{{{2
     var qfl: list<dict<any>> = getqflist()
-    filter(qfl, (_, v) => v.valid)
+        ->filter((_, v: dict<any>): bool => v.valid)
     var title: string = getqflist({title: 0})
     setqflist([], 'r', {items: qfl, title: title})
 enddef
@@ -410,33 +410,35 @@ def qf#cupdate(mod: string) #{{{2
 
     # get a qfl where the text is updated
     var list: list<dict<any>> = Getqflist()
-    # Why using `get()`?{{{
-    #
-    # `getbufline()`  should return  a list  with  a single  item, the  line
-    # `lnum` in the buffer `bufnr`.
-    # But, if the buffer is unloaded, it will just return an empty list.
-    # From `:h getbufline()`:
-    #
-    #    > This function  works only  for loaded  buffers.  For  unloaded and
-    #    > non-existing buffers, an empty |List| is returned.
-    #
-    # Therefore, if  an entry in  the qfl is present  in a buffer  which you
-    # didn't visit in the past, it  won't be loaded, and `getbufline()` will
-    # return an empty list.
-    #
-    # In this case, we want the text field to stay the same (hence `v.text`).
-    #}}}
-    #                                                                 │
-    map(list, (_, v) => extend(v, {text: getbufline(v.bufnr, v.lnum)->get(0, v.text)}))
-    #                   │
-    #                   └ There will be a conflict between the old value
-    #                     associated to the key `text`, and the new one.
-    #
-    #                     And   in  case   of   conflict,  by   default
-    #                     `extend()` overwrites the  old value with the
-    #                     new  one.
-    #                     So,  in effect,  `extend()` will  replace the
-    #                     old text with the new one.
+        # Why `extend()`?{{{
+        #
+        # There  will be  a conflict  between the  old value  associated to  the key
+        # `text`, and the new one.
+        #
+        # And in  case of conflict, by  default `extend()` overwrites the  old value
+        # with the  new one.  So,  in effect, `extend()`  will replace the  old text
+        # with the new one.
+        #}}}
+        ->map((_, v) => extend(v, {
+            text: getbufline(v.bufnr, v.lnum)
+                # Why `get()`?{{{
+                #
+                # `getbufline()`  should return  a list  with  a single  item, the  line
+                # `lnum` in the buffer `bufnr`.
+                # But, if the buffer is unloaded, it will just return an empty list.
+                # From `:h getbufline()`:
+                #
+                #    > This function  works only  for loaded  buffers.  For  unloaded and
+                #    > non-existing buffers, an empty |List| is returned.
+                #
+                # Therefore, if  an entry in  the qfl is present  in a buffer  which you
+                # didn't visit in the past, it  won't be loaded, and `getbufline()` will
+                # return an empty list.
+                #
+                # In this case, we want the text field to stay the same (hence `v.text`).
+                #}}}
+                ->get(0, v.text),
+            }))
 
     # set this new qfl
     var action: string = GetAction(mod)
@@ -829,9 +831,9 @@ def GetPat(apat: string): string #{{{2
 
     # If `:Cfilter` was passed a special argument, interpret it.
     if apat =~ keys(arg2pat)->join('\|')
-        var pat: list<string> = split(apat, '\s\+')
-        map(pat, (_, v) => arg2pat[v])
-        return join(pat, '\|')
+        return split(apat, '\s\+')
+            ->map((_, v: string): string => arg2pat[v])
+            ->join('\|')
     else
         # If no pattern was provided, use the search register as a fallback.
         # Remove a possible couple of slashes before and after the pattern.
@@ -856,7 +858,7 @@ def GetWidth(cmd: string): number #{{{2
         :     getqflist({title: 0}).title
     if title == 'TOC'
         var lines_length: list<number> = getloclist(0, {items: 0}).items
-            ->mapnew((_, v) => strchars(v.text, true))
+            ->mapnew((_, v: dict<any>): number => strchars(v.text, true))
         remove(lines_length, 0) # ignore first line (it may be very long, and is not that useful)
         var longest_line: number = max(lines_length)
         var right_padding: number = 1
