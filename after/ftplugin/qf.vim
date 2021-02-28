@@ -7,9 +7,9 @@ com -bar -buffer CRemoveInvalid qf#removeInvalidEntries()
 
 # Csave / Crestore / Cremove {{{2
 
-com -bar -buffer -bang -nargs=1 -complete=custom,qf#save_restore#complete Csave qf#save_restore#save(<q-args>, <bang>0)
-com -bar -buffer -nargs=? -complete=custom,qf#save_restore#complete Crestore qf#save_restore#restore(<q-args>)
-com -bar -buffer -bang -nargs=1 -complete=custom,qf#save_restore#complete Cremove qf#save_restore#remove(<q-args>, <bang>0)
+com -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete Csave qf#saveRestore#save(<q-args>, <bang>0)
+com -bar -buffer -nargs=? -complete=custom,qf#saveRestore#complete Crestore qf#saveRestore#restore(<q-args>)
+com -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete Cremove qf#saveRestore#remove(<q-args>, <bang>0)
 
 # Cconceal {{{2
 
@@ -47,7 +47,7 @@ com -bar -buffer Cupdate qf#cupdate(<q-mods>)
 # Mappings {{{1
 
 # disable some keys, to avoid annoying error messages
-qf#disable_some_keys(['a', 'd', 'gj', 'gqq', 'i', 'o', 'r', 'u', 'x'])
+qf#disableSomeKeys(['a', 'd', 'gj', 'gqq', 'i', 'o', 'r', 'u', 'x'])
 
 nno <buffer><nowait> <c-q> <cmd>Csave default<cr>
 nno <buffer><nowait> <c-r> <cmd>Crestore default<cr>

@@ -502,7 +502,7 @@ def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
     return ''
 enddef
 
-def qf#disable_some_keys(keys: list<string>) #{{{2
+def qf#disableSomeKeys(keys: list<string>) #{{{2
     if !exists('b:undo_ftplugin')
         b:undo_ftplugin = 'exe'
     endif
