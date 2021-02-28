@@ -149,7 +149,7 @@ setl cursorline nowrap
 # Variables {{{1
 
 # Are we viewing a location list or a quickfix list?
-const b:qf_is_loclist = win_getid()->getwininfo()[0].loclist
+const b:qf_is_loclist = win_getid()->getwininfo()[0]['loclist']
 
 # Matches {{{1
 

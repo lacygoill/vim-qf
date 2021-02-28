@@ -113,7 +113,7 @@ def PopupCreate() #{{{2
         })
 
     if !ShouldPersist()
-        extend(opts, {moved: 'any'})
+        opts.moved = 'any'
     endif
 
     # `:nos` to suppress `E325` in case the file is already open in another Vim instance

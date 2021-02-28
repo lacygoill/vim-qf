@@ -22,7 +22,7 @@ var loaded = true
 #             unlet! g:MY_LAST_QFL
 #             return
 #         endif
-#         var items: list<dict<any>> = getqflist({nr: qfls[0].nr, items: 0}).items
+#         var items: list<dict<any>> = getqflist({nr: qfls[0]['nr'], items: 0}).items
 #             ->map((_, v: dict<any>): dict<any> => extend(v, {
 #                 filename:
 #                     remove(v, 'bufnr')
@@ -101,12 +101,12 @@ def qf#save_restore#complete(...l: any): string #{{{2
         ->join("\n")
 enddef
 
-def qf#save_restore#save(afname: string, bang: bool) #{{{2
+def qf#save_restore#save(arg_fname: string, bang: bool) #{{{2
     if b:qf_is_loclist
         Error('[Csave] sorry, only a quickfix list can be saved, not a location list')
         return
     endif
-    var fname: string = Expand(afname)
+    var fname: string = Expand(arg_fname)
     if filereadable(fname) && !bang
         Error('[Csave] ' .. fname .. ' is an existing file; add ! to overwrite')
         return
@@ -184,12 +184,12 @@ def qf#save_restore#save(afname: string, bang: bool) #{{{2
     echo '[Csave] quickfix list saved in ' .. fname
 enddef
 
-def qf#save_restore#restore(afname: string) #{{{2
+def qf#save_restore#restore(arg_fname: string) #{{{2
     var fname: string
-    if afname == ''
+    if arg_fname == ''
         fname = get(g:, 'LAST_QFL', '')
     else
-        fname = Expand(afname)
+        fname = Expand(arg_fname)
     endif
 
     if !filereadable(fname)
@@ -201,7 +201,7 @@ def qf#save_restore#restore(afname: string) #{{{2
     echo '[Crestore] quickfix list restored from ' .. fname
 enddef
 
-def qf#save_restore#remove(afname: string, bang: bool) #{{{2
+def qf#save_restore#remove(arg_fname: string, bang: bool) #{{{2
     # Rationale:{{{
     #
     # `:Cremove` and `:Crestore` begins with the same 3 characters.
@@ -213,7 +213,7 @@ def qf#save_restore#remove(afname: string, bang: bool) #{{{2
         Error('[Cremove] add a bang')
         return
     endif
-    var fname: string = Expand(afname)
+    var fname: string = Expand(arg_fname)
     if !filereadable(fname)
         echo printf('[Cremove] cannot remove %s ; file not readable', fname)
         return

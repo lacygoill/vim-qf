@@ -172,7 +172,7 @@ const EFM_TYPE: dict<string> = {
 # ... will fire `FileType qf` iff the window is not opened.
 # I don't like a filetype plugin being sourced several times.
 #}}}
-var matches_any_qfl: dict<dict<list<dict<string>>>> = {}
+var matches_any_qfl: dict<dict<list<dict<string>>>>
 
 # What's the use of `KNOWN_PATTERNS`?{{{
 #
@@ -223,24 +223,24 @@ def qf#align(info: dict<number>): list<string> #{{{2
     endif
     var l: list<string>
     var lnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => qfl[v].lnum)
+        ->map((_, v: number): number => qfl[v]['lnum'])
         ->max()
         ->len()
     var col_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => qfl[v].col)
+        ->map((_, v: number): number => qfl[v]['col'])
         ->max()
         ->len()
     var pat_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => strchars(qfl[v].pattern, true))
+        ->map((_, v: number): number => strchars(qfl[v]['pattern'], true))
         ->max()
     var fname_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => qfl[v].bufnr->bufname()->fnamemodify(':t')->strchars(true))
+        ->map((_, v: number): number => qfl[v]['bufnr']->bufname()->fnamemodify(':t')->strchars(true))
         ->max()
     var type_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => get(EFM_TYPE, qfl[v].type, '')->strlen())
+        ->map((_, v: number): number => get(EFM_TYPE, qfl[v]['type'], '')->strlen())
         ->max()
     var errnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => qfl[v].nr)
+        ->map((_, v: number): number => qfl[v]['nr'])
         ->max()
         ->len()
     for idx in range(info.start_idx - 1, info.end_idx - 1)
@@ -274,10 +274,10 @@ def qf#align(info: dict<number>): list<string> #{{{2
     return l
 enddef
 
-def qf#cfilter(bang: bool, apat: string, mod: string) #{{{2
+def qf#cfilter(bang: bool, arg_pat: string, mod: string) #{{{2
     # get a qfl with(out) the entries we want to filter
     var list: list<dict<any>> = Getqflist()
-    var pat: string = GetPat(apat)
+    var pat: string = GetPat(arg_pat)
     var old_size: number = len(list)
     var Filter: func
     if bang
@@ -300,7 +300,7 @@ def qf#cfilter(bang: bool, apat: string, mod: string) #{{{2
         return
     endif
 
-    var title: string = GetTitle()->AddFilterIndicatorToTitle(apat, bang)
+    var title: string = GetTitle()->AddFilterIndicatorToTitle(arg_pat, bang)
     var action: string = GetAction(mod)
     Setqflist([], action, {items: list, title: title})
 
@@ -554,7 +554,7 @@ def qf#openAuto(cmd: string) #{{{2
     endif
 enddef
 
-def Open(acmd: string)
+def Open(arg_cmd: string)
     #    │
     #    └ we need to know which command was executed to decide whether
     #      we open the qf window or the ll window
@@ -562,18 +562,18 @@ def Open(acmd: string)
     # all the commands populating a ll seem to begin with the letter l
     var prefix: string
     var size: number
-    if acmd =~ '^l'
-        [prefix, size] = acmd =~ '^l'
+    if arg_cmd =~ '^l'
+        [prefix, size] = arg_cmd =~ '^l'
             ?     ['l', getloclist(0, {size: 0}).size]
             :     ['c', getqflist({size: 0}).size]
     else
-        [prefix, size] = acmd =~ '^l'
+        [prefix, size] = arg_cmd =~ '^l'
             ?     ['l', getloclist(0, {size: 0}).size]
             :     ['c', getqflist({size: 0}).size]
     endif
 
     # `true`: flag meaning we're going to open a loc window
-    var mod: string = call(GetWinMod, acmd =~ '^l' ? [true] : [])
+    var mod: string = call(GetWinMod, arg_cmd =~ '^l' ? [true] : [])
 
     # Wait.  `:copen` can't populate the qfl.  How could `cmd` be `copen`?{{{
     #
@@ -592,7 +592,7 @@ def Open(acmd: string)
     var cmd: string = expand('<amatch>') =~ '^[cl]open$' ? 'open' : 'window'
     var how_to_open: string
     if mod =~ 'vert'
-        how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. GetWidth(acmd)
+        how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. GetWidth(arg_cmd)
     else
         how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. max([min([10, size]), &wmh + 2])
         #                                                    │    │
@@ -618,7 +618,7 @@ def Open(acmd: string)
         return
     endtry
 
-    if acmd == 'helpgrep'
+    if arg_cmd == 'helpgrep'
         # Why do you close the help window?{{{
         #
         #    - The focus switches to the 1st entry in the qfl;
@@ -697,16 +697,16 @@ def qf#openManual(where: string) #{{{2
     endtry
 enddef
 
-def qf#setMatches(origin: string, group: string, apat: string) #{{{2
+def qf#setMatches(origin: string, group: string, arg_pat: string) #{{{2
     var id: number = GetId()
     if !has_key(matches_any_qfl, id)
         matches_any_qfl[id] = {}
     endif
-    var matches_this_qfl_this_origin: list<dict<string>> = get(matches_any_qfl[id], origin, [])
-    var pat: string = get(KNOWN_PATTERNS, apat, apat)
-    extend(matches_any_qfl[id], {
-        origin: extend(matches_this_qfl_this_origin, [{group: group, pat: pat}])
-        })
+    var matches_this_qfl_this_origin: list<dict<string>> =
+        get(matches_any_qfl[id], origin, [])
+    var pat: string = get(KNOWN_PATTERNS, arg_pat, arg_pat)
+    matches_any_qfl[id]['origin'] = extend(matches_this_qfl_this_origin,
+        [{group: group, pat: pat}])
 enddef
 
 def qf#toggleFullFilePath() #{{{2
@@ -788,7 +788,7 @@ def GetId(): number #{{{2
     return Getqflist_id()->get('id', 0)
 enddef
 
-def GetPat(apat: string): string #{{{2
+def GetPat(arg_pat: string): string #{{{2
     # TODO:{{{
     # We guess the comment leader of the buffers in the qfl, by inspecting
     # the values of 'cms' in the first buffer of the qfl.
@@ -830,19 +830,19 @@ def GetPat(apat: string): string #{{{2
         }
 
     # If `:Cfilter` was passed a special argument, interpret it.
-    if apat =~ keys(arg2pat)->join('\|')
-        return split(apat, '\s\+')
+    if arg_pat =~ keys(arg2pat)->join('\|')
+        return split(arg_pat, '\s\+')
             ->map((_, v: string): string => arg2pat[v])
             ->join('\|')
     else
         # If no pattern was provided, use the search register as a fallback.
         # Remove a possible couple of slashes before and after the pattern.
         # Otherwise, do nothing.
-        return apat == ''
+        return arg_pat == ''
             ?     @/
-            : apat =~ '^/.*/$'
-            ?     apat[1 : -2]
-            :     apat
+            : arg_pat =~ '^/.*/$'
+            ?     arg_pat[1 : -2]
+            :     arg_pat
     endif
 enddef
 
