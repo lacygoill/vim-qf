@@ -14,20 +14,21 @@ var loaded = true
 #         var curqfnr: number = getqflist({nr: 0}).nr
 #         var qfls: list<dict<any>> = range(1, getqflist({nr: '$'}).nr)
 #             ->mapnew((_, v: number): dict<any> => getqflist({nr: v, size: 0, title: 0}))
-#             ->filter((_, v: dict<any>): bool => v.size != 0
-#                            && v.size < 9999
-#                            && v.title !~ '^\s*:hub\s\+push\s*$'
-#                            && v.nr >= curqfnr)
+#             ->filter((_, v: dict<any>): bool =>
+#                          v.size != 0
+#                       && v.size < 9999
+#                       && v.title !~ '^\s*:hub\s\+push\s*$'
+#                       && v.nr >= curqfnr
+#             )
 #         if empty(qfls)
 #             unlet! g:MY_LAST_QFL
 #             return
 #         endif
 #         var items: list<dict<any>> = getqflist({nr: qfls[0]['nr'], items: 0}).items
 #             ->map((_, v: dict<any>): dict<any> => extend(v, {
-#                 filename:
-#                     remove(v, 'bufnr')
-#                     ->bufname()
-#                     ->fnamemodify(':p')
+#                 filename: remove(v, 'bufnr')
+#                         ->bufname()
+#                         ->fnamemodify(':p')
 #                 }))
 #         g:MY_LAST_QFL = {items: items, title: getqflist({title: 0}).title}
 #     enddef
@@ -128,9 +129,9 @@ def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
     # `fnamemodify(...)` makes sure that the  name is absolute, and not relative
     # to the current working directory.
     #}}}
-    map(items, (_, v: dict<any>): dict<any> =>
-        extend(v, {
-            filename: remove(v, 'bufnr')
+    items
+        ->map((_, v: dict<any>): dict<any> => extend(v, {
+                filename: remove(v, 'bufnr')
                         ->bufname()
                         ->fnamemodify(':p')
         }))
@@ -158,7 +159,7 @@ def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
     # MWE:
     #
     #     let dict = {'a': 'b\nc'}
-    #     echo substitute('%s', '%s', string(dict), '') =~# '\%x00'
+    #     echo '%s'->substitute('%s', string(dict), '') =~# '\%x00'
     #     1~
     #
     # We need to make sure it's parsed literally.
@@ -179,7 +180,8 @@ def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
     #
     # Similar issue with `&` which has a special meaning.
     #}}}
-    lines[1] = substitute(lines[1], '%s', string(qfl)->escape('&\'), '')
+    lines[1] = lines[1]
+        ->substitute('%s', string(qfl)->escape('&\'), '')
     writefile(lines, fname)
     echo '[Csave] quickfix list saved in ' .. fname
 enddef

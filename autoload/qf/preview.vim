@@ -126,7 +126,7 @@ def PopupCreate() #{{{2
 
     CloseWhenQuit()
     if ShouldPersist()
-        w:_qfpreview.validitems = mapnew(items, (_, v: dict<any>): bool => v.valid)
+        w:_qfpreview.validitems = items->mapnew((_, v: dict<any>): bool => v.valid)
         Persist()
     endif
 enddef
@@ -496,8 +496,8 @@ const FILTER_CMD: dict<func> = {
         SetSigncolumn(),
     ]}
 
-const FILTER_LHS: list<string> = map(['m', 'p', 'n', 'r'],
-    (_, v: string): string => MapMetaChord(v, true))
-    #                                         ^--^
-    #                                         don't translate the chords; we need symbolic notations
+const FILTER_LHS: list<string> = ['m', 'p', 'n', 'r']
+    ->map((_, v: string): string => MapMetaChord(v, true))
+    #                                               ^--^
+    #                                               don't translate the chords; we need symbolic notations
 

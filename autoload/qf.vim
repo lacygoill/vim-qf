@@ -199,8 +199,10 @@ if $MYVIMRC == ''
 else
     VIMRC_FILE = $MYVIMRC
     OTHER_PLUGINS = readfile(VIMRC_FILE)
-        ->filter((_, v: string): bool => v =~ '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)')
-        ->map((_, v: string): string => 'plugged/' .. matchstr(v, '.\{-}/\zs[^,'']*'))
+                    ->filter((_, v: string): bool =>
+                            v =~ '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)')
+                    ->map((_, v: string): string =>
+                            'plugged/' .. matchstr(v, '.\{-}/\zs[^,'']*'))
     OTHER_PLUGINS += ['autoload/plug.vim']
     lockvar! OTHER_PLUGINS
 endif
@@ -234,10 +236,12 @@ def qf#align(info: dict<number>): list<string> #{{{2
         ->map((_, v: number): number => strchars(qfl[v]['pattern'], true))
         ->max()
     var fname_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => qfl[v]['bufnr']->bufname()->fnamemodify(':t')->strchars(true))
+        ->map((_, v: number): number =>
+            qfl[v]['bufnr']->bufname()->fnamemodify(':t')->strchars(true))
         ->max()
     var type_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => get(EFM_TYPE, qfl[v]['type'], '')->strlen())
+        ->map((_, v: number): number =>
+            get(EFM_TYPE, qfl[v]['type'], '')->strlen())
         ->max()
     var errnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v: number): number => qfl[v]['nr'])
@@ -419,26 +423,27 @@ def qf#cupdate(mod: string) #{{{2
         # with the  new one.  So,  in effect, `extend()`  will replace the  old text
         # with the new one.
         #}}}
-        ->map((_, v) => extend(v, {
-            text: getbufline(v.bufnr, v.lnum)
-                # Why `get()`?{{{
-                #
-                # `getbufline()`  should return  a list  with  a single  item, the  line
-                # `lnum` in the buffer `bufnr`.
-                # But, if the buffer is unloaded, it will just return an empty list.
-                # From `:h getbufline()`:
-                #
-                #    > This function  works only  for loaded  buffers.  For  unloaded and
-                #    > non-existing buffers, an empty |List| is returned.
-                #
-                # Therefore, if  an entry in  the qfl is present  in a buffer  which you
-                # didn't visit in the past, it  won't be loaded, and `getbufline()` will
-                # return an empty list.
-                #
-                # In this case, we want the text field to stay the same (hence `v.text`).
-                #}}}
-                ->get(0, v.text),
-            }))
+        ->map((_, v: dict<any>): dict<any> => extend(v, {
+                text: getbufline(v.bufnr, v.lnum)
+                    # Why `get()`?{{{
+                    #
+                    # `getbufline()` should  return a  list with a  single item,
+                    # `the line lnum` in the buffer `bufnr`.
+                    # But, if the buffer is unloaded, it will just return an empty list.
+                    # From `:h getbufline()`:
+                    #
+                    #    > This function  works only  for loaded  buffers.  For  unloaded and
+                    #    > non-existing buffers, an empty |List| is returned.
+                    #
+                    # Therefore, if an  entry in the qfl is present  in a buffer
+                    # which you  didn't visit in  the past, it won't  be loaded,
+                    # and `getbufline()` will return an empty list.
+                    #
+                    # In  this case,  we want  the text field  to stay  the same
+                    # (hence `v.text`).
+                    #}}}
+                    ->get(0, v.text),
+        }))
 
     # set this new qfl
     var action: string = GetAction(mod)
@@ -770,7 +775,7 @@ def AddFilterIndicatorToTitle(title: string, pat: string, bang: bool): string #{
     var filter_indicator: string = '\s*\[:filter' .. (bang ? '!' : '!\@!')
     var has_already_been_filtered: bool = match(title, filter_indicator) >= 0
     return has_already_been_filtered
-        ?     substitute(title, '\ze\]$', (bang ? ' | ' : ' \& ') .. pat, '')
+        ?     title->substitute('\ze\]$', (bang ? ' | ' : ' \& ') .. pat, '')
         :     title .. ' [:filter' .. (bang ? '!' : '') .. ' ' .. pat .. ']'
 enddef
 
@@ -805,7 +810,7 @@ def GetPat(arg_pat: string): string #{{{2
         ->get(0, {})
         ->get('bufnr', 0)
         ->getbufvar('&cms')
-    cml = split(cml, '%s')->matchstr('\S\+')->escape('\')
+    cml = cml->split('%s')->matchstr('\S\+')->escape('\')
     if cml != ''
         cml = '\V' .. cml .. '\m'
     else
@@ -831,7 +836,8 @@ def GetPat(arg_pat: string): string #{{{2
 
     # If `:Cfilter` was passed a special argument, interpret it.
     if arg_pat =~ keys(arg2pat)->join('\|')
-        return split(arg_pat, '\s\+')
+        return arg_pat
+            ->split('\s\+')
             ->map((_, v: string): string => arg2pat[v])
             ->join('\|')
     else
@@ -859,7 +865,8 @@ def GetWidth(cmd: string): number #{{{2
     if title == 'TOC'
         var lines_length: list<number> = getloclist(0, {items: 0}).items
             ->mapnew((_, v: dict<any>): number => strchars(v.text, true))
-        remove(lines_length, 0) # ignore first line (it may be very long, and is not that useful)
+        # ignore first line (it may be very long, and is not that useful)
+        remove(lines_length, 0)
         var longest_line: number = max(lines_length)
         var right_padding: number = 1
         # this should evaluate to the total width of the fold/number/sign columns
