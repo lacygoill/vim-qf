@@ -14,7 +14,7 @@ def qf#statusline#title(): string
     elseif g:actual_curwin->str2nr() != win_getid()
         return pfx
     else
-        var len: number = strlen(w:quickfix_title)
+        var len: number = strchars(w:quickfix_title, true)
         # Why not using `.80` in the outer `%{qf#...()}`?{{{
         #
         # When the title is too long, Vim would truncate its start.

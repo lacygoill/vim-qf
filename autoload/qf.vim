@@ -241,7 +241,7 @@ def qf#align(info: dict<number>): list<string> #{{{2
         ->max()
     var type_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v: number): number =>
-            get(EFM_TYPE, qfl[v]['type'], '')->strlen())
+            get(EFM_TYPE, qfl[v]['type'], '')->strchars(true))
         ->max()
     var errnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v: number): number => qfl[v]['nr'])
@@ -251,6 +251,10 @@ def qf#align(info: dict<number>): list<string> #{{{2
         var e: dict<any> = qfl[idx]
         if !e.valid
             add(l, '|| ' .. e.text)
+        # happens  if you  re-open  the  qf window  after  wiping  out a  buffer
+        # containing an entry from the qfl
+        elseif e.bufnr == 0
+            add(l, 'the buffer no longer exists')
         else
             # case where the entry does not  refer to a particular location in a
             # file, but just to a file as a whole (e.g. `:Find`, `:PluginsToCommit`, ...)
