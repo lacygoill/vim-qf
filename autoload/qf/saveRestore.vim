@@ -97,7 +97,8 @@ endif
 
 # Interface {{{1
 def qf#saveRestore#complete(...l: any): string #{{{2
-    return glob(QFL_DIR .. '/*.txt', false, true)
+    return QFL_DIR
+        ->readdir((n: string): bool => n =~ '\.txt$')
         ->map((_, v: string): string => fnamemodify(v, ':t:r'))
         ->join("\n")
 enddef
