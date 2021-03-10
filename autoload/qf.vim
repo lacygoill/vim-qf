@@ -200,7 +200,7 @@ else
     VIMRC_FILE = $MYVIMRC
     OTHER_PLUGINS = readfile(VIMRC_FILE)
                     ->filter((_, v: string): bool =>
-                            v =~ '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill/vim-awk\)')
+                            v =~ '^\s*Plug\s\+''\%(\%(nicsig\)\@!\|nicsig/vim-awk\)')
                     ->map((_, v: string): string =>
                             'plugged/' .. matchstr(v, '.\{-}/\zs[^,'']*'))
     OTHER_PLUGINS += ['autoload/plug.vim']
