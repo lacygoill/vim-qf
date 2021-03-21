@@ -151,7 +151,7 @@ def PopupClose() #{{{2
 enddef
 
 def PopupFilter(winid: number, key: string): bool #{{{2
-    if !has_key(FILTER_CMD, key)
+    if !FILTER_CMD->has_key(key)
         return false
     endif
     get(FILTER_CMD, key)(winid)

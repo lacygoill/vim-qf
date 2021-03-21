@@ -200,7 +200,7 @@ else
     VIMRC_FILE = $MYVIMRC
     OTHER_PLUGINS = readfile(VIMRC_FILE)
                     ->filter((_, v: string): bool =>
-                            v =~ '^\s*Plug\s\+''\%(\%(nicsig\)\@!\|nicsig/vim-awk\)')
+                            v =~ '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill-awk\)')
                     ->map((_, v: string): string =>
                             'plugged/' .. matchstr(v, '.\{-}/\zs[^,'']*'))
     OTHER_PLUGINS += ['autoload/plug.vim']
@@ -233,15 +233,15 @@ def qf#align(info: dict<number>): list<string> #{{{2
         ->max()
         ->len()
     var pat_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => strchars(qfl[v]['pattern'], true))
+        ->map((_, v: number): number => strcharlen(qfl[v]['pattern']))
         ->max()
     var fname_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v: number): number =>
-            qfl[v]['bufnr']->bufname()->fnamemodify(':t')->strchars(true))
+            qfl[v]['bufnr']->bufname()->fnamemodify(':t')->strcharlen())
         ->max()
     var type_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v: number): number =>
-            get(EFM_TYPE, qfl[v]['type'], '')->strchars(true))
+            get(EFM_TYPE, qfl[v]['type'], '')->strcharlen())
         ->max()
     var errnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
         ->map((_, v: number): number => qfl[v]['nr'])
@@ -320,7 +320,7 @@ def qf#cfilter(bang: bool, arg_pat: string, mod: string) #{{{2
             bang
             ?    'DID'
             :    'did NOT',
-            strchars(pat, true) <= 50
+            strcharlen(pat) <= 50
             ?    pat
             :    'the pattern')
 enddef
@@ -601,7 +601,7 @@ def Open(arg_cmd: string)
     var cmd: string = expand('<amatch>') =~ '^[cl]open$' ? 'open' : 'window'
     var how_to_open: string
     if mod =~ 'vert'
-        how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. GetWidth(arg_cmd)
+        how_to_open = mod .. ' ' .. prefix .. cmd .. ' 40'
     else
         how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. max([min([10, size]), &wmh + 2])
         #                                                    │    │
@@ -708,7 +708,7 @@ enddef
 
 def qf#setMatches(origin: string, group: string, arg_pat: string) #{{{2
     var id: number = GetId()
-    if !has_key(matches_any_qfl, id)
+    if !matches_any_qfl->has_key(id)
         matches_any_qfl[id] = {}
     endif
     var matches_this_qfl_this_origin: list<dict<string>> =
@@ -860,25 +860,6 @@ def GetTitle(): string #{{{2
     return get(b:, 'qf_is_loclist', false)
         ?     getloclist(0, {title: 0})->get('title', '')
         :     getqflist({title: 0})->get('title', '')
-enddef
-
-def GetWidth(cmd: string): number #{{{2
-    var title: string = cmd =~ '^l'
-        ?     getloclist(0, {title: 0}).title
-        :     getqflist({title: 0}).title
-    if title == 'TOC'
-        var lines_length: list<number> = getloclist(0, {items: 0}).items
-            ->mapnew((_, v: dict<any>): number => strchars(v.text, true))
-        # ignore first line (it may be very long, and is not that useful)
-        remove(lines_length, 0)
-        var longest_line: number = max(lines_length)
-        var right_padding: number = 1
-        # this should evaluate to the total width of the fold/number/sign columns
-        var left_columns: number = wincol() - virtcol('.')
-        return min([40, longest_line + right_padding + left_columns])
-    else
-        return 40
-    endif
 enddef
 
 def Getqflist(): list<dict<any>> #{{{2
