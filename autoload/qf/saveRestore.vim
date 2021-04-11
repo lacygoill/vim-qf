@@ -96,7 +96,7 @@ if !isdirectory(QFL_DIR)
 endif
 
 # Interface {{{1
-def qf#saveRestore#complete(...l: any): string #{{{2
+def qf#saveRestore#complete(_, _, _): string #{{{2
     return QFL_DIR
         ->readdir((n: string): bool => n =~ '\.txt$')
         ->map((_, v: string): string => fnamemodify(v, ':t:r'))

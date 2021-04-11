@@ -110,19 +110,18 @@ setl cursorline nowrap
 #
 # Yes, if you didn't align the text in the qfl:
 #
-#     &l:efm = '%f\|%l col %c\|%m'
+#     &l:efm = '%f\|%l col %c\| %m'
 #
 # But the  alignment adds extra whitespace,  so our current value  needs to take
 # them into account.
 #}}}
 
-#                          ┌ all meta symbols (\ . # [), including the backslash,
-#                          │ have to be written with a leading '%'
-#                          │ (see :h `efm-ignore`)
-#                          │
-&l:efm = '%f%*\s\|%l col %c%*\s\|%m'
-#│              ├──┘
-#│              └ scanf() notation for `%\s%\+`(see `:h efm-ignore /pattern matching`)
+#           ┌ all meta symbols (\ . # [), including the backslash,
+#           │ have to be written with a leading '%'
+#           │ (see :h `efm-ignore`)
+#           │
+&l:efm = '%f%\s\%#\|%l col %c%\s\%#\| %m'
+#│
 #└ using `setl` would make the value less readable;
 #  we would need to escape any:
 #

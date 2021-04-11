@@ -23,7 +23,7 @@ const EFM_TYPE: dict<string> = {
     # we use this ad-hoc flag in `vim-stacktrace` to distinguish Vim9 errors
     # which are raised at compile time, from those raised at runtime
     c: 'compiling',
-    }
+}
 
 # What's the purpose of `matches_any_qfl`?{{{
 #
@@ -189,7 +189,7 @@ var matches_any_qfl: dict<dict<list<dict<string>>>>
 const KNOWN_PATTERNS: dict<string> = {
     location: '^.\{-}|\s*\%(\d\+\)\=\s*\%(col\s\+\d\+\)\=\s*|\s\=',
     double_bar: '^|\s*|\s*\|\s*|\s*|\s*$',
-    }
+}
 
 var OTHER_PLUGINS: list<string>
 var VIMRC_FILE: string
@@ -282,7 +282,11 @@ def qf#align(info: dict<number>): list<string> #{{{2
     return l
 enddef
 
-def qf#cfilter(bang: bool, arg_pat: string, mod: string) #{{{2
+def qf#cfilter( #{{{2
+    bang: bool,
+    arg_pat: string,
+    mod: string
+)
     # get a qfl with(out) the entries we want to filter
     var list: list<dict<any>> = Getqflist()
     var pat: string = GetPat(arg_pat)
@@ -325,12 +329,12 @@ def qf#cfilter(bang: bool, arg_pat: string, mod: string) #{{{2
             :    'the pattern')
 enddef
 
-def qf#cfilterComplete(...l: any): string #{{{2
+def qf#cfilterComplete(_, _, _): string #{{{2
     # We disable `-commented` because it's not reliable.
     # See fix_me in this file.
     #
-    #     return join(['-commented', '-other_plugins', '-tmp'], "\n")
-    return join(['-other_plugins', '-tmp'], "\n")
+    #     return ['-commented', '-other_plugins', '-tmp']->join("\n")
+    return ['-other_plugins', '-tmp']->join("\n")
 enddef
 
 def qf#cfreeStack(loclist = false) #{{{2
@@ -343,7 +347,12 @@ def qf#cfreeStack(loclist = false) #{{{2
     endif
 enddef
 
-def qf#cgrepBuffer(lnum1: number, lnum2: number, pat: string, loclist = false) #{{{2
+def qf#cgrepBuffer( #{{{2
+    lnum1: number,
+    lnum2: number,
+    pat: string,
+    loclist = false
+)
     var pfx1: string = loclist ? 'l' : 'c'
     var pfx2: string = loclist ? 'l' : ''
     var range: string = ':' .. lnum1 .. ',' .. lnum2
@@ -474,8 +483,8 @@ def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
     if index(['char', 'line'], type) >= 0
         range = [line("'["), line("']")]
     elseif type == 'block'
-        var vcol1: number = virtcol("'[")
-        var vcol2: number = virtcol("']")
+        var vcol1: number = VirtcolFirstCell("'[")
+        var vcol2: number = VirtcolFirstCell("']")
         # We could also use:{{{
         #
         #     var pat: string = '\%V.*\%V'
@@ -706,7 +715,11 @@ def qf#openManual(where: string) #{{{2
     endtry
 enddef
 
-def qf#setMatches(origin: string, group: string, arg_pat: string) #{{{2
+def qf#setMatches( #{{{2
+    origin: string,
+    group: string,
+    arg_pat: string
+)
     var id: number = GetId()
     if !matches_any_qfl->has_key(id)
         matches_any_qfl[id] = {}
@@ -763,7 +776,12 @@ def qf#undoFtplugin() #{{{2
 enddef
 #}}}1
 # Utilities {{{1
-def AddFilterIndicatorToTitle(title: string, pat: string, bang: bool): string #{{{2
+def AddFilterIndicatorToTitle( #{{{2
+    title: string,
+    pat: string,
+    bang: bool
+): string
+
     # What is this “filter indicator”?{{{
     #
     # If  the qfl  has  already been  filtered,  we don't  want  to add  another
@@ -834,9 +852,9 @@ def GetPat(arg_pat: string): string #{{{2
     #}}}
     var arg2pat: dict<string> = {
         -commented: '^\s*' .. cml,
-        -other_plugins: '^\S*/\%(' .. join(OTHER_PLUGINS, '\|') .. '\)',
+        -other_plugins: '^\S*/\%(' .. OTHER_PLUGINS->join('\|') .. '\)',
         -tmp: '^\S*/\%(qfl\|session\|tmp\)/\S*\.vim',
-        }
+    }
 
     # If `:Cfilter` was passed a special argument, interpret it.
     if arg_pat =~ keys(arg2pat)->join('\|')
@@ -876,11 +894,15 @@ def MaybeResizeHeight() #{{{2
     endif
 enddef
 
-def Setqflist(...l: any) #{{{2
+def Setqflist(...l: list<any>) #{{{2
     if get(b:, 'qf_is_loclist', false)
         call('setloclist', [0] + l)
     else
         call('setqflist', l)
     endif
+enddef
+
+def VirtcolFirstCell(filepos: string): number #{{{2
+    return virtcol([line(filepos), col(filepos) - 1]) + 1
 enddef
 

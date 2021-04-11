@@ -18,7 +18,7 @@ def qf#preview#open(persistent = false) #{{{2
         w:_qfpreview = {
             persistent: false,
             height: GetWinheight(),
-            }
+        }
         # increase the height of the window when we zoom the tmux pane where Vim is displayed
         augroup QfpreviewResetHeight
             au! * <buffer>
@@ -110,7 +110,7 @@ def PopupCreate() #{{{2
         filter: PopupFilter,
         # only filter keys in normal mode (the default is "a"; all modes)
         filtermode: 'n',
-        })
+    })
 
     if !ShouldPersist()
         opts.moved = 'any'
@@ -348,28 +348,28 @@ def GetLineAndAnchor(wininfo: dict<any>): dict<any> #{{{2
             # for the popup to be aligned with the current window, we need to use the cell right above
             # the upper-left corner as the *bottom left* corner of the popup
             pos: 'botleft',
-            }
+        }
     # not enough room above; try below
     elseif lines_below >= w:_qfpreview.height
         opts = {
             # `+1` to not hide the status line of the window below the qf window
             line: wininfo.winrow + wininfo.height + 1,
             pos: 'topleft',
-            }
+        }
     # still not enough room; if there's a little room above, reduce the height of the popup so that it fits
     elseif lines_above >= 5
         w:_qfpreview.height = lines_above
         opts = {
             line: wininfo.winrow - 2,
             pos: 'botleft',
-            }
+        }
     # still not enough room; if there's a little room below, reduce the height of the popup so that it fits
     elseif lines_below >= 5
         w:_qfpreview.height = lines_below
         opts = {
             line: wininfo.winrow + wininfo.height + 1,
             pos: 'topleft',
-            }
+        }
     else
         echohl ErrorMsg
         echom 'Not enough room to display popup window'
@@ -414,7 +414,7 @@ def SetHeight(step: number) #{{{2
     #
     # Suppose you include the key `+` in `FILTER_CMD`:
     #
-    #     \ '+': () => SetHeight(1),
+    #     \ '+': (_) => SetHeight(1),
     #
     # and then you run:
     #
@@ -438,19 +438,11 @@ def SetHeight(step: number) #{{{2
         return
     endif
 
-    # TODO(Vim9): in the future, simplify{{{
-    #
-    #     w:_qfpreview.height += step
-    #
-    # Doesn't work right now:
-    #
-    #     Index with operation not supported yet
-    #}}}
-    w:_qfpreview.height = w:_qfpreview.height + step
+    w:_qfpreview.height += step
     popup_setoptions(w:_qfpreview.winid, {
         minheight: w:_qfpreview.height,
         maxheight: w:_qfpreview.height,
-        })
+    })
     SetSigncolumn()
 enddef
 
@@ -476,7 +468,7 @@ enddef
 def TablineIsVisible(): bool #{{{2
     return &stal == 2 || &stal == 1 && tabpagenr('$') >= 2
 enddef
-
+#}}}1
 # Init {{{1
 
 import MapMetaChord from 'lg/map.vim'
@@ -484,17 +476,17 @@ import Popup_create from 'lg/popup.vim'
 
 # this tells the popup filter which keys it must handle, and how
 const FILTER_CMD: dict<func> = {
-    [MapMetaChord('m')]: () => SetHeight(-1),
-    [MapMetaChord('p')]: () => SetHeight(1),
+    [MapMetaChord('m')]: (_) => SetHeight(-1),
+    [MapMetaChord('p')]: (_) => SetHeight(1),
     # toggle number column
     [MapMetaChord('n')]: (id: number) => (!getwinvar(id, '&number'))->setwinvar(id, '&number'),
     # reset topline to the line of the quickfix entry;
     # useful to get back to original position after scrolling
-    [MapMetaChord('r')]: (id: number) => [
-        popup_setoptions(id, {firstline: w:_qfpreview.firstline}),
-        popup_setoptions(id, {firstline: 0}),
-        SetSigncolumn(),
-    ]}
+    [MapMetaChord('r')]: (id: number) => {
+        popup_setoptions(id, {firstline: w:_qfpreview.firstline})
+        popup_setoptions(id, {firstline: 0})
+        SetSigncolumn()
+    }}
 
 const FILTER_LHS: list<string> = ['m', 'p', 'n', 'r']
     ->map((_, v: string): string => MapMetaChord(v, true))
