@@ -318,13 +318,18 @@ def ClearAutocmds() #{{{2
     #}}}
     # We can't clear  the augroups because there could still  be autocmds inside
     # (but for other buffers).
-    au! QfpreviewPersistent * <buffer>
-    au! QfpreviewClose * <buffer>
+    au! QfpreviewPersistent * <buffer=abuf>
+    au! QfpreviewClose * <buffer=abuf>
 enddef
 #}}}1
 # Util {{{1
 def GetWinheight(): number #{{{2
-    return min([winheight(0), winnr('#')->winheight() / 2])
+    var curheight: number = winheight(0)
+    var prevheight: number = winnr('#')->winheight()
+    var height: number = [curheight, prevheight / 2]->min()
+    # if the qf  window is really small  (e.g. 2 lines), let's make  sure we can
+    # see enough context
+    return [5, height]->max()
 enddef
 
 def GetLineAndAnchor(wininfo: dict<any>): dict<any> #{{{2

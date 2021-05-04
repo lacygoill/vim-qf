@@ -87,64 +87,6 @@ setl cursorline nowrap
 # from the title, even when the latter is long and the terminal window is narrow
 &l:stl = '%{qf#statusline#title()}%=    %l/%L '
 
-# efm {{{2
-# Why do you set `'efm'`?{{{
-#
-#     :vim /fu/gj %
-#     :setl ma | keepj $d_ | setl noma
-#     :cgetb
-#
-# The new qfl is not interactive.
-# This is because `:cgetb` interprets the contents of the qfl thanks to `'efm'`,
-# (contrary to `:grep` which uses `'gfm'`).
-#
-# The default global value is very long:
-#
-#     put =&g:efm | s/\\\@1<!,/\r/g
-#
-# But it seems  it doesn't contain any  value describing the contents  of a qfl.
-# IOW, it's designed to interpret the output of some shell commands and populate
-# the qfl.  It's not designed to parse the qfl itself.
-#}}}
-# Could I use a simpler value?{{{
-#
-# Yes, if you didn't align the text in the qfl:
-#
-#     &l:efm = '%f\|%l col %c\| %m'
-#
-# But the  alignment adds extra whitespace,  so our current value  needs to take
-# them into account.
-#}}}
-
-#           ┌ all meta symbols (\ . # [), including the backslash,
-#           │ have to be written with a leading '%'
-#           │ (see :h `efm-ignore`)
-#           │
-&l:efm = '%f%\s\%#\|%l col %c%\s\%#\| %m'
-#│
-#└ using `setl` would make the value less readable;
-#  we would need to escape any:
-#
-#    - backslash
-#
-#    - bar
-#
-#      here we still escape a bar, but it's only for the regex engine
-#      `:set` would need an additional backslash
-#
-#    - comma
-#
-#      We need to escape a comma even  without `:setl`, because a comma has a
-#      special meaning for `'efm'`: separation between 2 formats.
-#
-#      But with `:set` we would need a double backslash, because a comma has
-#      also a special meaning for `:set`: separation between 2 option values.
-#
-#    - double quote
-#
-#    - space
-#}}}2
-
 # Variables {{{1
 
 # Are we viewing a location list or a quickfix list?

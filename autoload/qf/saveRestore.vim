@@ -99,7 +99,7 @@ endif
 def qf#saveRestore#complete(_, _, _): string #{{{2
     return QFL_DIR
         ->readdir((n: string): bool => n =~ '\.txt$')
-        ->map((_, v: string): string => fnamemodify(v, ':t:r'))
+        ->map((_, v: string): string => v->fnamemodify(':t:r'))
         ->join("\n")
 enddef
 
@@ -195,7 +195,10 @@ def qf#saveRestore#restore(arg_fname: string) #{{{2
         fname = Expand(arg_fname)
     endif
 
-    if !filereadable(fname)
+    if fname == ''
+        echo '[Crestore] do not know which quickfix list to restore'
+        return
+    elseif !filereadable(fname)
         echo '[Crestore] ' .. fname .. ' is not readable'
         return
     endif

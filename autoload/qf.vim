@@ -149,7 +149,7 @@ const EFM_TYPE: dict<string> = {
 # As a result, we would need to also trigger `FileType qf`:
 #
 #     do <nomodeline> QuickFixCmdPost cwindow
-#     if &bt isnot# 'quickfix'
+#     if &buftype isnot# 'quickfix'
 #         return
 #     endif
 #     do <nomodeline> FileType qf
@@ -192,18 +192,9 @@ const KNOWN_PATTERNS: dict<string> = {
 }
 
 var OTHER_PLUGINS: list<string>
-var VIMRC_FILE: string
 # `$MYVIMRC` is empty when we start with `-Nu /tmp/vimrc`.
-if $MYVIMRC == ''
-    OTHER_PLUGINS = ['autoload/plug.vim']
-else
-    VIMRC_FILE = $MYVIMRC
-    OTHER_PLUGINS = readfile(VIMRC_FILE)
-                    ->filter((_, v: string): bool =>
-                            v =~ '^\s*Plug\s\+''\%(\%(lacygoill\)\@!\|lacygoill-awk\)')
-                    ->map((_, v: string): string =>
-                            'plugged/' .. matchstr(v, '.\{-}/\zs[^,'']*'))
-    OTHER_PLUGINS += ['autoload/plug.vim']
+if $MYVIMRC != ''
+    OTHER_PLUGINS = g:MinpacPlugins()
     lockvar! OTHER_PLUGINS
 endif
 
@@ -525,7 +516,7 @@ def qf#disableSomeKeys(keys: list<string>) #{{{2
         b:undo_ftplugin = 'exe'
     endif
     for key in keys
-        sil exe 'nno <buffer><nowait> ' .. key .. ' <nop>'
+        exe 'sil nno <buffer><nowait> ' .. key .. ' <nop>'
         b:undo_ftplugin ..= '|exe "nunmap <buffer> ' .. key .. '"'
     endfor
 enddef
@@ -741,7 +732,7 @@ enddef
 var full_filepath: bool
 
 def qf#undoFtplugin() #{{{2
-    set bl< cul< efm< stl< wrap<
+    set bl< cul< stl< wrap<
     unlet! b:qf_is_loclist
 
     nunmap <buffer> <c-q>
@@ -832,7 +823,9 @@ def GetPat(arg_pat: string): string #{{{2
         ->get(0, {})
         ->get('bufnr', 0)
         ->getbufvar('&cms')
-    cml = cml->split('%s')->matchstr('\S\+')->escape('\')
+        ->split('%s')
+        ->matchstr('\S\+')
+        ->escape('\')
     if cml != ''
         cml = '\V' .. cml .. '\m'
     else
@@ -852,7 +845,7 @@ def GetPat(arg_pat: string): string #{{{2
     #}}}
     var arg2pat: dict<string> = {
         -commented: '^\s*' .. cml,
-        -other_plugins: '^\S*/\%(' .. OTHER_PLUGINS->join('\|') .. '\)',
+        -other_plugins: '^\S*/pack/minpac/\%(opt\|start\)/\%(' .. OTHER_PLUGINS->join('\|') .. '\)/',
         -tmp: '^\S*/\%(qfl\|session\|tmp\)/\S*\.vim',
     }
 
@@ -890,7 +883,7 @@ def MaybeResizeHeight() #{{{2
         var newheight: number = min([10, Getqflist()->len()])
         # at least 2 lines (to avoid `E36` if we've reset `'ea'`)
         newheight = max([2, newheight])
-        exe ':' .. newheight .. 'wincmd _'
+        exe 'resize ' .. newheight
     endif
 enddef
 
