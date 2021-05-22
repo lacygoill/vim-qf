@@ -138,9 +138,9 @@ def PopupClose() #{{{2
     #     $ vim +'helpg foobar' +'tabnew' +'tabfirst'
     #     " press "p" to preview qf entry
     #     :tabclose
-    #     Error detected while processing BufWinLeave Autocommands for "<buffer=29>":~
-    #     E121: Undefined variable: w:_qfpreview~
-    #     E116: Invalid arguments for function popup_close~
+    #     Error detected while processing BufWinLeave Autocommands for "<buffer=29>":˜
+    #     E121: Undefined variable: w:_qfpreview˜
+    #     E116: Invalid arguments for function popup_close˜
     #
     # It appears that – in that case – when `BufWinLeave` is fired, we're not in
     # the qf window anymore, but in the window of the newly focused tab.
@@ -427,8 +427,8 @@ def SetHeight(step: number) #{{{2
     #     " press "p" to open popup
     #     " press "C-w w" to focus other window
     #     " press "C-w +" to increase size of current window
-    #     Error detected while processing function <SNR>180_popup_filter[3]..<lambda>448[1]..<SNR>180_setheight:~
-    #     E121: Undefined variable: w:_qfpreview~
+    #     Error detected while processing function <SNR>180_popup_filter[3]..<lambda>448[1]..<SNR>180_setheight:˜
+    #     E121: Undefined variable: w:_qfpreview˜
     #
     # In the last  `C-w +`, `C-w` is  ignored by the filter, but  not `+`, which
     # invokes this function, while the current window is not the qf window where

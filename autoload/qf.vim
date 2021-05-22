@@ -660,7 +660,7 @@ def Open(arg_cmd: string)
         #
         #                                                   v---------v
         #     $ vim -Nu NONE +'au QuickFixCmdPost * cw10|au bufwinenter * ++once helpc' +'helpg foobar' +'helpg wont_find_this' +'helpg wont_find_this'
-        #     E788: Not allowed to edit another buffer now~
+        #     E788: Not allowed to edit another buffer now˜
         #
         # And `BufEnter` may raise `E426` and `E433`:
         #

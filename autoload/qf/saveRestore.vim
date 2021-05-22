@@ -161,7 +161,7 @@ def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
     #
     #     let dict = {'a': 'b\nc'}
     #     echo '%s'->substitute('%s', string(dict), '') =~# '\%x00'
-    #     1~
+    #     1˜
     #
     # We need to make sure it's parsed literally.
     #
@@ -172,7 +172,7 @@ def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
     #
     #     let dict = {'a': 'b"c'}
     #     echo json_encode(dict)
-    #     {"a":"b\"c"}~
+    #     {"a":"b\"c"}˜
     #            ^
     #
     # And again, those backslashes must be parsed literally by `substitute()`.
