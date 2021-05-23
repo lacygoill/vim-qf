@@ -241,16 +241,16 @@ def qf#align(info: dict<number>): list<string> #{{{2
     for idx in range(info.start_idx - 1, info.end_idx - 1)
         var e: dict<any> = qfl[idx]
         if !e.valid
-            add(l, '|| ' .. e.text)
+            l->add('|| ' .. e.text)
         # happens  if you  re-open  the  qf window  after  wiping  out a  buffer
         # containing an entry from the qfl
         elseif e.bufnr == 0
-            add(l, 'the buffer no longer exists')
+            l->add('the buffer no longer exists')
         else
             # case where the entry does not  refer to a particular location in a
             # file, but just to a file as a whole (e.g. `:Find`, `:PluginsToCommit`, ...)
             if e.lnum == 0 && e.col == 0 && e.pattern == ''
-                add(l, bufname(e.bufnr))
+                l->add(bufname(e.bufnr))
             else
                 var fname: string = printf('%-*S', fname_width, bufname(e.bufnr)
                     ->fnamemodify(full_filepath ? ':p' : ':t'))
@@ -263,9 +263,9 @@ def qf#align(info: dict<number>): list<string> #{{{2
                     errnum = printf('%*d', errnum_width + 1, e.nr)
                 endif
                 if e.pattern == ''
-                    add(l, printf('%s|%s col %s %s%s| %s', fname, lnum, col, type, errnum, e.text))
+                    l->add(printf('%s|%s col %s %s%s| %s', fname, lnum, col, type, errnum, e.text))
                 else
-                    add(l, printf('%s|%s %s%s| %s', fname, pat, type, errnum, e.text))
+                    l->add(printf('%s|%s %s%s| %s', fname, pat, type, errnum, e.text))
                 endif
             endif
         endif
