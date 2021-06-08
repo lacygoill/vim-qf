@@ -20,10 +20,10 @@ var loaded = true
 
 # Options {{{1
 
-# don't let the default qf filetype plugin set `'stl'`, we'll do it ourselves
+# don't let the default qf filetype plugin set `'statusline'`, we'll do it ourselves
 g:qf_disable_statusline = 1
 
-set qftf=qf#align
+&quickfixtextfunc = 'qf#align'
 
 # Commands {{{1
 

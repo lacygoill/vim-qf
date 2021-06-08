@@ -122,7 +122,7 @@ def PopupCreate() #{{{2
     SetSigncolumn()
     SetSign(curentry.bufnr, curentry.lnum)
     # hide ad-hoc characters used for syntax highlighting (like bars and stars in help files)
-    setwinvar(w:_qfpreview.winid, '&cole', 3)
+    setwinvar(w:_qfpreview.winid, '&conceallevel', 3)
 
     CloseWhenQuit()
     if ShouldPersist()
@@ -471,7 +471,7 @@ def PopupIsTooBig(): bool #{{{2
 enddef
 
 def TablineIsVisible(): bool #{{{2
-    return &stal == 2 || &stal == 1 && tabpagenr('$') >= 2
+    return &showtabline == 2 || &showtabline == 1 && tabpagenr('$') >= 2
 enddef
 #}}}1
 # Init {{{1

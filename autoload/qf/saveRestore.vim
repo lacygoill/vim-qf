@@ -56,7 +56,7 @@ var loaded = true
 #         # You may  lose a lot of  time/energy before remembering you  have this code
 #         # which restores an old qfl.
 #         # This is  especially true if the  two qfl which  end on the stack  are very
-#         # similar, which happens when you're refining an 'efm'.
+#         # similar, which happens when you're refining an 'errorformat'.
 #         #}}}
 #         # Why not restoring the qfl if `v:servername` is empty?{{{
 #         #
@@ -90,7 +90,7 @@ var loaded = true
 
 const QFL_DIR: string = $HOME .. '/.vim/tmp/qfl'
 if !isdirectory(QFL_DIR)
-    if mkdir(QFL_DIR, 'p', 0o700)
+    if !mkdir(QFL_DIR, 'p', 0o700)
         echom '[vim-qf] failed to create directory ' .. QFL_DIR
     endif
 endif

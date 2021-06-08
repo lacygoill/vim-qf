@@ -149,7 +149,7 @@ const EFM_TYPE: dict<string> = {
 # As a result, we would need to also trigger `FileType qf`:
 #
 #     do <nomodeline> QuickFixCmdPost cwindow
-#     if &buftype isnot# 'quickfix'
+#     if &buftype !=# 'quickfix'
 #         return
 #     endif
 #     do <nomodeline> FileType qf
@@ -380,7 +380,8 @@ def qf#concealLtagPatternColumn() #{{{2
         matchdelete(w:ltag_conceal_match)
     endif
     w:ltag_conceal_match = matchadd('Conceal', '|.\{-}\\\$\s*|' .. '\|' .. '|.\{-}|')
-    setl cocu=nvc cole=3
+    &l:concealcursor = 'nvc'
+    &l:conceallevel = 3
 enddef
 
 def qf#createMatches() #{{{2
@@ -394,7 +395,8 @@ def qf#createMatches() #{{{2
                 var pat: string
                 [group, pat] = [a_match.group, a_match.pat]
                 if group == 'Conceal'
-                    setl cocu=nc cole=3
+                    &l:concealcursor = 'nc'
+                    &l:conceallevel = 3
                 endif
                 call('matchadd', [group, pat, 0, -1]
                     + (group =~ 'Conceal'
@@ -465,7 +467,7 @@ def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
 #    - delete anything else (and update the qfl)
 
     if type_or_lnum == ''
-        &opfunc = 'qf#concealOrDelete'
+        &operatorfunc = 'qf#concealOrDelete'
         return 'g@'
     endif
 
@@ -485,7 +487,8 @@ def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
         #}}}
         var pat: string = '\%' .. vcol1 .. 'v.*\%' .. vcol2 .. 'v.'
         matchadd('Conceal', pat, 0, -1, {conceal: 'x'})
-        setl cocu=nc cole=3
+        &l:concealcursor = 'nc'
+        &l:conceallevel = 3
         return ''
     elseif type == 'Ex'
         range = [type_or_lnum, lnum2]
@@ -498,11 +501,11 @@ def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
     remove(qfl, range[0] - 1, range[1] - 1)
 
     # we need to preserve conceal options, because our qf filetype plugin resets them
-    var cole_save: number = &l:cole
-    var cocu_save: string = &l:cocu
+    var conceallevel_save: number = &l:conceallevel
+    var concealcursor_save: string = &l:concealcursor
     # set this new qfl
     Setqflist([], 'r', {items: qfl})
-    [&l:cole, &l:cocu] = [cole_save, cocu_save]
+    [&l:conceallevel, &l:concealcursor] = [conceallevel_save, concealcursor_save]
 
     MaybeResizeHeight()
 
@@ -527,9 +530,12 @@ def qf#nv(errorfile: string): string #{{{2
     if empty(file)
         return ''
     endif
-    var title: string = remove(file, 0)
+    var title: string = file->remove(0)
     # we use simple error formats suitable for a grep-like command
-    var qfl: list<dict<any>> = getqflist({lines: file, efm: '%f:%l:%c:%m,%f:%l:%m'})
+    var qfl: list<dict<any>> = getqflist({
+        lines: file,
+        efm: '%f:%l:%c:%m,%f:%l:%m'
+    })
     var items: list<dict<any>> = get(qfl, 'items', [])
     setqflist([], ' ', {items: items, title: title})
     cw
@@ -587,7 +593,7 @@ def Open(arg_cmd: string)
     # Wait.  `:copen` can't populate the qfl.  How could `cmd` be `copen`?{{{
     #
     # In some of our  plugins, we may want to open the qf  window even though it
-    # doesn't contain any valid entry (ex: `:Scriptnames`).
+    # doesn't contain any valid entry (e.g.: `:Scriptnames`).
     # In that case, we execute sth like:
     #
     #     do <nomodeline> QuickFixCmdPost copen
@@ -603,18 +609,18 @@ def Open(arg_cmd: string)
     if mod =~ 'vert'
         how_to_open = mod .. ' ' .. prefix .. cmd .. ' 40'
     else
-        how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. max([min([10, size]), &wmh + 2])
+        how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. max([min([10, size]), &winminheight + 2])
         #                                                    │    │
         #                                                    │    └ at most 10 lines high
-        #                                                    └ at least `&wmh + 2` lines high
-        # Why `&wmh + 2`?{{{
+        #                                                    └ at least `&winminheight + 2` lines high
+        # Why `&winminheight + 2`?{{{
         #
         # First, the number passed to `:[cl]{open|window}`  must be at least 1, even
         # if the qfl is empty.  E.g., `:lwindow 0` would raise `E939`.
         #
-        # Second, if `'ea'` is  reset, and the qf window is only 1  or 2 lines high,
-        # pressing Enter on the qf entry would raise `E36`.
-        # In general, the issue is triggered when  the qf window is `&wmh + 1` lines
+        # Second, if `'equalalways'` is reset, and the  qf window is only 1 or 2
+        # lines high, pressing Enter on the qf entry would raise `E36`.
+        # In general, the issue is triggered when  the qf window is `&winminheight + 1` lines
         # high or lower.
         #}}}
     endif
@@ -679,7 +685,7 @@ def qf#openManual(where: string) #{{{2
         return
     endif
 
-    var sb_was_on: bool = &sb | set nosb
+    var splitbelow_was_on: bool = &splitbelow | &splitbelow = false
     try
         if where == 'nosplit'
             exe "norm! \<cr>zv" | return
@@ -700,8 +706,8 @@ def qf#openManual(where: string) #{{{2
         Catch()
         return
     finally
-        if sb_was_on
-            set sb
+        if splitbelow_was_on
+            &splitbelow = true
         endif
     endtry
 enddef
@@ -732,7 +738,11 @@ enddef
 var full_filepath: bool
 
 def qf#undoFtplugin() #{{{2
-    set bl< cul< stl< wrap<
+    set buflisted<
+    set cursorline<
+    set statusline<
+    set wrap<
+
     unlet! b:qf_is_loclist
 
     nunmap <buffer> <c-q>
@@ -794,9 +804,9 @@ enddef
 
 def GetAction(mod: string): string #{{{2
     return mod =~ '^keep' ? ' ' : 'r'
-    #                         │     │
-    #                         │     └ don't create a new list, just replace the current one
-    #                         └ create a new list
+    #                        │     │
+    #                        │     └ don't create a new list, just replace the current one
+    #                        └ create a new list
 enddef
 
 def GetId(): number #{{{2
@@ -808,8 +818,8 @@ enddef
 
 def GetPat(arg_pat: string): string #{{{2
     # TODO:{{{
-    # We guess the comment leader of the buffers in the qfl, by inspecting
-    # the values of 'cms' in the first buffer of the qfl.
+    # We guess the comment  leader of the buffers in the  qfl, by inspecting the
+    # values of 'commentstring' in the first buffer of the qfl.
     # However, `getbufvar()` will return an empty string if we haven't visited
     # the buffer yet.
     # Find a way to warn the user that they should visit the first buffer...
@@ -822,7 +832,7 @@ def GetPat(arg_pat: string): string #{{{2
     var cml: string = getqflist()
         ->get(0, {})
         ->get('bufnr', 0)
-        ->getbufvar('&cms')
+        ->getbufvar('&commentstring')
         ->split('%s')
         ->matchstr('\S\+')
         ->escape('\')
@@ -846,7 +856,8 @@ def GetPat(arg_pat: string): string #{{{2
     var arg2pat: dict<string> = {
         -commented: '^\s*' .. cml,
         -other_plugins: '^\S*/pack/minpac/\%(opt\|start\)/\%(' .. OTHER_PLUGINS->join('\|') .. '\)/',
-        -tmp: '^\S*/\%(qfl\|session\|tmp\)/\S*\.vim',
+        -tmp:    '^\S*/\%(qfl\|session\)/[^ \t/]*\.vim'
+            .. '\|^\S*/tmp/\S*\.vim',
     }
 
     # If `:Cfilter` was passed a special argument, interpret it.
@@ -881,7 +892,7 @@ def MaybeResizeHeight() #{{{2
     if winwidth(0) == &columns
         # no more than 10 lines
         var newheight: number = min([10, Getqflist()->len()])
-        # at least 2 lines (to avoid `E36` if we've reset `'ea'`)
+        # at least 2 lines (to avoid `E36` if we've reset `'equalalways'`)
         newheight = max([2, newheight])
         exe 'resize ' .. newheight
     endif

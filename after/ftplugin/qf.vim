@@ -79,13 +79,14 @@ nno <buffer><nowait> q <cmd>call qf#quit()<cr>
 
 # Options {{{1
 
-setl nobuflisted
+&l:buflisted = false
 
-setl cursorline nowrap
+&l:cursorline = true
+&l:wrap = false
 
 # the 4  spaces before `%l`  make sure that  the line address  is well-separated
 # from the title, even when the latter is long and the terminal window is narrow
-&l:stl = '%{qf#statusline#title()}%=    %l/%L '
+&l:statusline = '%{qf#statusline#title()}%=    %l/%L '
 
 # Variables {{{1
 
@@ -94,12 +95,12 @@ const b:qf_is_loclist = win_getid()->getwininfo()[0]['loclist']
 
 # Matches {{{1
 
-# Why reset 'cole' and 'cocu'?{{{
+# Why reset 'conceallevel' and 'concealcursor'?{{{
 #
 # The  2nd time  we display  a  qf buffer  in  the same  window, there's  no
 # guarantee that we're going to conceal anything.
 #}}}
-set cocu< cole<
+set concealcursor< conceallevel<
 au Syntax qf ++once qf#concealLtagPatternColumn()
 
 # Teardown {{{1
