@@ -5,9 +5,9 @@ var loaded = true
 
 # How to save the current qfl automatically when quitting Vim, and how to restore it automatically on startup?{{{
 #
-#     augroup SaveAndRestoreLastQfl | au!
-#         au VimLeavePre * SaveLastQfl()
-#         au VimEnter * RestoreLastQfl()
+#     augroup SaveAndRestoreLastQfl | autocmd!
+#         autocmd VimLeavePre * SaveLastQfl()
+#         autocmd VimEnter * RestoreLastQfl()
 #     augroup END
 #
 #     def SaveLastQfl()
@@ -91,7 +91,7 @@ var loaded = true
 const QFL_DIR: string = $HOME .. '/.vim/tmp/qfl'
 if !isdirectory(QFL_DIR)
     if !mkdir(QFL_DIR, 'p', 0o700)
-        echom '[vim-qf] failed to create directory ' .. QFL_DIR
+        echomsg '[vim-qf] failed to create directory ' .. QFL_DIR
     endif
 endif
 
@@ -151,7 +151,7 @@ def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
     # This is because a backslash has a special meaning, even in the replacement
     # part of a substitution.
     #
-    # From `:h :s%`
+    # From `:help :s%`
     #
     #    > The special meaning is also used inside the third argument {sub} of
     #    > the |substitute()| function with the following exceptions:
@@ -160,7 +160,7 @@ def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
     # MWE:
     #
     #     let dict = {'a': 'b\nc'}
-    #     echo '%s'->substitute('%s', string(dict), '') =~# '\%x00'
+    #     echo '%s'->substitute('%s', string(dict), '') =~ '\%x00'
     #     1˜
     #
     # We need to make sure it's parsed literally.
@@ -202,8 +202,8 @@ def qf#saveRestore#restore(arg_fname: string) #{{{2
         echo '[Crestore] ' .. fname .. ' is not readable'
         return
     endif
-    exe 'so ' .. fnameescape(fname)
-    cw
+    execute 'source ' .. fnameescape(fname)
+    cwindow
     echo '[Crestore] quickfix list restored from ' .. fname
 enddef
 
@@ -234,7 +234,7 @@ enddef
 # Util {{{1
 def Error(msg: string) #{{{2
     echohl ErrorMsg
-    echom msg
+    echomsg msg
     echohl NONE
 enddef
 

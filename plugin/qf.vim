@@ -27,27 +27,27 @@ g:qf_disable_statusline = 1
 
 # Commands {{{1
 
-com -bar CFreeStack qf#cfreeStack()
-com -bar LFreeStack qf#cfreeStack(true)
+command -bar CFreeStack qf#cfreeStack()
+command -bar LFreeStack qf#cfreeStack(true)
 
-com -nargs=1 -range=% -addr=buffers CGrepBuffer qf#cgrepBuffer(<line1>, <line2>, <q-args>)
-com -nargs=1 -range=% -addr=buffers LGrepBuffer qf#cgrepBuffer(<line1>, <line2>, <q-args>, true)
+command -nargs=1 -range=% -addr=buffers CGrepBuffer qf#cgrepBuffer(<line1>, <line2>, <q-args>)
+command -nargs=1 -range=% -addr=buffers LGrepBuffer qf#cgrepBuffer(<line1>, <line2>, <q-args>, true)
 
 # Autocmds {{{1
 
 # Automatically open the qf/ll window after a quickfix command.
-augroup MyQuickfix | au!
+augroup MyQuickfix | autocmd!
 
     # Do *not* remove the `++nested` flag.{{{
     #
     # Other plugins may need to be informed when the qf window is opened.
     # See: https://github.com/romainl/vim-qf/pull/70
     #}}}
-    au QuickFixCmdPost * ++nested expand('<amatch>')->qf#openAuto()
-    #  │                                   │
-    #  │                                   └ name of the command which was run
-    #  └ after a quickfix command is run
+    autocmd QuickFixCmdPost * ++nested expand('<amatch>')->qf#openAuto()
+    #       │                                   │
+    #       │                                   └ name of the command which was run
+    #       └ after a quickfix command is run
 
-    au FileType qf qf#preview#mappings()
+    autocmd FileType qf qf#preview#mappings()
 augroup END
 

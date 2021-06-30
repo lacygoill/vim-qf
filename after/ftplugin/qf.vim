@@ -3,17 +3,20 @@ vim9script
 # Commands {{{1
 # CRemoveInvalid {{{2
 
-com -bar -buffer CRemoveInvalid qf#removeInvalidEntries()
+command -bar -buffer CRemoveInvalid qf#removeInvalidEntries()
 
 # Csave / Crestore / Cremove {{{2
 
-com -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete Csave qf#saveRestore#save(<q-args>, <bang>0)
-com -bar -buffer -nargs=? -complete=custom,qf#saveRestore#complete Crestore qf#saveRestore#restore(<q-args>)
-com -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete Cremove qf#saveRestore#remove(<q-args>, <bang>0)
+command -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete
+    \ Csave qf#saveRestore#save(<q-args>, <bang>0)
+command -bar -buffer -nargs=? -complete=custom,qf#saveRestore#complete
+    \ Crestore qf#saveRestore#restore(<q-args>)
+command -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete
+    \ Cremove qf#saveRestore#remove(<q-args>, <bang>0)
 
 # Cconceal {{{2
 
-com -bar -buffer -range Cconceal qf#concealOrDelete(<line1>, <line2>)
+command -bar -buffer -range Cconceal qf#concealOrDelete(<line1>, <line2>)
 
 # Cfilter {{{2
 # Documentation:{{{
@@ -29,8 +32,8 @@ com -bar -buffer -range Cconceal qf#concealOrDelete(<line1>, <line2>)
 # Do not give the `-bar` attribute to the commands.
 # It would break a pattern containing a bar (for example, for an alternation).
 
-com -bang -buffer -nargs=? -complete=custom,qf#cfilterComplete Cfilter
-    \ qf#cfilter(<bang>0, <q-args>, <q-mods>)
+command -bang -buffer -nargs=? -complete=custom,qf#cfilterComplete
+    \ Cfilter qf#cfilter(<bang>0, <q-args>, <q-mods>)
 
 # Cupdate {{{2
 
@@ -38,23 +41,23 @@ com -bang -buffer -nargs=? -complete=custom,qf#cfilterComplete Cfilter
 # Useful after a refactoring, to have a visual feedback.
 # Example:
 #
-#     :cgete system('grep -IRn pat /tmp/some_dir/')
-#     :noa cfdo %s/pat/rep/ge | update
+#     :cgetexpr system('grep -IRn pat /tmp/some_dir/')
+#     :noautocmd cfdo :% substitute/pat/rep/ge | update
 #     :Cupdate
 
-com -bar -buffer Cupdate qf#cupdate(<q-mods>)
+command -bar -buffer Cupdate qf#cupdate(<q-mods>)
 #}}}1
 # Mappings {{{1
 
 # disable some keys, to avoid annoying error messages
 qf#disableSomeKeys(['a', 'd', 'gj', 'gqq', 'i', 'o', 'r', 'u', 'x'])
 
-nno <buffer><nowait> <c-q> <cmd>Csave default<cr>
-nno <buffer><nowait> <c-r> <cmd>Crestore default<cr>
+nnoremap <buffer><nowait> <C-Q> <Cmd>Csave default<CR>
+nnoremap <buffer><nowait> <C-R> <Cmd>Crestore default<CR>
 
-nno <buffer><nowait> <c-s> <cmd>call qf#openManual('split')<cr>
-nno <buffer><nowait> <c-v><c-v> <cmd>call qf#openManual('vert split')<cr>
-nno <buffer><nowait> <c-t> <cmd>call qf#openManual('tabpage')<cr>
+nnoremap <buffer><nowait> <C-S> <Cmd>call qf#openManual('split')<CR>
+nnoremap <buffer><nowait> <C-V><C-V> <Cmd>call qf#openManual('vertical split')<CR>
+nnoremap <buffer><nowait> <C-T> <Cmd>call qf#openManual('tabpage')<CR>
 # FYI:{{{
 #
 # By default:
@@ -63,19 +66,19 @@ nno <buffer><nowait> <c-t> <cmd>call qf#openManual('tabpage')<cr>
 #     C-w t  moves the focus to the top window in the current tab page
 #}}}
 
-nno <buffer><nowait> <cr> <cmd>call qf#openManual('nosplit')<cr>
-nmap <buffer><nowait> <c-w><cr> <c-s>
+nnoremap <buffer><nowait> <CR> <Cmd>call qf#openManual('nosplit')<CR>
+nmap <buffer><nowait> <C-W><CR> <C-S>
 
-nno <buffer><expr><nowait> D  qf#concealOrDelete()
-nno <buffer><expr><nowait> DD qf#concealOrDelete() .. '_'
-xno <buffer><expr><nowait> D  qf#concealOrDelete()
+nnoremap <buffer><expr><nowait> D  qf#concealOrDelete()
+nnoremap <buffer><expr><nowait> DD qf#concealOrDelete() .. '_'
+xnoremap <buffer><expr><nowait> D  qf#concealOrDelete()
 
-nno <buffer><nowait>cof <cmd>call qf#toggleFullFilePath()<cr>
+nnoremap <buffer><nowait>cof <Cmd>call qf#toggleFullFilePath()<CR>
 
-nno <buffer><nowait> p <cmd>call qf#preview#open()<cr>
-nno <buffer><nowait> P <cmd>call qf#preview#open(v:true)<cr>
+nnoremap <buffer><nowait> p <Cmd>call qf#preview#open()<CR>
+nnoremap <buffer><nowait> P <Cmd>call qf#preview#open(v:true)<CR>
 
-nno <buffer><nowait> q <cmd>call qf#quit()<cr>
+nnoremap <buffer><nowait> q <Cmd>call qf#quit()<CR>
 
 # Options {{{1
 
@@ -101,10 +104,10 @@ const b:qf_is_loclist = win_getid()->getwininfo()[0]['loclist']
 # guarantee that we're going to conceal anything.
 #}}}
 set concealcursor< conceallevel<
-au Syntax qf ++once qf#concealLtagPatternColumn()
+autocmd Syntax qf ++once qf#concealLtagPatternColumn()
 
 # Teardown {{{1
 
-b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
+b:undo_ftplugin = get(b:, 'undo_ftplugin', 'execute')
     .. '| call qf#undoFtplugin()'
 

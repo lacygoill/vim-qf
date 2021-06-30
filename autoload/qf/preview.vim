@@ -21,8 +21,8 @@ def qf#preview#open(persistent = false) #{{{2
         }
         # increase the height of the window when we zoom the tmux pane where Vim is displayed
         augroup QfpreviewResetHeight
-            au! * <buffer>
-            au VimResized <buffer> w:_qfpreview.height = GetWinheight()
+            autocmd! * <buffer>
+            autocmd VimResized <buffer> w:_qfpreview.height = GetWinheight()
                 | PopupClose()
                 | qf#preview#open()
         augroup END
@@ -65,11 +65,11 @@ def qf#preview#mappings()
     # it would disable *all* mappings while the popup is visible.
     #}}}
     if !exists('b:undo_ftplugin')
-        b:undo_ftplugin = 'exe'
+        b:undo_ftplugin = 'execute'
     endif
     for key in FILTER_LHS
-        exe 'nno <buffer><nowait> ' .. key .. ' ' .. key
-        var unmap_cmd: string = '|exe "nunmap <buffer> ' .. key .. '"'
+        execute 'nnoremap <buffer><nowait> ' .. key .. ' ' .. key
+        var unmap_cmd: string = '|execute "nunmap <buffer> ' .. key .. '"'
         # sanity check; unmapping the same key twice could raise an error
         if stridx(b:undo_ftplugin, unmap_cmd) == -1
             b:undo_ftplugin ..= unmap_cmd
@@ -116,9 +116,9 @@ def PopupCreate() #{{{2
         opts.moved = 'any'
     endif
 
-    # `:nos` to suppress `E325` in case the file is already open in another Vim instance
+    # `:noswapfile` to suppress `E325` in case the file is already open in another Vim instance
     # See: https://github.com/vim/vim/issues/5822
-    nos w:_qfpreview.winid = Popup_create(curentry.bufnr, opts)[1]
+    noswapfile w:_qfpreview.winid = Popup_create(curentry.bufnr, opts)[1]
     SetSigncolumn()
     SetSign(curentry.bufnr, curentry.lnum)
     # hide ad-hoc characters used for syntax highlighting (like bars and stars in help files)
@@ -135,7 +135,7 @@ def PopupClose() #{{{2
     # Why this `if` guard?{{{
     #
     #
-    #     $ vim +'helpg foobar' +'tabnew' +'tabfirst'
+    #     $ vim +'helpgrep foobar' +'tabnew' +'tabfirst'
     #     " press "p" to preview qf entry
     #     :tabclose
     #     Error detected while processing BufWinLeave Autocommands for "<buffer=29>":˜
@@ -189,7 +189,7 @@ def SetSign(bufnr: number, lnum: number) #{{{2
     #    - the buffer in which you're previewing a qf entry contains more than 1 entry
     #    - you've already previewed another entry from the same buffer
     #}}}
-    sil! sign_undefine('QfPreviewCurrentEntryLine')
+    silent! sign_undefine('QfPreviewCurrentEntryLine')
     # define a new sign named `QfPreviewCurrentEntryLine`, used for the previewed qf entry
     sign_define('QfPreviewCurrentEntryLine', {text: '>>', texthl: 'PopupSign'})
     # place it
@@ -198,7 +198,7 @@ def SetSign(bufnr: number, lnum: number) #{{{2
     #          │   │                 └ name of the sign
     #          │   │
     #          │   └ name of the group of the sign
-    #          │     (here, it *must* start with "PopUp"; see `:h sign-group /PopUp`)
+    #          │     (here, it *must* start with "PopUp"; see `:help sign-group /PopUp`)
     #          │
     #          └ automatically allocate a new identifier to the sign
     #}}}
@@ -208,11 +208,11 @@ def CloseWhenQuit() #{{{2
     # Need an augroup  to prevent the duplication of the  autocmds when we press
     # `p` several times in the same qf window.
     augroup QfpreviewClose
-        au! * <buffer>
+        autocmd! * <buffer>
         # close the popup when the qf window is closed or left
         # Why not `QuitPre` or `BufWinLeave`?{{{
         #
-        # `QuitPre` is fired when we close the qf window with `:q`, but not with `:close`.
+        # `QuitPre` is fired when we close the qf window with `:quit`, but not with `:close`.
         # `BufWinLeave` is  fired when we  close the  qf window, no  matter how,
         # provided no other window still displays the qf buffer.
         #
@@ -226,17 +226,17 @@ def CloseWhenQuit() #{{{2
         # otherwise, it would hide a regular buffer as well as the cursor, which
         # is totally unexpected.
         #}}}
-        au WinLeave <buffer> ++once PopupClose()
+        autocmd WinLeave <buffer> ++once PopupClose()
         if w:_qfpreview.persistent
             # re-open the popup if we've temporarily left the qf window and came back
-            au WinEnter <buffer> ++once FireCursormoved()
+            autocmd WinEnter <buffer> ++once FireCursormoved()
             # Don't listen to `QuitPre` nor `WinClosed`.{{{
             #
             # The qf  buffer could still be  displayed in other windows,  and in
             # one of them the persistent mode could be enabled.
             #}}}
             # clear the autocmds when the qf buffer is no longer displayed anywhere
-            au BufWinLeave <buffer> ++once ClearAutocmds()
+            autocmd BufWinLeave <buffer> ++once ClearAutocmds()
         endif
     augroup END
 enddef
@@ -259,8 +259,8 @@ def Persist() #{{{2
         #      but the contents is not present right inside the command,
         #      only the *name*
         #}}}
-        au! * <buffer>
-        au CursorMoved <buffer> Update()
+        autocmd! * <buffer>
+        autocmd CursorMoved <buffer> Update()
     augroup END
 enddef
 
@@ -305,7 +305,7 @@ def FireCursormoved() #{{{2
     endif
     # necessary to disable a guard in `Update()`
     w:_qfpreview.lastline = 0
-    do <nomodeline> QfpreviewPersistent CursorMoved
+    doautocmd <nomodeline> QfpreviewPersistent CursorMoved
 enddef
 
 def ClearAutocmds() #{{{2
@@ -318,8 +318,8 @@ def ClearAutocmds() #{{{2
     #}}}
     # We can't clear  the augroups because there could still  be autocmds inside
     # (but for other buffers).
-    au! QfpreviewPersistent * <buffer=abuf>
-    au! QfpreviewClose * <buffer=abuf>
+    autocmd! QfpreviewPersistent * <buffer=abuf>
+    autocmd! QfpreviewClose * <buffer=abuf>
 enddef
 #}}}1
 # Util {{{1
@@ -377,7 +377,7 @@ def GetLineAndAnchor(wininfo: dict<any>): dict<any> #{{{2
         }
     else
         echohl ErrorMsg
-        echom 'Not enough room to display popup window'
+        echomsg 'Not enough room to display popup window'
         echohl None
         unlet! w:_qfpreview
         return {}
@@ -423,7 +423,7 @@ def SetHeight(step: number) #{{{2
     #
     # and then you run:
     #
-    #     $ vim +'helpg foobar'
+    #     $ vim +'helpgrep foobar'
     #     " press "p" to open popup
     #     " press "C-w w" to focus other window
     #     " press "C-w +" to increase size of current window

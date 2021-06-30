@@ -105,7 +105,7 @@ const EFM_TYPE: dict<string> = {
 #             autocmd QuickFixCmdPost cwindow
 #
 #         a plugin:
-#             do <nomodeline> QuickFixCmdPost cwindow
+#             doautocmd <nomodeline> QuickFixCmdPost cwindow
 #
 #                 → open qf window
 #                 → FileType qf
@@ -148,16 +148,16 @@ const EFM_TYPE: dict<string> = {
 #
 # As a result, we would need to also trigger `FileType qf`:
 #
-#     do <nomodeline> QuickFixCmdPost cwindow
-#     if &buftype !=# 'quickfix'
+#     doautocmd <nomodeline> QuickFixCmdPost cwindow
+#     if &buftype != 'quickfix'
 #         return
 #     endif
-#     do <nomodeline> FileType qf
+#     doautocmd <nomodeline> FileType qf
 #
 # To avoid sourcing the qf filetype plugin when populating the qfl, we could use
-# `:noa`:
+# `:noautocmd`:
 #
-#     noa call setqflist(...)
+#     noautocmd call setqflist(...)
 #
 # Conclusion:
 # Even with all  that, the qf filetype  plugin would be sourced twice  if the qf
@@ -167,7 +167,7 @@ const EFM_TYPE: dict<string> = {
 #         autocmd QuickFixCmdPost cwindow
 #
 #     a plugin:
-#         do <nomodeline> QuickFixCmdPost cwindow
+#         doautocmd <nomodeline> QuickFixCmdPost cwindow
 #
 # ... will fire `FileType qf` iff the window is not opened.
 # I don't like a filetype plugin being sourced several times.
@@ -204,7 +204,7 @@ def qf#quit() #{{{2
         feedkeys('q', 'in')
         return
     endif
-    q
+    quit
 enddef
 
 def qf#align(info: dict<number>): list<string> #{{{2
@@ -331,10 +331,10 @@ enddef
 def qf#cfreeStack(loclist = false) #{{{2
     if loclist
         setloclist(0, [], 'f')
-        lhi
+        lhistory
     else
         setqflist([], 'f')
-        chi
+        chistory
     endif
 enddef
 
@@ -350,18 +350,17 @@ def qf#cgrepBuffer( #{{{2
 
     # ┌ we don't want the title of the qfl separating `:` from `cexpr`
     # │
-    exe pfx1 .. 'expr []'
-    #                            ┌ if the pattern is absent from a buffer,
-    #                            │ it will raise an error
-    #                            │
-    #                            │ ┌ to prevent a possible autocmd from opening the qf window
-    #                            │ │  every time the qfl is expanded; it could make Vim open
-    #                            │ │  a new split for every buffer
-    #                            │ │
-    var cmd: string = printf('sil! noa %sbufdo %svimgrepadd /%s/gj %%', range, pfx2, pat)
-    exe cmd
+    execute pfx1 .. 'expr []'
+    var cmd: string = printf(
+        # if the pattern is absent from a buffer, it will raise an error
+        'silent!'
+        # to  prevent a possible autocmd  from opening the qf  window every time
+        # the qfl is expanded; it could make Vim open a new split for every buffer
+        .. ' noautocmd'
+        .. ' :%s bufdo :%s vimgrepadd /%s/gj %%', range, pfx2, pat)
+    execute cmd
 
-    exe pfx1 .. 'window'
+    execute pfx1 .. 'window'
 
     if loclist
         setloclist(0, [], 'a', {title: ':' .. cmd})
@@ -410,7 +409,7 @@ enddef
 def qf#removeInvalidEntries() #{{{2
     var qfl: list<dict<any>> = getqflist()
         ->filter((_, v: dict<any>): bool => v.valid)
-    var title: string = getqflist({title: 0})
+    var title: string = getqflist({title: 0}).title
     setqflist([], 'r', {items: qfl, title: title})
 enddef
 
@@ -436,7 +435,7 @@ def qf#cupdate(mod: string) #{{{2
                     # `getbufline()` should  return a  list with a  single item,
                     # `the line lnum` in the buffer `bufnr`.
                     # But, if the buffer is unloaded, it will just return an empty list.
-                    # From `:h getbufline()`:
+                    # From `:help getbufline()`:
                     #
                     #    > This function  works only  for loaded  buffers.  For  unloaded and
                     #    > non-existing buffers, an empty |List| is returned.
@@ -458,7 +457,7 @@ def qf#cupdate(mod: string) #{{{2
     MaybeResizeHeight()
 
     # restore position
-    exe 'norm! ' .. pos .. 'G'
+    execute 'normal! ' .. pos .. 'G'
 enddef
 
 def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
@@ -510,17 +509,17 @@ def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
     MaybeResizeHeight()
 
     # restore position
-    exe 'norm! ' .. pos .. 'G'
+    execute 'normal! ' .. pos .. 'G'
     return ''
 enddef
 
 def qf#disableSomeKeys(keys: list<string>) #{{{2
     if !exists('b:undo_ftplugin')
-        b:undo_ftplugin = 'exe'
+        b:undo_ftplugin = 'execute'
     endif
     for key in keys
-        exe 'sil nno <buffer><nowait> ' .. key .. ' <nop>'
-        b:undo_ftplugin ..= '|exe "nunmap <buffer> ' .. key .. '"'
+        execute 'silent nnoremap <buffer><nowait> ' .. key .. ' <Nop>'
+        b:undo_ftplugin ..= '|execute "nunmap <buffer> ' .. key .. '"'
     endfor
 enddef
 
@@ -538,20 +537,20 @@ def qf#nv(errorfile: string): string #{{{2
     })
     var items: list<dict<any>> = get(qfl, 'items', [])
     setqflist([], ' ', {items: items, title: title})
-    cw
+    cwindow
     return ''
 enddef
 
 def qf#openAuto(cmd: string) #{{{2
-    # `:lh`, like `:helpg`, opens a help window (with 1st match).{{{
+    # `:lhelpgrep`, like `:helpgrep`, opens a help window (with 1st match).{{{
     #
-    # But, contrary to `:helpg`, the location list is local to a window.
+    # But, contrary to `:helpgrep`, the location list is local to a window.
     # Which one?
-    # The one where we executed `:lh`? No.
-    # The help window opened by `:lh`? Yes.
+    # The one where we executed `:lhelpgrep`? No.
+    # The help window opened by `:lhelpgrep`? Yes.
     #
     # So, the ll window will NOT be associated with the window where we executed
-    # `:lh`, but to the help window (with 1st match).
+    # `:lhelpgrep`, but to the help window (with 1st match).
     #
     # And,  `:cwindow` will  succeed from  any window,  but `:lwindow`  can only
     # succeed from the help window (with 1st match).
@@ -560,10 +559,10 @@ def qf#openAuto(cmd: string) #{{{2
     # We need to delay `:lwindow` with a one-shot autocmd listening to `BufWinEnter`.
     #}}}
     if cmd == 'lhelpgrep'
-        #  ┌ next time a buffer is displayed in a window
-        #  │                    ┌ call this function to open the location window
-        #  │                    │
-        au BufWinEnter * ++once Open('lhelpgrep')
+        #       ┌ next time a buffer is displayed in a window
+        #       │                    ┌ call this function to open the location window
+        #       │                    │
+        autocmd BufWinEnter * ++once Open('lhelpgrep')
     else
         Open(cmd)
     endif
@@ -596,8 +595,8 @@ def Open(arg_cmd: string)
     # doesn't contain any valid entry (e.g.: `:Scriptnames`).
     # In that case, we execute sth like:
     #
-    #     do <nomodeline> QuickFixCmdPost copen
-    #     do <nomodeline> QuickFixCmdPost lopen
+    #     doautocmd <nomodeline> QuickFixCmdPost copen
+    #     doautocmd <nomodeline> QuickFixCmdPost lopen
     #
     # In these  examples, `:copen` and  `:lopen` are not valid  commands because
     # they don't  populate a  qfl.  We  could probably use  an ad-hoc  name, but
@@ -606,7 +605,7 @@ def Open(arg_cmd: string)
     #}}}
     var cmd: string = expand('<amatch>') =~ '^[cl]open$' ? 'open' : 'window'
     var how_to_open: string
-    if mod =~ 'vert'
+    if mod =~ 'vertical'
         how_to_open = mod .. ' ' .. prefix .. cmd .. ' 40'
     else
         how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. max([min([10, size]), &winminheight + 2])
@@ -627,7 +626,7 @@ def Open(arg_cmd: string)
 
     # it will fail if there's no loclist
     try
-        exe how_to_open
+        execute how_to_open
     catch
         Catch()
         return
@@ -647,7 +646,7 @@ def Open(arg_cmd: string)
         #      I prefer to open it later from the qf window;
         #      this way, they will be positioned next to each other.
         #}}}
-        #   Why don't you close it for `:lh`, only `:helpg`?{{{
+        #   Why don't you close it for `:lhelpgrep`, only `:helpgrep`?{{{
         #
         # Because, the location list is attached to this help window.
         # If we close it, the ll window will be closed too.
@@ -664,15 +663,22 @@ def Open(arg_cmd: string)
         #
         # For example, `BufWinEnter` or `BufReadPost` may raise `E788` (only in Vim):
         #
-        #                                                   v---------v
-        #     $ vim -Nu NONE +'au QuickFixCmdPost * cw10|au bufwinenter * ++once helpc' +'helpg foobar' +'helpg wont_find_this' +'helpg wont_find_this'
+        #     #                                              v---------v
+        #     autocmd QuickFixCmdPost * cwindow 10 | autocmd BufWinEnter * ++once helpclose
+        #     helpgrep foobar
+        #     helpgrep wont_find_this
+        #     helpgrep wont_find_this
         #     E788: Not allowed to edit another buffer now˜
         #
         # And `BufEnter` may raise `E426` and `E433`:
         #
-        #     $ vim -Nu NONE +'au QuickFixCmdPost * cw10|au bufenter * ++once helpc' +'helpg wont_find_this' +h
+        #     autocmd QuickFixCmdPost * cwindow 10 | autocmd BufEnter * ++once helpclose
+        #     helpgrep wont_find_this
+        #     help
+        #     E433: No tags file˜
+        #     E426: tag not found: help.txt@en˜
         #}}}
-        au SafeState * ++once helpc
+        autocmd SafeState * ++once helpclose
     endif
 enddef
 
@@ -688,18 +694,18 @@ def qf#openManual(where: string) #{{{2
     var splitbelow_was_on: bool = &splitbelow | &splitbelow = false
     try
         if where == 'nosplit'
-            exe "norm! \<cr>zv" | return
+            execute "normal! \<CR>zv" | return
         endif
 
-        exe "norm! \<c-w>\<cr>zv"
-        if where == 'vert split'
+        execute "normal! \<C-W>\<CR>zv"
+        if where == 'vertical split'
             wincmd L
         elseif where == 'tabpage'
             var orig: number = win_getid()
-            tab sp
+            tab split
             var new: number = win_getid()
             win_gotoid(orig)
-            q
+            quit
             win_gotoid(new)
         endif
     catch
@@ -745,15 +751,15 @@ def qf#undoFtplugin() #{{{2
 
     unlet! b:qf_is_loclist
 
-    nunmap <buffer> <c-q>
-    nunmap <buffer> <c-r>
+    nunmap <buffer> <C-Q>
+    nunmap <buffer> <C-R>
 
-    nunmap <buffer> <c-s>
-    nunmap <buffer> <c-v><c-v>
-    nunmap <buffer> <c-t>
+    nunmap <buffer> <C-S>
+    nunmap <buffer> <C-V><C-V>
+    nunmap <buffer> <C-T>
 
-    nunmap <buffer> <cr>
-    nunmap <buffer> <c-w><cr>
+    nunmap <buffer> <CR>
+    nunmap <buffer> <C-W><CR>
 
     nunmap <buffer> D
     nunmap <buffer> DD
@@ -765,15 +771,15 @@ def qf#undoFtplugin() #{{{2
 
     nunmap <buffer> q
 
-    delc CRemoveInvalid
+    delcommand CRemoveInvalid
 
-    delc Csave
-    delc Crestore
-    delc Cremove
+    delcommand Csave
+    delcommand Crestore
+    delcommand Cremove
 
-    delc Cconceal
-    delc Cfilter
-    delc Cupdate
+    delcommand Cconceal
+    delcommand Cfilter
+    delcommand Cupdate
 enddef
 #}}}1
 # Utilities {{{1
@@ -894,7 +900,7 @@ def MaybeResizeHeight() #{{{2
         var newheight: number = min([10, Getqflist()->len()])
         # at least 2 lines (to avoid `E36` if we've reset `'equalalways'`)
         newheight = max([2, newheight])
-        exe 'resize ' .. newheight
+        execute 'resize ' .. newheight
     endif
 enddef
 
