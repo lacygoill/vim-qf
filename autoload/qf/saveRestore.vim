@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 # How to save the current qfl automatically when quitting Vim, and how to restore it automatically on startup?{{{
 #
 #     augroup SaveAndRestoreLastQfl | autocmd!
@@ -25,7 +22,7 @@ var loaded = true
 #             return
 #         endif
 #         var items: list<dict<any>> = getqflist({nr: qfls[0]['nr'], items: 0}).items
-#             ->map((_, v: dict<any>): dict<any> => extend(v, {
+#             ->map((_, v: dict<any>) => extend(v, {
 #                 filename: remove(v, 'bufnr')
 #                         ->bufname()
 #                         ->fnamemodify(':p')
@@ -99,7 +96,7 @@ endif
 def qf#saveRestore#complete(_, _, _): string #{{{2
     return QFL_DIR
         ->readdir((n: string): bool => n =~ '\.txt$')
-        ->map((_, v: string): string => v->fnamemodify(':t:r'))
+        ->map((_, v: string) => v->fnamemodify(':t:r'))
         ->join("\n")
 enddef
 
@@ -131,7 +128,7 @@ def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
     # to the current working directory.
     #}}}
     items
-        ->map((_, v: dict<any>): dict<any> => extend(v, {
+        ->map((_, v: dict<any>) => extend(v, {
                 filename: remove(v, 'bufnr')
                         ->bufname()
                         ->fnamemodify(':p')

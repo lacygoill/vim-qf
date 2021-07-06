@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 def qf#statusline#title(): string
     # Remember that all the code in this function is evaluated in the context of
     # the window for which the status line is built.

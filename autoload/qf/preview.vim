@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 # Interface {{{1
 def qf#preview#open(persistent = false) #{{{2
     # Why the `w:` scope?  Why not `b:`?{{{
@@ -118,7 +115,7 @@ def PopupCreate() #{{{2
 
     # `:noswapfile` to suppress `E325` in case the file is already open in another Vim instance
     # See: https://github.com/vim/vim/issues/5822
-    noswapfile w:_qfpreview.winid = Popup_create(curentry.bufnr, opts)[1]
+    noswapfile w:_qfpreview.winid = Popup_create(curentry.bufnr, opts).winid
     SetSigncolumn()
     SetSign(curentry.bufnr, curentry.lnum)
     # hide ad-hoc characters used for syntax highlighting (like bars and stars in help files)
@@ -136,7 +133,7 @@ def PopupClose() #{{{2
     #
     #
     #     $ vim +'helpgrep foobar' +'tabnew' +'tabfirst'
-    #     " press "p" to preview qf entry
+    #     # press "p" to preview qf entry
     #     :tabclose
     #     Error detected while processing BufWinLeave Autocommands for "<buffer=29>":˜
     #     E121: Undefined variable: w:_qfpreview˜
@@ -424,9 +421,9 @@ def SetHeight(step: number) #{{{2
     # and then you run:
     #
     #     $ vim +'helpgrep foobar'
-    #     " press "p" to open popup
-    #     " press "C-w w" to focus other window
-    #     " press "C-w +" to increase size of current window
+    #     # press "p" to open popup
+    #     # press "C-w w" to focus other window
+    #     # press "C-w +" to increase size of current window
     #     Error detected while processing function <SNR>180_popup_filter[3]..<lambda>448[1]..<SNR>180_setheight:˜
     #     E121: Undefined variable: w:_qfpreview˜
     #
@@ -494,7 +491,7 @@ const FILTER_CMD: dict<func> = {
     }}
 
 const FILTER_LHS: list<string> = ['m', 'p', 'n', 'r']
-    ->map((_, v: string): string => MapMetaChord(v, true))
-    #                                               ^--^
-    #                                               don't translate the chords; we need symbolic notations
+    ->map((_, v: string) => MapMetaChord(v, true))
+    #                                       ^--^
+    #                                       don't translate the chords; we need symbolic notations
 

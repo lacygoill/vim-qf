@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 # TODO:
 # We shouldn't  create matches.  We shouldn't  use the complex ad  hoc mechanism
 # around  `matches_any_qfl`.  Instead  we should  create ad  hoc syntax  file.
@@ -216,26 +213,26 @@ def qf#align(info: dict<number>): list<string> #{{{2
     endif
     var l: list<string>
     var lnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => qfl[v]['lnum'])
+        ->map((_, v: number) => qfl[v]['lnum'])
         ->max()
         ->len()
     var col_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => qfl[v]['col'])
+        ->map((_, v: number) => qfl[v]['col'])
         ->max()
         ->len()
     var pat_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => strcharlen(qfl[v]['pattern']))
+        ->map((_, v: number) => strcharlen(qfl[v]['pattern']))
         ->max()
     var fname_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number =>
+        ->map((_, v: number) =>
             qfl[v]['bufnr']->bufname()->fnamemodify(':t')->strcharlen())
         ->max()
     var type_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number =>
+        ->map((_, v: number) =>
             get(EFM_TYPE, qfl[v]['type'], '')->strcharlen())
         ->max()
     var errnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
-        ->map((_, v: number): number => qfl[v]['nr'])
+        ->map((_, v: number) => qfl[v]['nr'])
         ->max()
         ->len()
     for idx in range(info.start_idx - 1, info.end_idx - 1)
@@ -428,7 +425,7 @@ def qf#cupdate(mod: string) #{{{2
         # with the  new one.  So,  in effect, `extend()`  will replace the  old text
         # with the new one.
         #}}}
-        ->map((_, v: dict<any>): dict<any> => extend(v, {
+        ->map((_, v: dict<any>) => extend(v, {
                 text: getbufline(v.bufnr, v.lnum)
                     # Why `get()`?{{{
                     #
@@ -562,7 +559,7 @@ def qf#openAuto(cmd: string) #{{{2
         #       ┌ next time a buffer is displayed in a window
         #       │                    ┌ call this function to open the location window
         #       │                    │
-        autocmd BufWinEnter * ++once Open('lhelpgrep')
+        autocmd BufWinEnter * ++once timer_start(0, (_) => Open('lhelpgrep'))
     else
         Open(cmd)
     endif
@@ -867,10 +864,10 @@ def GetPat(arg_pat: string): string #{{{2
     }
 
     # If `:Cfilter` was passed a special argument, interpret it.
-    if arg_pat =~ keys(arg2pat)->join('\|')
+    if arg_pat =~ arg2pat->keys()->join('\|')
         return arg_pat
             ->split('\s\+')
-            ->map((_, v: string): string => arg2pat[v])
+            ->map((_, v: string) => arg2pat[v])
             ->join('\|')
     else
         # If no pattern was provided, use the search register as a fallback.
