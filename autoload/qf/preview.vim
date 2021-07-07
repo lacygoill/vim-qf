@@ -64,7 +64,7 @@ def qf#preview#mappings()
     if !exists('b:undo_ftplugin')
         b:undo_ftplugin = 'execute'
     endif
-    for key in FILTER_LHS
+    for key: string in FILTER_LHS
         execute 'nnoremap <buffer><nowait> ' .. key .. ' ' .. key
         var unmap_cmd: string = '|execute "nunmap <buffer> ' .. key .. '"'
         # sanity check; unmapping the same key twice could raise an error

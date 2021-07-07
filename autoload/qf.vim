@@ -235,7 +235,7 @@ def qf#align(info: dict<number>): list<string> #{{{2
         ->map((_, v: number) => qfl[v]['nr'])
         ->max()
         ->len()
-    for idx in range(info.start_idx - 1, info.end_idx - 1)
+    for idx: number in range(info.start_idx - 1, info.end_idx - 1)
         var e: dict<any> = qfl[idx]
         if !e.valid
             l->add('|| ' .. e.text)
@@ -385,8 +385,8 @@ def qf#createMatches() #{{{2
 
     var matches_this_qfl: dict<list<dict<string>>> = get(matches_any_qfl, id, {})
     if !empty(matches_this_qfl)
-        for matches_from_all_origins in values(matches_this_qfl)
-            for a_match in matches_from_all_origins
+        for matches_from_all_origins: list<dict<string>> in values(matches_this_qfl)
+            for a_match: dict<string> in matches_from_all_origins
                 var group: string
                 var pat: string
                 [group, pat] = [a_match.group, a_match.pat]
@@ -514,7 +514,7 @@ def qf#disableSomeKeys(keys: list<string>) #{{{2
     if !exists('b:undo_ftplugin')
         b:undo_ftplugin = 'execute'
     endif
-    for key in keys
+    for key: string in keys
         execute 'silent nnoremap <buffer><nowait> ' .. key .. ' <Nop>'
         b:undo_ftplugin ..= '|execute "nunmap <buffer> ' .. key .. '"'
     endfor
