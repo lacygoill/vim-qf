@@ -7,12 +7,15 @@ command -bar -buffer CRemoveInvalid qf#removeInvalidEntries()
 
 # Csave / Crestore / Cremove {{{2
 
-command -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete
-    \ Csave qf#saveRestore#save(<q-args>, <bang>0)
-command -bar -buffer -nargs=? -complete=custom,qf#saveRestore#complete
-    \ Crestore qf#saveRestore#restore(<q-args>)
-command -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete
-    \ Cremove qf#saveRestore#remove(<q-args>, <bang>0)
+command -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete Csave {
+    qf#saveRestore#save(<q-args>, <bang>0)
+}
+command -bar -buffer -nargs=? -complete=custom,qf#saveRestore#complete Crestore {
+    qf#saveRestore#restore(<q-args>)
+}
+command -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete Cremove {
+    qf#saveRestore#remove(<q-args>, <bang>0)
+}
 
 # Cconceal {{{2
 
@@ -32,8 +35,9 @@ command -bar -buffer -range Cconceal qf#concealOrDelete(<line1>, <line2>)
 # Do not give the `-bar` attribute to the commands.
 # It would break a pattern containing a bar (for example, for an alternation).
 
-command -bang -buffer -nargs=? -complete=custom,qf#cfilterComplete
-    \ Cfilter qf#cfilter(<bang>0, <q-args>, <q-mods>)
+command -bang -buffer -nargs=? -complete=custom,qf#cfilterComplete Cfilter {
+    qf#cfilter(<bang>0, <q-args>, <q-mods>)
+}
 
 # Cupdate {{{2
 

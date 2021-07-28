@@ -813,7 +813,7 @@ def GetAction(mod: string): string #{{{2
 enddef
 
 def GetId(): number #{{{2
-    var Getqflist_id: func = get(b:, 'qf_is_loclist', false)
+    var Getqflist_id: func: list<any> = get(b:, 'qf_is_loclist', false)
         ?    function('getloclist', [0] + [{id: 0}])
         :    function('getqflist', [{id: 0}])
     return Getqflist_id()->get('id', 0)
