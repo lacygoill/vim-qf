@@ -120,18 +120,12 @@ const EFM_TYPE: dict<string> = {
 #      → they should be passed a numeric flag, to help them determine
 #        whether we operate on a loclist or a qfl
 #
-#    - `GetId()` should stop relying on `b:qf_is_loclist`
+#    - `GetId()` should stop relying on `win_gettype()`
 #       and use the flag we pass instead
 #
 #       This is because when we would invoke `qf#setMatches()`,
-#       the qf window would NOT have been opened, so there would
-#       be no `b:qf_is_loclist`.
-#
-#       It couldn't even rely on the expression populating `b:qf_is_loclist`:
-#
-#         win_getid()->getwininfo()->get(0, {})->get('loclist', 0)
-#
-#       ... because, again, there would be no qf window yet.
+#       the qf window would NOT have been opened, so `win_gettype()`
+#       would be wrong.
 #
 # Second:
 # Suppose the qf window  is already opened, and one of our  plugin creates a new
@@ -528,7 +522,7 @@ def qf#nv(errorfile: string): string #{{{2
     endif
     var title: string = file->remove(0)
     # we use simple error formats suitable for a grep-like command
-    var qfl: list<dict<any>> = getqflist({
+    var qfl: dict<any> = getqflist({
         lines: file,
         efm: '%f:%l:%c:%m,%f:%l:%m'
     })
@@ -680,11 +674,12 @@ def Open(arg_cmd: string)
 enddef
 
 def qf#openManual(where: string) #{{{2
-    var size: number = b:qf_is_loclist
+    var wintype: string = win_gettype()
+    var size: number = wintype == 'loclist'
         ?     getloclist(0, {size: 0}).size
         :     getqflist({size: 0}).size
     if empty(size)
-        echo (b:qf_is_loclist ? 'location' : 'quickfix') .. ' list is empty'
+        echo (wintype == 'loclist' ? 'location' : 'quickfix') .. ' list is empty'
         return
     endif
 
@@ -745,8 +740,6 @@ def qf#undoFtplugin() #{{{2
     set cursorline<
     set statusline<
     set wrap<
-
-    unlet! b:qf_is_loclist
 
     nunmap <buffer> <C-Q>
     nunmap <buffer> <C-R>
@@ -813,7 +806,7 @@ def GetAction(mod: string): string #{{{2
 enddef
 
 def GetId(): number #{{{2
-    var Getqflist_id: func: list<any> = get(b:, 'qf_is_loclist', false)
+    var Getqflist_id: func: list<any> = win_gettype() == 'loclist'
         ?    function('getloclist', [0] + [{id: 0}])
         :    function('getqflist', [{id: 0}])
     return Getqflist_id()->get('id', 0)
@@ -882,13 +875,13 @@ def GetPat(arg_pat: string): string #{{{2
 enddef
 
 def GetTitle(): string #{{{2
-    return get(b:, 'qf_is_loclist', false)
+    return win_gettype() == 'loclist'
         ?     getloclist(0, {title: 0})->get('title', '')
         :     getqflist({title: 0})->get('title', '')
 enddef
 
 def Getqflist(): list<dict<any>> #{{{2
-    return get(b:, 'qf_is_loclist', false) ? getloclist(0) : getqflist()
+    return win_gettype() == 'loclist' ? getloclist(0) : getqflist()
 enddef
 
 def MaybeResizeHeight() #{{{2
@@ -902,7 +895,7 @@ def MaybeResizeHeight() #{{{2
 enddef
 
 def Setqflist(...l: list<any>) #{{{2
-    if get(b:, 'qf_is_loclist', false)
+    if win_gettype() == 'loclist'
         call('setloclist', [0] + l)
     else
         call('setqflist', l)

@@ -19,9 +19,7 @@ def qf#preview#open(persistent = false) #{{{2
         # increase the height of the window when we zoom the tmux pane where Vim is displayed
         augroup QfpreviewResetHeight
             autocmd! * <buffer>
-            autocmd VimResized <buffer> w:_qfpreview.height = GetWinheight()
-                | PopupClose()
-                | qf#preview#open()
+            autocmd VimResized <buffer> OnVimResized()
         augroup END
     endif
 
@@ -93,7 +91,7 @@ def PopupCreate() #{{{2
     endif
 
     var opts: dict<any> = GetLineAndAnchor(wininfo)
-    if typename(opts) !~ '^dict'
+    if typename(opts) !~ '^dict' || opts->empty()
         return
     endif
 
@@ -303,6 +301,16 @@ def FireCursormoved() #{{{2
     # necessary to disable a guard in `Update()`
     w:_qfpreview.lastline = 0
     doautocmd <nomodeline> QfpreviewPersistent CursorMoved
+enddef
+
+def OnVimResized() #{{{2
+    if !exists('w:_qfpreview')
+       return
+    endif
+
+    w:_qfpreview.height = GetWinheight()
+    PopupClose()
+    qf#preview#open()
 enddef
 
 def ClearAutocmds() #{{{2

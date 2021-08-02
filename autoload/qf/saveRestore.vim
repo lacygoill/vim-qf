@@ -101,7 +101,7 @@ def qf#saveRestore#complete(_, _, _): string #{{{2
 enddef
 
 def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
-    if b:qf_is_loclist
+    if win_gettype() == 'loclist'
         Error('[Csave] sorry, only a quickfix list can be saved, not a location list')
         return
     endif

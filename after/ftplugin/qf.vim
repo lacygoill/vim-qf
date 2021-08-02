@@ -95,11 +95,6 @@ nnoremap <buffer><nowait> q <Cmd>call qf#quit()<CR>
 # from the title, even when the latter is long and the terminal window is narrow
 &l:statusline = '%{qf#statusline#title()}%=    %l/%L '
 
-# Variables {{{1
-
-# Are we viewing a location list or a quickfix list?
-const b:qf_is_loclist = win_getid()->getwininfo()[0]['loclist']
-
 # Matches {{{1
 
 # Why reset 'conceallevel' and 'concealcursor'?{{{
