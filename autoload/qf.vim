@@ -182,11 +182,12 @@ const KNOWN_PATTERNS: dict<string> = {
     double_bar: '^|\s*|\s*\|\s*|\s*|\s*$',
 }
 
-var OTHER_PLUGINS: list<string>
+var VENDOR: list<string>
 # `$MYVIMRC` is empty when we start with `-Nu /tmp/vimrc`.
 if $MYVIMRC != ''
-    OTHER_PLUGINS = g:MinpacPlugins()
-    lockvar! OTHER_PLUGINS
+    import VENDOR as alias from $MYVIMRC
+    VENDOR = alias
+    lockvar! VENDOR
 endif
 
 # Interface {{{1
@@ -315,8 +316,8 @@ def qf#cfilterComplete(_, _, _): string #{{{2
     # We disable `-commented` because it's not reliable.
     # See fix_me in this file.
     #
-    #     return ['-commented', '-other_plugins', '-tmp']->join("\n")
-    return ['-other_plugins', '-tmp']->join("\n")
+    #     return ['-commented', '-vendor', '-tmp']->join("\n")
+    return ['-vendor', '-tmp']->join("\n")
 enddef
 
 def qf#cfreeStack(loclist = false) #{{{2
@@ -851,7 +852,7 @@ def GetPat(arg_pat: string): string #{{{2
     #}}}
     var arg2pat: dict<string> = {
         -commented: '^\s*' .. cml,
-        -other_plugins: '^\S*/pack/minpac/\%(opt\|start\)/\%(' .. OTHER_PLUGINS->join('\|') .. '\)/',
+        -vendor: '^\S*/pack/vendor/\%(opt\|start\)/\%(' .. VENDOR->join('\|') .. '\)/',
         -tmp:    '^\S*/\%(qfl\|session\)/[^ \t/]*\.vim'
             .. '\|^\S*/tmp/\S*\.vim',
     }
