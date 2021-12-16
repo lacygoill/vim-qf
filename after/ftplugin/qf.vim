@@ -19,7 +19,10 @@ command -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete Cre
 
 # Cconceal {{{2
 
-command -bar -buffer -range Cconceal qf#concealOrDelete(<line1>, <line2>)
+command -bar -buffer -range Cconceal {
+    qf#concealOrDelete()
+    execute printf('normal! %dGg@%dG', <line1>, <line2>)
+}
 
 # Cfilter {{{2
 # Documentation:{{{

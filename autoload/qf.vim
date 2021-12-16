@@ -452,19 +452,18 @@ def qf#cupdate(mod: string) #{{{2
     execute 'normal! ' .. pos .. 'G'
 enddef
 
-def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
+def qf#concealOrDelete(type = ''): string #{{{2
 # Purpose:
 #    - conceal visual block
 #    - delete anything else (and update the qfl)
 
-    if type_or_lnum == ''
+    if type == ''
         &operatorfunc = 'qf#concealOrDelete'
         return 'g@'
     endif
 
-    var type: string = lnum2 == 0 ? type_or_lnum : 'Ex'
     var range: list<number>
-    if index(['char', 'line'], type) >= 0
+    if ['char', 'line']->index(type) >= 0
         range = [line("'["), line("']")]
     elseif type == 'block'
         var vcol1: number = VirtcolFirstCell("'[")
@@ -481,8 +480,6 @@ def qf#concealOrDelete(type_or_lnum: any = '', lnum2 = 0): string #{{{2
         &l:concealcursor = 'nc'
         &l:conceallevel = 3
         return ''
-    elseif type == 'Ex'
-        range = [type_or_lnum, lnum2]
     endif
     # for future restoration
     var pos: number = min(range)
