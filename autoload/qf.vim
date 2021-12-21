@@ -903,4 +903,3 @@ enddef
 def VirtcolFirstCell(filepos: string): number #{{{2
     return virtcol([line(filepos), col(filepos) - 1]) + 1
 enddef
-

@@ -502,4 +502,3 @@ const FILTER_LHS: list<string> = ['m', 'p', 'n', 'r']
     ->map((_, v: string) => MapMetaChord(v, true))
     #                                       ^--^
     #                                       don't translate the chords; we need symbolic notations
-

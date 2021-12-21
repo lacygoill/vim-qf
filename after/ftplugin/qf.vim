@@ -112,4 +112,3 @@ autocmd Syntax qf ++once qf#concealLtagPatternColumn()
 
 b:undo_ftplugin = get(b:, 'undo_ftplugin', 'execute')
     .. '| call qf#undoFtplugin()'
-

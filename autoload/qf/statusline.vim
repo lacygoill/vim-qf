@@ -27,4 +27,3 @@ def qf#statusline#title(): string
         return pfx .. (len > 80 ? w:quickfix_title[: 79] .. '»' : w:quickfix_title)
     endif
 enddef
-

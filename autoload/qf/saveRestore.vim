@@ -245,4 +245,3 @@ def Expand(fname: string): string #{{{2
     #}}}
     return QFL_DIR .. '/' .. fname .. '.txt'
 enddef
-

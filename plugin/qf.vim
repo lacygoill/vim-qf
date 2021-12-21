@@ -18,6 +18,9 @@ var loaded = true
 # TODO: Add a command to sort qf entries in some way?
 # Inspiration: https://github.com/vim/vim/issues/6412 (look for `qf#sort#qflist()`)
 
+# TODO: Automatically add a sign for each entry in the qfl.
+# Inspiration: https://gist.github.com/BoltsJ/5942ecac7f0b0e9811749ef6e19d2176
+
 # Options {{{1
 
 # don't let the default qf filetype plugin set `'statusline'`, we'll do it ourselves
@@ -50,4 +53,3 @@ augroup MyQuickfix | autocmd!
 
     autocmd FileType qf qf#preview#mappings()
 augroup END
-
