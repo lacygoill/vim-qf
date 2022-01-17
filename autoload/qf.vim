@@ -7,8 +7,11 @@ vim9script noclear
 
 # TODO: Split the code: one feature per file.
 
-import Catch from 'lg.vim'
-import GetWinMod from 'lg/window.vim'
+import 'Lg.vim'
+const Catch: func = Lg.Catch
+
+import 'lg/Window.vim'
+const WinGetMod: func = Window.GetMod
 
 # Variables {{{1
 
@@ -17,8 +20,8 @@ const EFM_TYPE: dict<string> = {
     w: 'warning',
     i: 'info',
     n: 'note',
-    # we use this ad-hoc flag in `vim-stacktrace` to distinguish Vim9 errors
-    # which are raised at compile time, from those raised at runtime
+    # we use  this ad-hoc  flag in `vim-stacktrace`  to distinguish  Vim9 errors
+    # which are given at compile time, from those given at runtime
     c: 'compiling',
 }
 
@@ -185,8 +188,8 @@ const KNOWN_PATTERNS: dict<string> = {
 var VENDOR: list<string>
 # `$MYVIMRC` is empty when we start with `-Nu /tmp/vimrc`.
 if $MYVIMRC != ''
-    import VENDOR as alias from $MYVIMRC
-    VENDOR = alias
+    import $MYVIMRC as Vimrc
+    VENDOR = Vimrc.VENDOR
     lockvar! VENDOR
 endif
 
@@ -344,7 +347,7 @@ def qf#cgrepBuffer( #{{{2
     # │
     execute pfx1 .. 'expr []'
     var cmd: string = printf(
-        # if the pattern is absent from a buffer, it will raise an error
+        # if the pattern is absent from a buffer, it will give an error
         'silent!'
         # to  prevent a possible autocmd  from opening the qf  window every time
         # the qfl is expanded; it could make Vim open a new split for every buffer
@@ -576,7 +579,7 @@ def Open(arg_cmd: string)
     endif
 
     # `true`: flag meaning we're going to open a loc window
-    var mod: string = call(GetWinMod, arg_cmd =~ '^l' ? [true] : [])
+    var mod: string = WinGetMod()
 
     # Wait.  `:copen` can't populate the qfl.  How could `cmd` be `copen`?{{{
     #
@@ -604,10 +607,10 @@ def Open(arg_cmd: string)
         # Why `&winminheight + 2`?{{{
         #
         # First, the number passed to `:[cl]{open|window}`  must be at least 1, even
-        # if the qfl is empty.  E.g., `:lwindow 0` would raise `E939`.
+        # if the qfl is empty.  E.g., `:lwindow 0` would give `E939`.
         #
         # Second, if `'equalalways'` is reset, and the  qf window is only 1 or 2
-        # lines high, pressing Enter on the qf entry would raise `E36`.
+        # lines high, pressing Enter on the qf entry would give `E36`.
         # In general, the issue is triggered when  the qf window is `&winminheight + 1` lines
         # high or lower.
         #}}}
@@ -650,7 +653,7 @@ def Open(arg_cmd: string)
         #
         # They are full of pitfalls.
         #
-        # For example, `BufWinEnter` or `BufReadPost` may raise `E788` (only in Vim):
+        # For example, `BufWinEnter` or `BufReadPost` may give `E788` (only in Vim):
         #
         #     #                                              v---------v
         #     autocmd QuickFixCmdPost * cwindow 10 | autocmd BufWinEnter * ++once helpclose
@@ -659,7 +662,7 @@ def Open(arg_cmd: string)
         #     helpgrep wont_find_this
         #     E788: Not allowed to edit another buffer now˜
         #
-        # And `BufEnter` may raise `E426` and `E433`:
+        # And `BufEnter` may give `E426` and `E433`:
         #
         #     autocmd QuickFixCmdPost * cwindow 10 | autocmd BufEnter * ++once helpclose
         #     helpgrep wont_find_this
@@ -883,13 +886,15 @@ def Getqflist(): list<dict<any>> #{{{2
 enddef
 
 def MaybeResizeHeight() #{{{2
-    if winwidth(0) == &columns
-        # no more than 10 lines
-        var newheight: number = min([10, Getqflist()->len()])
-        # at least 2 lines (to avoid `E36` if we've reset `'equalalways'`)
-        newheight = max([2, newheight])
-        execute 'resize ' .. newheight
+    if winnr('$') == 1 || winwidth(0) != &columns
+        return
     endif
+
+    # no more than 10 lines
+    var newheight: number = min([10, Getqflist()->len()])
+    # at least 2 lines (to avoid `E36` if we've reset `'equalalways'`)
+    newheight = max([2, newheight])
+    execute 'resize ' .. newheight
 enddef
 
 def Setqflist(...l: list<any>) #{{{2

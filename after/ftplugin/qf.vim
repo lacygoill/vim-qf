@@ -59,12 +59,12 @@ command -bar -buffer Cupdate qf#cupdate(<q-mods>)
 # disable some keys, to avoid annoying error messages
 qf#disableSomeKeys(['a', 'd', 'gj', 'gqq', 'i', 'o', 'r', 'u', 'x'])
 
-nnoremap <buffer><nowait> <C-Q> <Cmd>Csave default<CR>
-nnoremap <buffer><nowait> <C-R> <Cmd>Crestore default<CR>
+nnoremap <buffer><nowait> <C-Q> <ScriptCmd>Csave default<CR>
+nnoremap <buffer><nowait> <C-R> <ScriptCmd>Crestore default<CR>
 
-nnoremap <buffer><nowait> <C-S> <Cmd>call qf#openManual('split')<CR>
-nnoremap <buffer><nowait> <C-V><C-V> <Cmd>call qf#openManual('vertical split')<CR>
-nnoremap <buffer><nowait> <C-T> <Cmd>call qf#openManual('tabpage')<CR>
+nnoremap <buffer><nowait> <C-S> <ScriptCmd>qf#openManual('split')<CR>
+nnoremap <buffer><nowait> <C-V><C-V> <ScriptCmd>qf#openManual('vertical split')<CR>
+nnoremap <buffer><nowait> <C-T> <ScriptCmd>qf#openManual('tabpage')<CR>
 # FYI:{{{
 #
 # By default:
@@ -73,19 +73,19 @@ nnoremap <buffer><nowait> <C-T> <Cmd>call qf#openManual('tabpage')<CR>
 #     C-w t  moves the focus to the top window in the current tab page
 #}}}
 
-nnoremap <buffer><nowait> <CR> <Cmd>call qf#openManual('nosplit')<CR>
+nnoremap <buffer><nowait> <CR> <ScriptCmd>qf#openManual('nosplit')<CR>
 nmap <buffer><nowait> <C-W><CR> <C-S>
 
 nnoremap <buffer><expr><nowait> D  qf#concealOrDelete()
 nnoremap <buffer><expr><nowait> DD qf#concealOrDelete() .. '_'
 xnoremap <buffer><expr><nowait> D  qf#concealOrDelete()
 
-nnoremap <buffer><nowait>cof <Cmd>call qf#toggleFullFilePath()<CR>
+nnoremap <buffer><nowait>cof <ScriptCmd>qf#toggleFullFilePath()<CR>
 
-nnoremap <buffer><nowait> p <Cmd>call qf#preview#open()<CR>
-nnoremap <buffer><nowait> P <Cmd>call qf#preview#open(v:true)<CR>
+nnoremap <buffer><nowait> p <ScriptCmd>qf#preview#open()<CR>
+nnoremap <buffer><nowait> P <ScriptCmd>qf#preview#open(true)<CR>
 
-nnoremap <buffer><nowait> q <Cmd>call qf#quit()<CR>
+nnoremap <buffer><nowait> q <ScriptCmd>qf#quit()<CR>
 
 # Options {{{1
 

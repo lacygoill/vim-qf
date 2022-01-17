@@ -65,7 +65,7 @@ def qf#preview#mappings()
     for key: string in FILTER_LHS
         execute 'nnoremap <buffer><nowait> ' .. key .. ' ' .. key
         var unmap_cmd: string = '|execute "nunmap <buffer> ' .. key .. '"'
-        # sanity check; unmapping the same key twice could raise an error
+        # sanity check; unmapping the same key twice could give an error
         if stridx(b:undo_ftplugin, unmap_cmd) == -1
             b:undo_ftplugin ..= unmap_cmd
         endif
@@ -481,24 +481,27 @@ enddef
 #}}}1
 # Init {{{1
 
-import MapMetaChord from 'lg/map.vim'
-import Popup_create from 'lg/popup.vim'
+import 'lg/Map.vim'
+const MetaChord: func = Map.MetaChord
+
+import 'lg/Popup.vim'
+const Popup_create: func = Popup.Create
 
 # this tells the popup filter which keys it must handle, and how
 const FILTER_CMD: dict<func> = {
-    [MapMetaChord('m')]: (_) => SetHeight(-1),
-    [MapMetaChord('p')]: (_) => SetHeight(1),
+    [MetaChord('m')]: (_) => SetHeight(-1),
+    [MetaChord('p')]: (_) => SetHeight(1),
     # toggle number column
-    [MapMetaChord('n')]: (id: number) => (!getwinvar(id, '&number'))->setwinvar(id, '&number'),
+    [MetaChord('n')]: (id: number) => (!getwinvar(id, '&number'))->setwinvar(id, '&number'),
     # reset topline to the line of the quickfix entry;
     # useful to get back to original position after scrolling
-    [MapMetaChord('r')]: (id: number) => {
+    [MetaChord('r')]: (id: number) => {
         popup_setoptions(id, {firstline: w:_qfpreview.firstline})
         popup_setoptions(id, {firstline: 0})
         SetSigncolumn()
     }}
 
 const FILTER_LHS: list<string> = ['m', 'p', 'n', 'r']
-    ->map((_, v: string) => MapMetaChord(v, true))
-    #                                       ^--^
-    #                                       don't translate the chords; we need symbolic notations
+    ->map((_, v: string) => MetaChord(v, true))
+    #                                    ^--^
+    #                                    don't translate the chords; we need symbolic notations
