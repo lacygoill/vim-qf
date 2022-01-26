@@ -7,11 +7,8 @@ vim9script noclear
 
 # TODO: Split the code: one feature per file.
 
-import 'Lg.vim'
-const Catch: func = Lg.Catch
-
-import 'lg/Window.vim'
-const WinGetMod: func = Window.GetMod
+import 'lg.vim'
+import 'lg/window.vim'
 
 # Variables {{{1
 
@@ -86,18 +83,18 @@ const EFM_TYPE: dict<string> = {
 # In a plugin, when we populate a qfl and want to apply a match to its window,
 # we invoke:
 #
-#     call qf#setMatches({origin}, {HG}, {pat})
+#     SetMatches({origin}, {HG}, {pat})
 #
 # It will register a match in `matches_any_qfl`.
-# Then, we invoke `qf#createMatches()` to create the matches.
-# Finally, we  also invoke  `qf#createMatches()` in  `after/ftplugin/qf.vim` so
-# that the matches are re-applied whenever we close/re-open the qf window.
+# Then, we invoke `CreateMatches()` to create the matches.
+# Finally, we  also invoke `CreateMatches()` in  `after/ftplugin/qf.vim` so that
+# the matches are re-applied whenever we close/re-open the qf window.
 #
-# `qf#createMatches()`  checks  whether  the  id   of  the  current  qfl  is  in
+# `CreateMatches()`  checks   whether  the   id  of  the   current  qfl   is  in
 # `matches_any_qfl`.  If it  is, it installs all the matches  which are bound to
 # it.
 #}}}
-# Why call `qf#createMatches()` in every third-party plugin?{{{
+# Why call `CreateMatches()` in every third-party plugin?{{{
 
 # Why not just relying on the autocmd opening the qf window?
 #
@@ -110,14 +107,14 @@ const EFM_TYPE: dict<string> = {
 #                 → open qf window
 #                 → FileType qf
 #                 → source qf ftplugin
-#                 → call qf#createMatches()
+#                 → call CreateMatches()
 #
 # So, in this scenario, we would need to set the matches BEFORE opening
 # the qf window (currently we do it AFTER).
 #
 # First: we would need to refactor several functions.
 #
-#    - qf#setMatches()
+#    - SetMatches()
 #      GetId()
 #
 #      → they should be passed a numeric flag, to help them determine
@@ -126,7 +123,7 @@ const EFM_TYPE: dict<string> = {
 #    - `GetId()` should stop relying on `win_gettype()`
 #       and use the flag we pass instead
 #
-#       This is because when we would invoke `qf#setMatches()`,
+#       This is because when we would invoke `SetMatches()`,
 #       the qf window would NOT have been opened, so `win_gettype()`
 #       would be wrong.
 #
@@ -137,8 +134,8 @@ const EFM_TYPE: dict<string> = {
 # Why?
 # Because, when `setloclist()` or `setqflist()` is invoked, if the qf window is already
 # opened, it triggers `BufReadPost` → `FileType` → `Syntax`.
-# So, our filetype plugin would be immediately sourced, and `qf#createMatches()` would
-# be executed too early (before `qf#setMatches()` has set the match).
+# So, our  filetype plugin would  be immediately sourced,  and `CreateMatches()`
+# would be executed too early (before `SetMatches()` has set the match).
 #
 # As a result, we would need to also trigger `FileType qf`:
 #
@@ -174,11 +171,11 @@ var matches_any_qfl: dict<dict<list<dict<string>>>>
 # apply a match, add it to this  dictionary, with a telling name.  Then, instead
 # of writing this:
 #
-#     call qf#setMatches({origin}, {HG}, {complex_regex})
+#     SetMatches({origin}, {HG}, {complex_regex})
 #
 # ... you can write this:
 #
-#     call qf#setMatches({origin}, {HG}, {telling_name})
+#     SetMatches({origin}, {HG}, {telling_name})
 #}}}
 const KNOWN_PATTERNS: dict<string> = {
     location: '^.\{-}|\s*\%(\d\+\)\=\s*\%(col\s\+\d\+\)\=\s*|\s\=',
@@ -188,13 +185,13 @@ const KNOWN_PATTERNS: dict<string> = {
 var VENDOR: list<string>
 # `$MYVIMRC` is empty when we start with `-Nu /tmp/vimrc`.
 if $MYVIMRC != ''
-    import $MYVIMRC as Vimrc
-    VENDOR = Vimrc.VENDOR
+    import $MYVIMRC as vimrc
+    VENDOR = vimrc.VENDOR
     lockvar! VENDOR
 endif
 
 # Interface {{{1
-def qf#quit() #{{{2
+export def Quit() #{{{2
     if reg_recording() != ''
         feedkeys('q', 'in')
         return
@@ -202,7 +199,7 @@ def qf#quit() #{{{2
     quit
 enddef
 
-def qf#align(info: dict<number>): list<string> #{{{2
+export def Align(info: dict<number>): list<string> #{{{2
     var qfl: list<any>
     if info.quickfix
         qfl = getqflist({id: info.id, items: 0}).items
@@ -268,7 +265,7 @@ def qf#align(info: dict<number>): list<string> #{{{2
     return l
 enddef
 
-def qf#cfilter( #{{{2
+export def Cfilter( #{{{2
     bang: bool,
     arg_pat: string,
     mod: string
@@ -315,7 +312,7 @@ def qf#cfilter( #{{{2
             :    'the pattern')
 enddef
 
-def qf#cfilterComplete(_, _, _): string #{{{2
+export def CfilterComplete(_, _, _): string #{{{2
     # We disable `-commented` because it's not reliable.
     # See fix_me in this file.
     #
@@ -323,7 +320,7 @@ def qf#cfilterComplete(_, _, _): string #{{{2
     return ['-vendor', '-tmp']->join("\n")
 enddef
 
-def qf#cfreeStack(loclist = false) #{{{2
+export def CfreeStack(loclist = false) #{{{2
     if loclist
         setloclist(0, [], 'f')
         lhistory
@@ -333,7 +330,7 @@ def qf#cfreeStack(loclist = false) #{{{2
     endif
 enddef
 
-def qf#cgrepBuffer( #{{{2
+export def CgrepBuffer( #{{{2
     lnum1: number,
     lnum2: number,
     pat: string,
@@ -364,7 +361,7 @@ def qf#cgrepBuffer( #{{{2
     endif
 enddef
 
-def qf#concealLtagPatternColumn() #{{{2
+export def ConcealLtagPatternColumn() #{{{2
 # We don't  want to  see the middle  column displaying a  pattern in  a location
 # window opened by an `:ltag` command.
     if get(w:, 'quickfix_title', '')[: 4] != 'ltag '
@@ -378,7 +375,7 @@ def qf#concealLtagPatternColumn() #{{{2
     &l:conceallevel = 3
 enddef
 
-def qf#createMatches() #{{{2
+export def CreateMatches() #{{{2
     var id: number = GetId()
 
     var matches_this_qfl: dict<list<dict<string>>> = get(matches_any_qfl, id, {})
@@ -401,14 +398,14 @@ def qf#createMatches() #{{{2
     endif
 enddef
 
-def qf#removeInvalidEntries() #{{{2
+export def RemoveInvalidEntries() #{{{2
     var qfl: list<dict<any>> = getqflist()
         ->filter((_, v: dict<any>): bool => v.valid)
     var title: string = getqflist({title: 0}).title
     setqflist([], 'r', {items: qfl, title: title})
 enddef
 
-def qf#cupdate(mod: string) #{{{2
+export def Cupdate(mod: string) #{{{2
     # to restore later
     var pos: number = line('.')
 
@@ -455,13 +452,13 @@ def qf#cupdate(mod: string) #{{{2
     execute 'normal! ' .. pos .. 'G'
 enddef
 
-def qf#concealOrDelete(type = ''): string #{{{2
+export def ConcealOrDelete(type = ''): string #{{{2
 # Purpose:
 #    - conceal visual block
 #    - delete anything else (and update the qfl)
 
     if type == ''
-        &operatorfunc = 'qf#concealOrDelete'
+        &operatorfunc = ConcealOrDelete
         return 'g@'
     endif
 
@@ -505,7 +502,7 @@ def qf#concealOrDelete(type = ''): string #{{{2
     return ''
 enddef
 
-def qf#disableSomeKeys(keys: list<string>) #{{{2
+export def DisableSomeKeys(keys: list<string>) #{{{2
     if !exists('b:undo_ftplugin')
         b:undo_ftplugin = 'execute'
     endif
@@ -516,7 +513,7 @@ def qf#disableSomeKeys(keys: list<string>) #{{{2
 enddef
 
 
-def qf#nv(errorfile: string): string #{{{2
+export def Nv(errorfile: string): string #{{{2
     var file: list<string> = readfile(errorfile)
     if empty(file)
         return ''
@@ -533,7 +530,7 @@ def qf#nv(errorfile: string): string #{{{2
     return ''
 enddef
 
-def qf#openAuto(cmd: string) #{{{2
+export def OpenAuto(cmd: string) #{{{2
     # `:lhelpgrep`, like `:helpgrep`, opens a help window (with 1st match).{{{
     #
     # But, contrary to `:helpgrep`, the location list is local to a window.
@@ -579,7 +576,7 @@ def Open(arg_cmd: string)
     endif
 
     # `true`: flag meaning we're going to open a loc window
-    var mod: string = WinGetMod()
+    var mod: string = window.GetMod()
 
     # Wait.  `:copen` can't populate the qfl.  How could `cmd` be `copen`?{{{
     #
@@ -620,7 +617,7 @@ def Open(arg_cmd: string)
     try
         execute how_to_open
     catch
-        Catch()
+        lg.Catch()
         return
     endtry
 
@@ -674,7 +671,7 @@ def Open(arg_cmd: string)
     endif
 enddef
 
-def qf#openManual(where: string) #{{{2
+export def OpenManual(where: string) #{{{2
     var wintype: string = win_gettype()
     var size: number = wintype == 'loclist'
         ?     getloclist(0, {size: 0}).size
@@ -702,7 +699,7 @@ def qf#openManual(where: string) #{{{2
             win_gotoid(new)
         endif
     catch
-        Catch()
+        lg.Catch()
         return
     finally
         if splitbelow_was_on
@@ -711,7 +708,7 @@ def qf#openManual(where: string) #{{{2
     endtry
 enddef
 
-def qf#setMatches( #{{{2
+export def SetMatches( #{{{2
     origin: string,
     group: string,
     arg_pat: string
@@ -727,7 +724,7 @@ def qf#setMatches( #{{{2
         [{group: group, pat: pat}])
 enddef
 
-def qf#toggleFullFilePath() #{{{2
+export def ToggleFullFilePath() #{{{2
     var pos: list<number> = getcurpos()
     full_filepath = !full_filepath
     var list: list<dict<any>> = Getqflist()
@@ -736,7 +733,7 @@ def qf#toggleFullFilePath() #{{{2
 enddef
 var full_filepath: bool
 
-def qf#undoFtplugin() #{{{2
+export def UndoFtplugin() #{{{2
     set buflisted<
     set cursorline<
     set statusline<

@@ -1,7 +1,9 @@
 vim9script noclear
 
+import autoload 'qf/preview.vim'
+
 # Interface {{{1
-def qf#preview#open(persistent = false) #{{{2
+export def Open(persistent = false) #{{{2
     # Why the `w:` scope?  Why not `b:`?{{{
     #
     # The code  would be much more  verbose/complex; you would probably  need an
@@ -49,7 +51,7 @@ def qf#preview#open(persistent = false) #{{{2
     PopupCreate()
 enddef
 
-def qf#preview#mappings()
+export def Mappings()
     # Purpose of this function:{{{
     #
     # We currently  use `M-m` as a  prefix for various commands  which highlight
@@ -113,7 +115,7 @@ def PopupCreate() #{{{2
 
     # `:noswapfile` to suppress `E325` in case the file is already open in another Vim instance
     # See: https://github.com/vim/vim/issues/5822
-    noswapfile w:_qfpreview.winid = Popup_create(curentry.bufnr, opts).winid
+    noswapfile w:_qfpreview.winid = popup.Create(curentry.bufnr, opts).winid
     SetSigncolumn()
     SetSign(curentry.bufnr, curentry.lnum)
     # hide ad-hoc characters used for syntax highlighting (like bars and stars in help files)
@@ -310,7 +312,7 @@ def OnVimResized() #{{{2
 
     w:_qfpreview.height = GetWinheight()
     PopupClose()
-    qf#preview#open()
+    preview.Open()
 enddef
 
 def ClearAutocmds() #{{{2
@@ -481,27 +483,24 @@ enddef
 #}}}1
 # Init {{{1
 
-import 'lg/Map.vim'
-const MetaChord: func = Map.MetaChord
-
-import 'lg/Popup.vim'
-const Popup_create: func = Popup.Create
+import 'lg/mapping.vim'
+import 'lg/popup.vim'
 
 # this tells the popup filter which keys it must handle, and how
 const FILTER_CMD: dict<func> = {
-    [MetaChord('m')]: (_) => SetHeight(-1),
-    [MetaChord('p')]: (_) => SetHeight(1),
+    [mapping.MetaChord('m')]: (_) => SetHeight(-1),
+    [mapping.MetaChord('p')]: (_) => SetHeight(1),
     # toggle number column
-    [MetaChord('n')]: (id: number) => (!getwinvar(id, '&number'))->setwinvar(id, '&number'),
+    [mapping.MetaChord('n')]: (id: number) => (!getwinvar(id, '&number'))->setwinvar(id, '&number'),
     # reset topline to the line of the quickfix entry;
     # useful to get back to original position after scrolling
-    [MetaChord('r')]: (id: number) => {
+    [mapping.MetaChord('r')]: (id: number) => {
         popup_setoptions(id, {firstline: w:_qfpreview.firstline})
         popup_setoptions(id, {firstline: 0})
         SetSigncolumn()
     }}
 
 const FILTER_LHS: list<string> = ['m', 'p', 'n', 'r']
-    ->map((_, v: string) => MetaChord(v, true))
-    #                                    ^--^
-    #                                    don't translate the chords; we need symbolic notations
+    ->map((_, v: string) => mapping.MetaChord(v, true))
+    #                                            ^--^
+    #                                            don't translate the chords; we need symbolic notations

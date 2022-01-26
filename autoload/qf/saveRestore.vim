@@ -94,14 +94,14 @@ if !isdirectory(QFL_DIR)
 endif
 
 # Interface {{{1
-def qf#saveRestore#complete(_, _, _): string #{{{2
+export def Complete(_, _, _): string #{{{2
     return QFL_DIR
         ->readdir((n: string): bool => n =~ '\.txt$')
         ->map((_, v: string) => v->fnamemodify(':t:r'))
         ->join("\n")
 enddef
 
-def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
+export def Save(arg_fname: string, bang: bool) #{{{2
     if win_gettype() == 'loclist'
         Error('[Csave] sorry, only a quickfix list can be saved, not a location list')
         return
@@ -185,7 +185,7 @@ def qf#saveRestore#save(arg_fname: string, bang: bool) #{{{2
     echo '[Csave] quickfix list saved in ' .. fname
 enddef
 
-def qf#saveRestore#restore(arg_fname: string) #{{{2
+export def Restore(arg_fname: string) #{{{2
     var fname: string
     if arg_fname == ''
         fname = get(g:, 'LAST_QFL', '')
@@ -205,7 +205,7 @@ def qf#saveRestore#restore(arg_fname: string) #{{{2
     echo '[Crestore] quickfix list restored from ' .. fname
 enddef
 
-def qf#saveRestore#remove(arg_fname: string, bang: bool) #{{{2
+export def Remove(arg_fname: string, bang: bool) #{{{2
     # Rationale:{{{
     #
     # `:Cremove` and `:Crestore` begins with the same 3 characters.

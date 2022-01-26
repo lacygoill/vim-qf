@@ -1,6 +1,6 @@
 vim9script noclear
 
-def qf#statusline#title(): string
+export def Title(): string
     # Remember that all the code in this function is evaluated in the context of
     # the window for which the status line is built.
     # So even if the  function is called for a *non-focused*  qf window, you can

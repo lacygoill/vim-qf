@@ -1,26 +1,30 @@
 vim9script
 
+import autoload 'qf.vim'
+import autoload 'qf/preview.vim'
+import autoload 'qf/saveRestore.vim'
+
 # Commands {{{1
 # CRemoveInvalid {{{2
 
-command -bar -buffer CRemoveInvalid qf#removeInvalidEntries()
+command -bar -buffer CRemoveInvalid qf.RemoveInvalidEntries()
 
 # Csave / Crestore / Cremove {{{2
 
-command -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete Csave {
-    qf#saveRestore#save(<q-args>, <bang>0)
+command -bar -buffer -bang -nargs=1 -complete=custom,saveRestore.Complete Csave {
+    saveRestore.Save(<q-args>, <bang>0)
 }
-command -bar -buffer -nargs=? -complete=custom,qf#saveRestore#complete Crestore {
-    qf#saveRestore#restore(<q-args>)
+command -bar -buffer -nargs=? -complete=custom,saveRestore.Complete Crestore {
+    saveRestore.Restore(<q-args>)
 }
-command -bar -buffer -bang -nargs=1 -complete=custom,qf#saveRestore#complete Cremove {
-    qf#saveRestore#remove(<q-args>, <bang>0)
+command -bar -buffer -bang -nargs=1 -complete=custom,saveRestore.Complete Cremove {
+    saveRestore.Remove(<q-args>, <bang>0)
 }
 
 # Cconceal {{{2
 
 command -bar -buffer -range Cconceal {
-    qf#concealOrDelete()
+    qf.ConcealOrDelete()
     execute printf('normal! %dGg@%dG', <line1>, <line2>)
 }
 
@@ -38,8 +42,8 @@ command -bar -buffer -range Cconceal {
 # Do not give the `-bar` attribute to the commands.
 # It would break a pattern containing a bar (for example, for an alternation).
 
-command -bang -buffer -nargs=? -complete=custom,qf#cfilterComplete Cfilter {
-    qf#cfilter(<bang>0, <q-args>, <q-mods>)
+command -bang -buffer -nargs=? -complete=custom,qf.CfilterComplete Cfilter {
+    qf.Cfilter(<bang>0, <q-args>, <q-mods>)
 }
 
 # Cupdate {{{2
@@ -52,19 +56,19 @@ command -bang -buffer -nargs=? -complete=custom,qf#cfilterComplete Cfilter {
 #     :noautocmd cfdo :% substitute/pat/rep/ge | update
 #     :Cupdate
 
-command -bar -buffer Cupdate qf#cupdate(<q-mods>)
+command -bar -buffer Cupdate qf.Cupdate(<q-mods>)
 #}}}1
 # Mappings {{{1
 
 # disable some keys, to avoid annoying error messages
-qf#disableSomeKeys(['a', 'd', 'gj', 'gqq', 'i', 'o', 'r', 'u', 'x'])
+qf.DisableSomeKeys(['a', 'd', 'gj', 'gqq', 'i', 'o', 'r', 'u', 'x'])
 
 nnoremap <buffer><nowait> <C-Q> <ScriptCmd>Csave default<CR>
 nnoremap <buffer><nowait> <C-R> <ScriptCmd>Crestore default<CR>
 
-nnoremap <buffer><nowait> <C-S> <ScriptCmd>qf#openManual('split')<CR>
-nnoremap <buffer><nowait> <C-V><C-V> <ScriptCmd>qf#openManual('vertical split')<CR>
-nnoremap <buffer><nowait> <C-T> <ScriptCmd>qf#openManual('tabpage')<CR>
+nnoremap <buffer><nowait> <C-S> <ScriptCmd>qf.OpenManual('split')<CR>
+nnoremap <buffer><nowait> <C-V><C-V> <ScriptCmd>qf.OpenManual('vertical split')<CR>
+nnoremap <buffer><nowait> <C-T> <ScriptCmd>qf.OpenManual('tabpage')<CR>
 # FYI:{{{
 #
 # By default:
@@ -73,19 +77,19 @@ nnoremap <buffer><nowait> <C-T> <ScriptCmd>qf#openManual('tabpage')<CR>
 #     C-w t  moves the focus to the top window in the current tab page
 #}}}
 
-nnoremap <buffer><nowait> <CR> <ScriptCmd>qf#openManual('nosplit')<CR>
+nnoremap <buffer><nowait> <CR> <ScriptCmd>qf.OpenManual('nosplit')<CR>
 nmap <buffer><nowait> <C-W><CR> <C-S>
 
-nnoremap <buffer><expr><nowait> D  qf#concealOrDelete()
-nnoremap <buffer><expr><nowait> DD qf#concealOrDelete() .. '_'
-xnoremap <buffer><expr><nowait> D  qf#concealOrDelete()
+nnoremap <buffer><expr><nowait> D  qf.ConcealOrDelete()
+nnoremap <buffer><expr><nowait> DD qf.ConcealOrDelete() .. '_'
+xnoremap <buffer><expr><nowait> D  qf.ConcealOrDelete()
 
-nnoremap <buffer><nowait>cof <ScriptCmd>qf#toggleFullFilePath()<CR>
+nnoremap <buffer><nowait>cof <ScriptCmd>qf.ToggleFullFilePath()<CR>
 
-nnoremap <buffer><nowait> p <ScriptCmd>qf#preview#open()<CR>
-nnoremap <buffer><nowait> P <ScriptCmd>qf#preview#open(true)<CR>
+nnoremap <buffer><nowait> p <ScriptCmd>preview.Open()<CR>
+nnoremap <buffer><nowait> P <ScriptCmd>preview.Open(true)<CR>
 
-nnoremap <buffer><nowait> q <ScriptCmd>qf#quit()<CR>
+nnoremap <buffer><nowait> q <ScriptCmd>qf.Quit()<CR>
 
 # Options {{{1
 
@@ -96,7 +100,7 @@ nnoremap <buffer><nowait> q <ScriptCmd>qf#quit()<CR>
 
 # the 4  spaces before `%l`  make sure that  the line address  is well-separated
 # from the title, even when the latter is long and the terminal window is narrow
-&l:statusline = '%{qf#statusline#title()}%=    %l/%L '
+&l:statusline = '%{qf#statusline#Title()}%=    %l/%L '
 
 # Matches {{{1
 
@@ -106,9 +110,9 @@ nnoremap <buffer><nowait> q <ScriptCmd>qf#quit()<CR>
 # guarantee that we're going to conceal anything.
 #}}}
 set concealcursor< conceallevel<
-autocmd Syntax qf ++once qf#concealLtagPatternColumn()
+autocmd Syntax qf ++once qf.ConcealLtagPatternColumn()
 
 # Teardown {{{1
 
 b:undo_ftplugin = get(b:, 'undo_ftplugin', 'execute')
-    .. '| call qf#undoFtplugin()'
+    .. '| call qf#UndoFtplugin()'

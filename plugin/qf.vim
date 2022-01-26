@@ -3,11 +3,14 @@ vim9script noclear
 if exists('loaded') | finish | endif
 var loaded = true
 
+import autoload 'qf.vim'
+import autoload 'qf/preview.vim'
+
 # TODO: Implement a mapping/command which would fold all entries belonging to the same file.
 # See here for inspiration: https://github.com/fcpg/vim-kickfix
 
 # TODO: Fold invalid entries and/or highlight them in some way.
-# Should  we prevent  `qf#align()`  from trying  to aligning  the  fields of  an
+# Should  we prevent  `qf.Align()`  from trying  to aligning  the  fields of  an
 # invalid entry (there's nothing to align anyway...)?
 
 # TODO: Add  custom  syntax highlighting  so  that  entries  from one  file  are
@@ -26,15 +29,15 @@ var loaded = true
 # don't let the default qf filetype plugin set `'statusline'`, we'll do it ourselves
 g:qf_disable_statusline = 1
 
-&quickfixtextfunc = 'qf#align'
+&quickfixtextfunc = 'qf.Align'
 
 # Commands {{{1
 
-command -bar CFreeStack qf#cfreeStack()
-command -bar LFreeStack qf#cfreeStack(true)
+command -bar CFreeStack qf.CfreeStack()
+command -bar LFreeStack qf.CfreeStack(true)
 
-command -nargs=1 -range=% -addr=buffers CGrepBuffer qf#cgrepBuffer(<line1>, <line2>, <q-args>)
-command -nargs=1 -range=% -addr=buffers LGrepBuffer qf#cgrepBuffer(<line1>, <line2>, <q-args>, true)
+command -nargs=1 -range=% -addr=buffers CGrepBuffer qf.CgrepBuffer(<line1>, <line2>, <q-args>)
+command -nargs=1 -range=% -addr=buffers LGrepBuffer qf.CgrepBuffer(<line1>, <line2>, <q-args>, true)
 
 # Autocmds {{{1
 
@@ -47,10 +50,10 @@ augroup MyQuickfix
     # Other plugins may need to be informed when the qf window is opened.
     # See: https://github.com/romainl/vim-qf/pull/70
     #}}}
-    autocmd QuickFixCmdPost * ++nested expand('<amatch>')->qf#openAuto()
+    autocmd QuickFixCmdPost * ++nested expand('<amatch>')->qf.OpenAuto()
     #       │                                   │
     #       │                                   └ name of the command which was run
     #       └ after a quickfix command is run
 
-    autocmd FileType qf qf#preview#mappings()
+    autocmd FileType qf preview.Mappings()
 augroup END
