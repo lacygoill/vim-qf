@@ -1,7 +1,5 @@
 vim9script noclear
 
-import autoload 'qf/preview.vim'
-
 # Interface {{{1
 export def Open(persistent = false) #{{{2
     # Why the `w:` scope?  Why not `b:`?{{{
@@ -105,7 +103,7 @@ def PopupCreate() #{{{2
         width: wininfo.width,
         firstline: w:_qfpreview.firstline,
         filter: PopupFilter,
-        # only filter keys in normal mode (the default is "a"; all modes)
+        # only filter keys in normal mode (the default is `a`; all modes)
         filtermode: 'n',
     })
 
@@ -133,7 +131,7 @@ def PopupClose() #{{{2
     #
     #
     #     $ vim +'helpgrep foobar' +'tabnew' +'tabfirst'
-    #     # press "p" to preview qf entry
+    #     # press: p (to preview qf entry)
     #     :tabclose
     #     Error detected while processing BufWinLeave Autocommands for "<buffer=29>":˜
     #     E121: Undefined variable: w:_qfpreview˜
@@ -312,7 +310,7 @@ def OnVimResized() #{{{2
 
     w:_qfpreview.height = GetWinheight()
     PopupClose()
-    preview.Open()
+    Open()
 enddef
 
 def ClearAutocmds() #{{{2
@@ -431,9 +429,9 @@ def SetHeight(step: number) #{{{2
     # and then you run:
     #
     #     $ vim +'helpgrep foobar'
-    #     # press "p" to open popup
-    #     # press "C-w w" to focus other window
-    #     # press "C-w +" to increase size of current window
+    #     # prss: p (to open popup)
+    #     # prss: C-w w (to focus othr window)
+    #     # press: C-w + (to increase size of current window)
     #     Error detected while processing function <SNR>180_popup_filter[3]..<lambda>448[1]..<SNR>180_setheight:˜
     #     E121: Undefined variable: w:_qfpreview˜
     #

@@ -114,5 +114,5 @@ autocmd Syntax qf ++once qf.ConcealLtagPatternColumn()
 
 # Teardown {{{1
 
-b:undo_ftplugin = get(b:, 'undo_ftplugin', 'execute')
+b:undo_ftplugin = (get(b:, 'undo_ftplugin') ?? 'execute')
     .. '| call qf#UndoFtplugin()'

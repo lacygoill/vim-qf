@@ -275,6 +275,9 @@ export def Cfilter( #{{{2
     var pat: string = GetPat(arg_pat)
     var old_size: number = len(list)
     var Filter: func
+    # TODO: `:Cfilter[!]` should only filter based on the text; not the filepath.
+    # TODO: `:Cfilter[!] /pat/f` should only filter based on the filepath; not the path.
+    # Rationale: Mixing the two is too confusing, and can give unexpected results.
     if bang
         # Why the question mark in the comparison operators?{{{
         #
@@ -503,7 +506,7 @@ export def ConcealOrDelete(type = ''): string #{{{2
 enddef
 
 export def DisableSomeKeys(keys: list<string>) #{{{2
-    if !exists('b:undo_ftplugin')
+    if !exists('b:undo_ftplugin') || b:undo_ftplugin == ''
         b:undo_ftplugin = 'execute'
     endif
     for key: string in keys

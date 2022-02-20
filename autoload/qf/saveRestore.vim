@@ -11,7 +11,7 @@ vim9script noclear
 #     def SaveLastQfl()
 #         var curqfnr: number = getqflist({nr: 0}).nr
 #         var qfls: list<dict<any>> = range(1, getqflist({nr: '$'}).nr)
-#             ->mapnew((_, v: number): dict<any> => getqflist({nr: v, size: 0, title: 0}))
+#             ->map((_, v: number): dict<any> => getqflist({nr: v, size: 0, title: 0}))
 #             ->filter((_, v: dict<any>): bool =>
 #                          v.size != 0
 #                       && v.size < 9999
