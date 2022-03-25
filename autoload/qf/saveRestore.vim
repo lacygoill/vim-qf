@@ -155,7 +155,7 @@ export def Save(arg_fname: string, bang: bool) #{{{2
     #    > the |substitute()| function with the following exceptions:
     #    > ...
     #
-    # MWE:
+    # MRE:
     #
     #     let dict = {'a': 'b\nc'}
     #     echo '%s'->substitute('%s', string(dict), '') =~ '\%x00'
