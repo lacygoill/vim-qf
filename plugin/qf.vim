@@ -3,8 +3,8 @@ vim9script noclear
 if exists('loaded') | finish | endif
 var loaded = true
 
-import autoload 'qf.vim'
-import autoload 'qf/preview.vim'
+import autoload '../autoload/qf.vim'
+import autoload '../autoload/qf/preview.vim'
 
 # TODO: Implement a mapping/command which would fold all entries belonging to the same file.
 # See here for inspiration: https://github.com/fcpg/vim-kickfix
