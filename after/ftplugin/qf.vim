@@ -52,7 +52,7 @@ command -bang -buffer -nargs=? -complete=custom,qf.CfilterComplete Cfilter {
 # Useful after a refactoring, to have a visual feedback.
 # Example:
 #
-#     :cgetexpr system('grep -IRn pat /tmp/some_dir/')
+#     :silent cgetexpr system('grep -IRn pat /tmp/some_dir/')
 #     :noautocmd cfdo :% substitute/pat/rep/ge | update
 #     :Cupdate
 

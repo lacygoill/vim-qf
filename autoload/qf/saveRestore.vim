@@ -135,14 +135,18 @@ export def Save(arg_fname: string, bang: bool) #{{{2
                         ->fnamemodify(':p')
         }))
     var qfl: dict<any> = {items: items, title: getqflist({title: 0}).title}
-    var lines: list<string> =<< trim END
-        vim9script
-        var qfl: dict<any> = %s
-        var items: list<dict<any>> = qfl.items
-        var title: string = qfl.title
-        setqflist([], ' ', {items: items, title: title})
-    END
-    # Why `escape()`?{{{
+    # Warning: If you replace `eval` with a later call to `substitute()`, don't forget to `escape()` `&` and `\`.{{{
+    #
+    #                                     no eval
+    #                                     v
+    #     var lines: list<string> =<< trim END
+    #     ...
+    #         var qfl: dict<any> = %s
+    #     ...
+    #     END
+    #     lines[1] = lines[1]
+    #         ->substitute('%s', string(qfl)->escape('&\'), '')
+    #                                       ^------------^
     #
     # Without, there  would be a  risk of  getting null characters,  which would
     # later break the sourcing of the file.
@@ -179,8 +183,13 @@ export def Save(arg_fname: string, bang: bool) #{{{2
     #
     # Similar issue with `&` which has a special meaning.
     #}}}
-    lines[1] = lines[1]
-        ->substitute('%s', string(qfl)->escape('&\'), '')
+    var lines: list<string> =<< trim eval END
+        vim9script
+        var qfl: dict<any> = {string(qfl)}
+        var items: list<dict<any>> = qfl.items
+        var title: string = qfl.title
+        setqflist([], ' ', {items: items, title: title})
+    END
     writefile(lines, fname)
     echo '[Csave] quickfix list saved in ' .. fname
 enddef
