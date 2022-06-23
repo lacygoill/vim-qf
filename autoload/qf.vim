@@ -469,8 +469,8 @@ export def ConcealOrDelete(type = ''): string #{{{2
     if ['char', 'line']->index(type) >= 0
         range = [line("'["), line("']")]
     elseif type == 'block'
-        var vcol1: number = VirtcolFirstCell("'[")
-        var vcol2: number = VirtcolFirstCell("']")
+        var vcol1: number = virtcol("'[", true)[0]
+        var vcol2: number = virtcol("']", true)[0]
         # We could also use:{{{
         #
         #     var pat: string = '\%V.*\%V'
@@ -905,6 +905,3 @@ def Setqflist(...l: list<any>) #{{{2
     endif
 enddef
 
-def VirtcolFirstCell(filepos: string): number #{{{2
-    return virtcol([line(filepos), col(filepos) - 1]) + 1
-enddef
