@@ -63,8 +63,8 @@ export def Mappings()
         b:undo_ftplugin = 'execute'
     endif
     for key: string in FILTER_LHS
-        execute 'nnoremap <buffer><nowait> ' .. key .. ' ' .. key
-        var unmap_cmd: string = '|execute "nunmap <buffer> ' .. key .. '"'
+        execute $'nnoremap <buffer><nowait> {key} {key}'
+        var unmap_cmd: string = $'|execute "nunmap <buffer> {key}"'
         # sanity check; unmapping the same key twice could give an error
         if stridx(b:undo_ftplugin, unmap_cmd) == -1
             b:undo_ftplugin ..= unmap_cmd
@@ -429,8 +429,8 @@ def SetHeight(step: number) #{{{2
     # and then you run:
     #
     #     $ vim +'helpgrep foobar'
-    #     # prss: p (to open popup)
-    #     # prss: C-w w (to focus othr window)
+    #     # press: p (to open popup)
+    #     # press: C-w w (to focus other window)
     #     # press: C-w + (to increase size of current window)
     #     Error detected while processing function <SNR>180_popup_filter[3]..<lambda>448[1]..<SNR>180_setheight:˜
     #     E121: Undefined variable: w:_qfpreview˜

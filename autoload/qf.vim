@@ -207,33 +207,40 @@ export def Align(info: dict<number>): list<string> #{{{2
         qfl = getloclist(info.winid, {id: info.id, items: 0}).items
     endif
     var l: list<string>
-    var lnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
+    var range: list<number> = range(info.start_idx - 1, info.end_idx - 1)
+    var lnum_width: number = range
+        ->copy()
         ->map((_, v: number) => qfl[v]['lnum'])
         ->max()
         ->len()
-    var col_width: number = range(info.start_idx - 1, info.end_idx - 1)
+    var col_width: number = range
+        ->copy()
         ->map((_, v: number) => qfl[v]['col'])
         ->max()
         ->len()
-    var pat_width: number = range(info.start_idx - 1, info.end_idx - 1)
+    var pat_width: number = range
+        ->copy()
         ->map((_, v: number) => strcharlen(qfl[v]['pattern']))
         ->max()
-    var fname_width: number = range(info.start_idx - 1, info.end_idx - 1)
+    var fname_width: number = range
+        ->copy()
         ->map((_, v: number) =>
             qfl[v]['bufnr']->bufname()->fnamemodify(':t')->strcharlen())
         ->max()
-    var type_width: number = range(info.start_idx - 1, info.end_idx - 1)
+    var type_width: number = range
+        ->copy()
         ->map((_, v: number) =>
             get(EFM_TYPE, qfl[v]['type'], '')->strcharlen())
         ->max()
-    var errnum_width: number = range(info.start_idx - 1, info.end_idx - 1)
+    var errnum_width: number = range
+        ->copy()
         ->map((_, v: number) => qfl[v]['nr'])
         ->max()
         ->len()
-    for idx: number in range(info.start_idx - 1, info.end_idx - 1)
+    for idx: number in range
         var e: dict<any> = qfl[idx]
         if !e.valid
-            l->add('|| ' .. e.text)
+            l->add($'|| {e.text}')
         # happens  if you  re-open  the  qf window  after  wiping  out a  buffer
         # containing an entry from the qfl
         elseif e.bufnr == 0
@@ -341,11 +348,11 @@ export def CgrepBuffer( #{{{2
 )
     var pfx1: string = loclist ? 'l' : 'c'
     var pfx2: string = loclist ? 'l' : ''
-    var range: string = ':' .. lnum1 .. ',' .. lnum2
+    var range: string = $':{lnum1},{lnum2}'
 
     # ┌ we don't want the title of the qfl separating `:` from `cexpr`
     # │
-    execute pfx1 .. 'expr []'
+    execute $'{pfx1}expr []'
     var cmd: string = printf(
         # if the pattern is absent from a buffer, it will give an error
         'silent!'
@@ -355,12 +362,12 @@ export def CgrepBuffer( #{{{2
         .. ' :%s bufdo :%s vimgrepadd /%s/gj %%', range, pfx2, pat)
     execute cmd
 
-    execute pfx1 .. 'window'
+    execute $'{pfx1}window'
 
     if loclist
-        setloclist(0, [], 'a', {title: ':' .. cmd})
+        setloclist(0, [], 'a', {title: $':{cmd}'})
     else
-        setqflist([], 'a', {title: ':' .. cmd})
+        setqflist([], 'a', {title: $':{cmd}'})
     endif
 enddef
 
@@ -452,7 +459,7 @@ export def Cupdate(mod: string) #{{{2
     MaybeResizeHeight()
 
     # restore position
-    execute 'normal! ' .. pos .. 'G'
+    execute $'normal! {pos}G'
 enddef
 
 export def ConcealOrDelete(type = ''): string #{{{2
@@ -478,7 +485,7 @@ export def ConcealOrDelete(type = ''): string #{{{2
         # ... but the match would disappear when we change the focused window,
         # probably because the visual marks would be set in another buffer.
         #}}}
-        var pat: string = '\%' .. vcol1 .. 'v.*\%' .. vcol2 .. 'v.'
+        var pat: string = $'\%{vcol1}v.*\%{vcol2}v.'
         matchadd('Conceal', pat, 0, -1, {conceal: 'x'})
         &l:concealcursor = 'nc'
         &l:conceallevel = 3
@@ -501,7 +508,7 @@ export def ConcealOrDelete(type = ''): string #{{{2
     MaybeResizeHeight()
 
     # restore position
-    execute 'normal! ' .. pos .. 'G'
+    execute $'normal! {pos}G'
     return ''
 enddef
 
@@ -510,8 +517,8 @@ export def DisableSomeKeys(keys: list<string>) #{{{2
         b:undo_ftplugin = 'execute'
     endif
     for key: string in keys
-        execute 'silent nnoremap <buffer><nowait> ' .. key .. ' <Nop>'
-        b:undo_ftplugin ..= '|execute "nunmap <buffer> ' .. key .. '"'
+        execute $'silent nnoremap <buffer><nowait> {key} <Nop>'
+        b:undo_ftplugin ..= $'|execute "nunmap <buffer> {key}"'
     endfor
 enddef
 
@@ -598,12 +605,12 @@ def Open(arg_cmd: string)
     var cmd: string = expand('<amatch>') =~ '^[cl]open$' ? 'open' : 'window'
     var how_to_open: string
     if mod =~ 'vertical'
-        how_to_open = mod .. ' ' .. prefix .. cmd .. ' 40'
+        how_to_open = $'{mod} {prefix}{cmd} 40'
     else
-        how_to_open = mod .. ' ' .. prefix .. cmd .. ' ' .. max([min([10, size]), &winminheight + 2])
-        #                                                    │    │
-        #                                                    │    └ at most 10 lines high
-        #                                                    └ at least `&winminheight + 2` lines high
+        var height: number = max([min([10, size]), &winminheight + 2])
+        #                     │    │
+        #                     │    └ at most 10 lines high
+        #                     └ at least `&winminheight + 2` lines high
         # Why `&winminheight + 2`?{{{
         #
         # First, the number passed to `:[cl]{open|window}`  must be at least 1, even
@@ -614,6 +621,7 @@ def Open(arg_cmd: string)
         # In general, the issue is triggered when  the qf window is `&winminheight + 1` lines
         # high or lower.
         #}}}
+        how_to_open = $'{mod} {prefix}{cmd} {height}'
     endif
 
     # it will fail if there's no loclist
@@ -796,7 +804,7 @@ def AddFilterIndicatorToTitle( #{{{2
     var has_already_been_filtered: bool = match(title, filter_indicator) >= 0
     return has_already_been_filtered
         ?     title->substitute('\ze\]$', (bang ? ' | ' : ' \& ') .. pat, '')
-        :     title .. ' [:filter' .. (bang ? '!' : '') .. ' ' .. pat .. ']'
+        :     $'{title} [:filter{bang ? '!' : ''} {pat}]'
 enddef
 
 def GetAction(mod: string): string #{{{2
@@ -834,7 +842,7 @@ def GetPat(arg_pat: string): string #{{{2
         ->matchstr('\S\+')
         ->escape('\')
     if cml != ''
-        cml = '\V' .. cml .. '\m'
+        cml = $'\V{cml}\m'
     else
         # An empty comment leader would make a pattern which matches all the time.
         # As a result, all the qfl would be emptied.
@@ -851,7 +859,7 @@ def GetPat(arg_pat: string): string #{{{2
     # should *not* be filtered, but they are).
     #}}}
     var arg2pat: dict<string> = {
-        -commented: '^\s*' .. cml,
+        -commented: $'^\s*{cml}',
         -vendor: '^\S*/pack/vendor/\%(opt\|start\)/\%(' .. VENDOR->join('\|') .. '\)/',
         -tmp:    '^\S*/\%(qfl\|session\)/[^ \t/]*\.vim'
             .. '\|^\S*/tmp/\S*\.vim',
@@ -894,7 +902,7 @@ def MaybeResizeHeight() #{{{2
     var newheight: number = min([10, Getqflist()->len()])
     # at least 2 lines (to avoid `E36` if we've reset `'equalalways'`)
     newheight = max([2, newheight])
-    execute 'resize ' .. newheight
+    execute $'resize {newheight}'
 enddef
 
 def Setqflist(...l: list<any>) #{{{2

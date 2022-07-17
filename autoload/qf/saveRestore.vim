@@ -86,10 +86,11 @@ vim9script noclear
 
 # Init {{{1
 
-const QFL_DIR: string = $HOME .. '/.vim/tmp/qfl'
+const QFL_DIR: string = $'{$HOME}/.vim/tmp/qfl'
 if !isdirectory(QFL_DIR)
     if !mkdir(QFL_DIR, 'p', 0o700)
-        echomsg '[vim-qf] failed to create directory ' .. QFL_DIR
+        echomsg $'vim-qf: failed to create directory {QFL_DIR}'
+        finish
     endif
 endif
 
@@ -103,18 +104,18 @@ enddef
 
 export def Save(arg_fname: string, bang: bool) #{{{2
     if win_gettype() == 'loclist'
-        Error('[Csave] sorry, only a quickfix list can be saved, not a location list')
+        Error(':Csave: sorry, only a quickfix list can be saved, not a location list')
         return
     endif
     var fname: string = Expand(arg_fname)
     if filereadable(fname) && !bang
-        Error('[Csave] ' .. fname .. ' is an existing file; add ! to overwrite')
+        Error($':Csave: {fname} is an existing file; add ! to overwrite')
         return
     endif
     g:LAST_QFL = fname
     var items: list<dict<any>> = getqflist({items: 0}).items
     if empty(items)
-        echo '[Csave] no quickfix list to save'
+        echo ':Csave: no quickfix list to save'
         return
     endif
     # Explanation:{{{
@@ -191,7 +192,7 @@ export def Save(arg_fname: string, bang: bool) #{{{2
         setqflist([], ' ', {items: items, title: title})
     END
     writefile(lines, fname)
-    echo '[Csave] quickfix list saved in ' .. fname
+    echo $':Csave: quickfix list saved in {fname}'
 enddef
 
 export def Restore(arg_fname: string) #{{{2
@@ -203,15 +204,15 @@ export def Restore(arg_fname: string) #{{{2
     endif
 
     if fname == ''
-        echo '[Crestore] do not know which quickfix list to restore'
+        echo ':Crestore: do not know which quickfix list to restore'
         return
     elseif !filereadable(fname)
-        echo '[Crestore] ' .. fname .. ' is not readable'
+        echo $':Crestore: {fname} is not readable'
         return
     endif
-    execute 'source ' .. fnameescape(fname)
+    execute $'source {fnameescape(fname)}'
     cwindow
-    echo '[Crestore] quickfix list restored from ' .. fname
+    echo $':Crestore: quickfix list restored from {fname}'
 enddef
 
 export def Remove(arg_fname: string, bang: bool) #{{{2
@@ -223,18 +224,18 @@ export def Remove(arg_fname: string, bang: bool) #{{{2
     # Asking for a bang reduces the risk of such accidents.
     #}}}
     if !bang
-        Error('[Cremove] add a bang')
+        Error(':Cremove: add a bang')
         return
     endif
     var fname: string = Expand(arg_fname)
     if !filereadable(fname)
-        echo printf('[Cremove] cannot remove %s ; file not readable', fname)
+        echo $':Cremove: cannot remove {fname} ; file not readable'
         return
     endif
     if delete(fname)
-        echo '[Cremove] failed to remove ' .. fname
+        echo $':Cremove: failed to remove {fname}'
     else
-        echo '[Cremove] removed ' .. fname
+        echo $':Cremove: removed {fname}'
     endif
 enddef
 #}}}1
@@ -253,5 +254,5 @@ def Expand(fname: string): string #{{{2
     #
     #     :vim /pat/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
     #}}}
-    return QFL_DIR .. '/' .. fname .. '.txt'
+    return $'{QFL_DIR}/{fname}.txt'
 enddef
