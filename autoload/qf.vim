@@ -190,6 +190,9 @@ if $MYVIMRC != ''
     lockvar! VENDOR
 endif
 
+var pos: list<number>
+var idx: number
+
 # Interface {{{1
 export def Quit() #{{{2
     if reg_recording() != ''
@@ -416,8 +419,7 @@ export def RemoveInvalidEntries() #{{{2
 enddef
 
 export def Cupdate(mod: string) #{{{2
-    # to restore later
-    var pos: number = line('.')
+    SavePosAndIdx()
 
     # get a qfl where the text is updated
     var list: list<dict<any>> = Getqflist()
@@ -458,8 +460,7 @@ export def Cupdate(mod: string) #{{{2
 
     MaybeResizeHeight()
 
-    # restore position
-    execute $'normal! {pos}G'
+    RestorePosAndIdx()
 enddef
 
 export def ConcealOrDelete(type = ''): string #{{{2
@@ -491,8 +492,8 @@ export def ConcealOrDelete(type = ''): string #{{{2
         &l:conceallevel = 3
         return ''
     endif
-    # for future restoration
-    var pos: number = min(range)
+
+    SavePosAndIdx()
 
     # get a qfl without the entries we want to delete
     var qfl: list<dict<any>> = Getqflist()
@@ -507,8 +508,7 @@ export def ConcealOrDelete(type = ''): string #{{{2
 
     MaybeResizeHeight()
 
-    # restore position
-    execute $'normal! {pos}G'
+    RestorePosAndIdx()
     return ''
 enddef
 
@@ -736,11 +736,13 @@ export def SetMatches( #{{{2
 enddef
 
 export def ToggleFullFilePath() #{{{2
-    var pos: list<number> = getcurpos()
+    SavePosAndIdx()
+
     full_filepath = !full_filepath
     var list: list<dict<any>> = Getqflist()
     Setqflist([], 'r', {items: list})
-    setpos('.', pos)
+
+    RestorePosAndIdx()
 enddef
 var full_filepath: bool
 
@@ -913,3 +915,12 @@ def Setqflist(...l: list<any>) #{{{2
     endif
 enddef
 
+def SavePosAndIdx() #{{{2
+    pos = getcurpos()
+    idx = getqflist({idx: 0}).idx
+enddef
+
+def RestorePosAndIdx() #{{{2
+    setqflist([], 'a', {idx: idx})
+    setpos('.', pos)
+enddef
