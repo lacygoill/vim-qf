@@ -433,25 +433,13 @@ export def Cupdate(mod: string) #{{{2
         # with the new one.
         #}}}
         ->map((_, v: dict<any>) => extend(v, {
-                text: getbufline(v.bufnr, v.lnum)
-                    # Why `get()`?{{{
-                    #
-                    # `getbufline()` should  return a  list with a  single item,
-                    # `the line lnum` in the buffer `bufnr`.
-                    # But, if the buffer is unloaded, it will just return an empty list.
-                    # From `:help getbufline()`:
-                    #
-                    #    > This function  works only  for loaded  buffers.  For  unloaded and
-                    #    > non-existing buffers, an empty |List| is returned.
-                    #
-                    # Therefore, if an  entry in the qfl is present  in a buffer
-                    # which you  didn't visit in  the past, it won't  be loaded,
-                    # and `getbufline()` will return an empty list.
-                    #
-                    # In  this case,  we want  the text field  to stay  the same
-                    # (hence `v.text`).
-                    #}}}
-                    ->get(0, v.text),
+                # Why `?? v.text`?{{{
+                #
+                # If the  buffer is unloaded, `getbufoneline()`  might return an
+                # empty string.   In that case, we  want the text field  to stay
+                # the same (hence `v.text`).
+                #}}}
+                text: getbufoneline(v.bufnr, v.lnum) ?? v.text
         }))
 
     # set this new qfl

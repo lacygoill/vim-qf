@@ -189,7 +189,7 @@ export def Save(arg_fname: string, bang: bool) #{{{2
         var qfl: dict<any> = {string(qfl)}
         var items: list<dict<any>> = qfl.items
         var title: string = qfl.title
-        setqflist([], ' ', {items: items, title: title})
+        setqflist([], ' ', {{items: items, title: title}})
     END
     writefile(lines, fname)
     echo $':Csave: quickfix list saved in {fname}'
