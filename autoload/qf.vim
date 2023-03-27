@@ -3,7 +3,8 @@ vim9script noclear
 # TODO:
 # We shouldn't  create matches.  We shouldn't  use the complex ad  hoc mechanism
 # around  `matches_any_qfl`.  Instead  we should  create ad  hoc syntax  file.
-# Look at how Neovim has solved the issue in `ftplugin/qf.vim` for TOC menus.
+# Look at  how we tackled  this issue when we  implemented TOC popup  windows in
+# help files: https://github.com/vim/vim/pull/10446
 
 # TODO: Split the code: one feature per file.
 
